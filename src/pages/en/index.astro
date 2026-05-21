@@ -30,14 +30,46 @@ const posts = (await getPosts(lang)).slice(0, 3);
   </section>
 
   <script>
-    import { animate, inView, stagger } from 'motion';
+    const heroItems = document.querySelectorAll<HTMLElement>('[data-hero] > *');
 
-    const heroItems = document.querySelectorAll('[data-hero] > *');
-    animate(heroItems, { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.7, easing: 'ease-out' });
+    heroItems.forEach((element, index) => {
+      element.animate(
+        [
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ],
+        {
+          delay: index * 100,
+          duration: 700,
+          easing: 'ease-out',
+          fill: 'both'
+        }
+      );
+    });
 
-    inView('[data-reveal]', (element) => {
-      animate(element, { opacity: [0, 1], y: [18, 0] }, { duration: 0.55, easing: 'ease-out' });
-    }, { margin: '0px 0px -120px 0px' });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.animate(
+            [
+              { opacity: 0, transform: 'translateY(18px)' },
+              { opacity: 1, transform: 'translateY(0)' }
+            ],
+            {
+              duration: 550,
+              easing: 'ease-out',
+              fill: 'both'
+            }
+          );
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -120px 0px' }
+    );
+
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => observer.observe(element));
   </script>
 </BaseLayout>
 

@@ -1,14 +1,15 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PostList from '@/components/PostList.astro';
-import { getPosts } from '@/lib/posts';
+import { getPosts, type BlogPost } from '@/lib/posts';
+import type { GetStaticPaths, Page } from 'astro';
 
-export async function getStaticPaths({ paginate }) {
+export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPosts('en');
   return paginate(posts, { pageSize: 10 });
-}
+}) satisfies GetStaticPaths;
 
-const { page } = Astro.props;
+const page = Astro.props.page as Page<BlogPost>;
 ---
 
 <BaseLayout lang="en" title={`Blog Page ${page.currentPage}`} description="Essays on life, design, travel, and thoughtful products." switchTo="/blog">
