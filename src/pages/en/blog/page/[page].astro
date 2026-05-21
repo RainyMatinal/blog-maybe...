@@ -1,0 +1,55 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostList from '@/components/PostList.astro';
+import { getPosts } from '@/lib/posts';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await getPosts('en');
+  return paginate(posts, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+---
+
+<BaseLayout lang="en" title={`Blog Page ${page.currentPage}`} description="Essays on life, design, travel, and thoughtful products." switchTo="/blog">
+  <section class="site-shell page-head">
+    <p class="ui-font eyebrow">{page.total} posts</p>
+    <h1 class="ui-font">Blog</h1>
+  </section>
+  <section class="site-shell section-space">
+    <PostList posts={page.data} lang="en" />
+    <nav class="pager ui-font" aria-label="Pagination">
+      {page.url.prev && <a href={page.url.prev}>Previous</a>}
+      <span>{page.currentPage} / {page.lastPage}</span>
+      {page.url.next && <a href={page.url.next}>Next</a>}
+    </nav>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-top: 80px;
+  }
+
+  .eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 40px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .pager {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+</style>

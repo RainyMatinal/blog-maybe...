@@ -1,0 +1,80 @@
+---
+import Cover from '@/components/Cover.astro';
+import TagPill from '@/components/TagPill.astro';
+import { formatDate, getPostSlug, type BlogPost } from '@/lib/posts';
+import { localizedPath } from '@/i18n/utils';
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const slug = getPostSlug(post);
+const href = localizedPath(post.data.lang, `/blog/${slug}`);
+const cover = post.data.cover ?? '/images/og-image.svg';
+---
+
+<article class="post-card" data-reveal>
+  <a href={href} aria-label={post.data.title}>
+    <Cover src={cover} alt={post.data.title} />
+  </a>
+  <div class="card-body">
+    <div class="ui-font card-meta">{formatDate(post.data.pubDate, post.data.lang)}</div>
+    <h3><a href={href}>{post.data.title}</a></h3>
+    <p>{post.data.description}</p>
+    <div class="card-tags">
+      {post.data.tags.map((tag) => <TagPill tag={tag} />)}
+    </div>
+  </div>
+</article>
+
+<style>
+  .post-card {
+    display: grid;
+    gap: 16px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .card-body {
+    display: grid;
+    gap: 8px;
+  }
+
+  .card-meta {
+    color: var(--color-muted);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  h3 {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
+
+  h3 a:hover {
+    color: var(--color-accent);
+  }
+
+  p {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    color: var(--color-muted);
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+</style>

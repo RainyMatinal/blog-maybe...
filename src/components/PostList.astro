@@ -1,0 +1,145 @@
+---
+import TagPill from '@/components/TagPill.astro';
+import { formatDate, getAllTags, getPostSlug, type BlogPost } from '@/lib/posts';
+import { localizedPath } from '@/i18n/utils';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  posts: BlogPost[];
+  lang: Lang;
+}
+
+const { posts, lang } = Astro.props;
+const tags = getAllTags(posts);
+---
+
+<section class="post-list" data-post-list>
+  <div class="tag-row" aria-label={lang === 'zh' ? '标签筛选' : 'Filter by tag'}>
+    <button class="ui-font tag-all active" type="button" data-tag-filter="all">{lang === 'zh' ? '全部' : 'All'}</button>
+    {tags.map((tag) => <TagPill tag={tag} asButton />)}
+  </div>
+  <div class="entries">
+    {posts.map((post) => {
+      const slug = getPostSlug(post);
+      return (
+        <article class="entry" data-post-item data-tags={post.data.tags.join('|')}>
+          <a href={localizedPath(lang, `/blog/${slug}`)}>
+            <span class="ui-font date">{formatDate(post.data.pubDate, lang)}</span>
+            <h2>{post.data.title}</h2>
+            <p>{post.data.description}</p>
+            <span class="entry-tags ui-font">{post.data.tags.join(' / ')}</span>
+          </a>
+        </article>
+      );
+    })}
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-post-list]');
+  const buttons = root ? [...root.querySelectorAll<HTMLButtonElement>('[data-tag-filter]')] : [];
+  const items = root ? [...root.querySelectorAll<HTMLElement>('[data-post-item]')] : [];
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const tag = button.dataset.tagFilter || 'all';
+      buttons.forEach((item) => item.classList.toggle('active', item === button));
+      items.forEach((item) => {
+        const tags = (item.dataset.tags || '').split('|');
+        item.hidden = tag !== 'all' && !tags.includes(tag);
+      });
+    });
+  });
+</script>
+
+<style>
+  .post-list {
+    display: grid;
+    gap: 32px;
+  }
+
+  .tag-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .tag-all {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    padding: 0 10px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .tag-all.active,
+  .tag-all:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .entries {
+    display: grid;
+    gap: 0;
+  }
+
+  .entry {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .entry:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .entry a {
+    display: grid;
+    grid-template-columns: 120px 1fr 1.5fr 150px;
+    gap: 24px;
+    padding: 24px 0;
+    align-items: baseline;
+  }
+
+  .date,
+  .entry-tags {
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
+
+  p {
+    overflow: hidden;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 15px;
+    line-height: 1.7;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .entry:hover h2 {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 840px) {
+    .entry a {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>

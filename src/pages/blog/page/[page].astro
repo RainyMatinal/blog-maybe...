@@ -1,0 +1,55 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostList from '@/components/PostList.astro';
+import { getPosts } from '@/lib/posts';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await getPosts('zh');
+  return paginate(posts, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+---
+
+<BaseLayout lang="zh" title={`博客 第 ${page.currentPage} 页`} description="生活随笔、设计思考、旅行记录与产品评测。" switchTo="/en/blog">
+  <section class="site-shell page-head">
+    <p class="ui-font eyebrow">{page.total} 篇文章</p>
+    <h1 class="ui-font">博客</h1>
+  </section>
+  <section class="site-shell section-space">
+    <PostList posts={page.data} lang="zh" />
+    <nav class="pager ui-font" aria-label="分页">
+      {page.url.prev && <a href={page.url.prev}>上一页</a>}
+      <span>{page.currentPage} / {page.lastPage}</span>
+      {page.url.next && <a href={page.url.next}>下一页</a>}
+    </nav>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-top: 80px;
+  }
+
+  .eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 40px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .pager {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+</style>

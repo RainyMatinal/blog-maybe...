@@ -1,0 +1,98 @@
+---
+import LangSwitcher from '@/components/LangSwitcher.astro';
+import ThemeToggle from '@/components/ThemeToggle.astro';
+import type { Lang } from '@/i18n/ui';
+import { localizedPath, useTranslations } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+  switchTo?: string;
+}
+
+const { lang, switchTo } = Astro.props;
+const t = useTranslations(lang);
+const links = [
+  { href: localizedPath(lang, '/'), label: t('nav.home') },
+  { href: localizedPath(lang, '/blog'), label: t('nav.blog') },
+  { href: localizedPath(lang, '/about'), label: t('nav.about') }
+];
+---
+
+<header class="site-nav">
+  <nav class="site-shell nav-inner" aria-label="Primary">
+    <a class="ui-font brand" href={localizedPath(lang, '/')}>{lang === 'zh' ? '生活与设计' : 'Life & Design'}</a>
+    <div class="nav-links">
+      {links.map((link) => <a class="ui-font" href={link.href}>{link.label}</a>)}
+    </div>
+    <div class="nav-actions">
+      <ThemeToggle />
+      <LangSwitcher lang={lang} to={switchTo} />
+    </div>
+  </nav>
+</header>
+
+<style>
+  .site-nav {
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    min-height: 72px;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .brand {
+    color: var(--color-text);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+  }
+
+  .nav-links,
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .nav-links {
+    justify-content: center;
+  }
+
+  .nav-links a {
+    color: var(--color-muted);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links a:hover {
+    color: var(--color-accent);
+  }
+
+  .nav-actions {
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  @media (max-width: 680px) {
+    .nav-inner {
+      grid-template-columns: 1fr auto;
+      min-height: 64px;
+    }
+
+    .nav-links {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+      padding-bottom: 14px;
+      overflow-x: auto;
+    }
+  }
+</style>

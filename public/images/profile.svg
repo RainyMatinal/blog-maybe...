@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Abstract author portrait</title>
+  <desc id="desc">An abstract warm-toned author portrait for the blog about life and design.</desc>
+  <rect width="600" height="600" fill="#F4F2ED"/>
+  <circle cx="300" cy="250" r="128" fill="#F5EDE7" stroke="#E2DDD6" stroke-width="3"/>
+  <path d="M335 155c-62 18-102 72-98 134 3 52 34 98 83 122-82 8-142 51-160 119h280c-16-66-67-106-139-119 65-26 106-88 95-154-7-41-29-76-61-102Z" fill="#C2714A" opacity=".88"/>
+  <path d="M256 278h92" stroke="#FAFAF7" stroke-width="8" stroke-linecap="square"/>
+  <path d="M230 520h190" stroke="#E2DDD6" stroke-width="3"/>
+</svg>

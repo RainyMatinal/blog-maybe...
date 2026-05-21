@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: string;
+  alt: string;
+  eager?: boolean;
+}
+
+const { src, alt, eager = false } = Astro.props;
+const isSvg = src.endsWith('.svg');
+const imageProps = {
+  src,
+  alt,
+  width: 1200,
+  height: 800,
+  loading: eager ? 'eager' : 'lazy',
+  decoding: 'async',
+  ...(isSvg ? {} : { format: 'webp' })
+} as const;
+---
+
+<figure class="cover">
+  <Image {...imageProps} />
+</figure>
+
+<style>
+  .cover {
+    margin: 0;
+    overflow: hidden;
+    background: var(--color-surface);
+    aspect-ratio: 3 / 2;
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 220ms ease, transform 220ms ease;
+  }
+
+  .cover:hover :global(img) {
+    filter: grayscale(35%);
+    transform: scale(1.015);
+  }
+</style>

@@ -1,0 +1,124 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
+import { getPosts } from '@/lib/posts';
+import { localizedPath } from '@/i18n/utils';
+
+const lang = 'zh';
+const posts = (await getPosts(lang)).slice(0, 3);
+---
+
+<BaseLayout lang={lang} title="生活与设计笔记" description="温柔、有质感、留白充足的生活与设计双语博客。" switchTo="/en/">
+  <section class="site-shell hero" data-hero>
+    <p class="ui-font hero-line">把日常慢慢折好，</p>
+    <p class="ui-font hero-line">也把设计看得更轻。</p>
+    <p class="en-serif hero-subtitle">Notes on living, seeing, and making with care.</p>
+  </section>
+
+  <section class="site-shell section-space latest">
+    <div class="section-head">
+      <h2 class="ui-font">近期写作 <span>Recent Writing</span></h2>
+      <a class="ui-font" href={localizedPath(lang, '/blog')}>查看全部</a>
+    </div>
+    <div class="post-grid">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+
+  <section class="site-shell about-line">
+    <p class="ui-font">记录一点视觉秩序，也记录一点被生活照亮的瞬间。</p>
+  </section>
+
+  <script>
+    import { animate, inView, stagger } from 'motion';
+
+    const heroItems = document.querySelectorAll('[data-hero] > *');
+    animate(heroItems, { opacity: [0, 1], y: [20, 0] }, { delay: stagger(0.1), duration: 0.7, easing: 'ease-out' });
+
+    inView('[data-reveal]', (element) => {
+      animate(element, { opacity: [0, 1], y: [18, 0] }, { duration: 0.55, easing: 'ease-out' });
+    }, { margin: '0px 0px -120px 0px' });
+  </script>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: 112px 0 64px;
+  }
+
+  .hero-line {
+    margin: 0;
+    font-size: 56px;
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: 0;
+  }
+
+  .hero-subtitle {
+    margin: 24px 0 0;
+    color: var(--color-muted);
+    font-size: 20px;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .section-head h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .section-head span {
+    margin-left: 8px;
+    color: var(--color-muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .section-head a {
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 24px;
+  }
+
+  .about-line {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .post-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding-top: 80px;
+    }
+
+    .hero-line {
+      font-size: 40px;
+    }
+
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

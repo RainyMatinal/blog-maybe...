@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Paper desk with design notes</title>
+  <desc id="desc">A warm editorial still life with paper sheets, a pencil, and soft geometric blocks.</desc>
+  <rect width="1200" height="800" fill="#FAFAF7"/>
+  <rect x="120" y="96" width="960" height="608" fill="#F4F2ED"/>
+  <path d="M210 190h410v330H210z" fill="#FFFDF8" stroke="#E2DDD6" stroke-width="2"/>
+  <path d="M680 160h260v420H680z" fill="#EEE8DF" stroke="#D8D0C6" stroke-width="2"/>
+  <path d="M250 250h300M250 302h250M250 354h290M250 406h210" stroke="#A8A29E" stroke-width="8" stroke-linecap="square"/>
+  <circle cx="810" cy="300" r="96" fill="#F5EDE7"/>
+  <path d="M732 420h160v42H732z" fill="#C2714A"/>
+  <path d="m470 600 330-210 18 28-330 210z" fill="#2E2B28"/>
+  <path d="m800 390 54-34-36 62z" fill="#D4845A"/>
+  <path d="M150 650h900" stroke="#E2DDD6" stroke-width="2"/>
+</svg>
