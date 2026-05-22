@@ -30,6 +30,18 @@ const { lang, title, subtitle } = Astro.props;
     </p>
   </section>
 
+  <section class="site-shell notes-tools">
+    <label class="notes-search ui-font">
+      <span>{lang === 'zh' ? '查询' : 'Search'}</span>
+      <input
+        type="search"
+        data-notes-search
+        placeholder={lang === 'zh' ? '搜日期、关键词、片段' : 'Search date, keyword, fragment'}
+      />
+    </label>
+    <p class="notes-search-meta ui-font" data-search-meta></p>
+  </section>
+
   <section class="site-shell notes-board" data-notes-board aria-label={title}></section>
 
   <aside class="notes-auth" data-auth-panel>
@@ -79,6 +91,39 @@ const { lang, title, subtitle } = Astro.props;
     </form>
   </dialog>
 
+  <dialog class="note-view-dialog" data-view-dialog>
+    <article class="note-view-card">
+      <button class="note-view-close ui-font" type="button" data-view-close>
+        {lang === 'zh' ? '关闭' : 'Close'}
+      </button>
+      <div class="note-view-meta ui-font">
+        <span data-view-date></span>
+        <span data-view-state></span>
+      </div>
+      <p data-view-content></p>
+      <div class="note-view-actions">
+        <button class="primary ui-font" type="button" data-view-edit hidden>
+          {lang === 'zh' ? '编辑' : 'Edit'}
+        </button>
+      </div>
+    </article>
+  </dialog>
+
+  <dialog class="confirm-dialog" data-confirm-dialog>
+    <form method="dialog" class="confirm-card">
+      <h2 class="ui-font">{lang === 'zh' ? '确认删除？' : 'Delete this note?'}</h2>
+      <p data-confirm-text></p>
+      <div class="confirm-actions">
+        <button class="ghost ui-font" value="cancel" type="button" data-confirm-cancel>
+          {lang === 'zh' ? '取消' : 'Cancel'}
+        </button>
+        <button class="danger ui-font" value="delete" type="button" data-confirm-delete>
+          {lang === 'zh' ? '删除' : 'Delete'}
+        </button>
+      </div>
+    </form>
+  </dialog>
+
   <script is:inline>
     const STORAGE_KEY = 'notes-board-v1';
     const AUTH_KEY = 'notes-auth-v1';
@@ -97,24 +142,46 @@ const { lang, title, subtitle } = Astro.props;
     const authClose = root.querySelector('[data-auth-close]');
     const captchaChip = root.querySelector('[data-captcha-chip]');
     const fab = root.querySelector('[data-compose-fab]');
+    const searchInput = root.querySelector('[data-notes-search]');
+    const searchMeta = root.querySelector('[data-search-meta]');
     const composeDialog = root.querySelector('[data-compose-dialog]');
     const composeForm = root.querySelector('[data-compose-form]');
     const composeCancel = root.querySelector('[data-compose-cancel]');
+    const viewDialog = root.querySelector('[data-view-dialog]');
+    const viewClose = root.querySelector('[data-view-close]');
+    const viewDate = root.querySelector('[data-view-date]');
+    const viewState = root.querySelector('[data-view-state]');
+    const viewContent = root.querySelector('[data-view-content]');
+    const viewEdit = root.querySelector('[data-view-edit]');
+    const confirmDialog = root.querySelector('[data-confirm-dialog]');
+    const confirmText = root.querySelector('[data-confirm-text]');
+    const confirmCancel = root.querySelector('[data-confirm-cancel]');
+    const confirmDelete = root.querySelector('[data-confirm-delete]');
 
     const ui = {
       zh: {
         loginFail: '账号、密码或验证码不对',
         noteEmpty: '还没有笔记，先写一条吧。',
+        noResult: '没有找到匹配的笔记。',
+        searchCount: (shown, total) => `找到 ${shown} / ${total} 条`,
         recent: '最近 3 天',
         archive: '归档',
+        drag: '拖动',
+        open: '放大',
+        confirmDelete: (text) => `确定删除这条笔记吗？「${text}」`,
         edit: '编辑',
         del: '删除'
       },
       en: {
         loginFail: 'Wrong account, password, or captcha',
         noteEmpty: 'No notes yet. Write the first one.',
+        noResult: 'No matching notes.',
+        searchCount: (shown, total) => `${shown} / ${total} notes found`,
         recent: 'Last 3 days',
         archive: 'Archive',
+        drag: 'Drag',
+        open: 'Open',
+        confirmDelete: (text) => `Delete this note? "${text}"`,
         edit: 'Edit',
         del: 'Delete'
       }
@@ -162,6 +229,40 @@ const { lang, title, subtitle } = Astro.props;
     const saveAuth = (value) => localStorage.setItem(AUTH_KEY, value ? '1' : '0');
     const ageDays = (date) => Math.floor((Date.now() - new Date(date).getTime()) / day);
     const isActive = (note) => ageDays(note.updatedAt || note.createdAt) < 3;
+    const isNarrow = () => matchMedia('(max-width: 720px)').matches;
+    const normalize = (value) => String(value || '').trim().toLocaleLowerCase();
+
+    const matchesSearch = (note) => {
+      if (!searchTerm) return true;
+      const status = isActive(note) ? ui.recent : ui.archive;
+      const haystack = normalize(`${note.content} ${noteTime(note)} ${status}`);
+      return haystack.includes(searchTerm);
+    };
+
+    const notePosition = (note) => {
+      if (!note.position) return null;
+      const x = Number(note.position.x);
+      const y = Number(note.position.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return { x, y };
+    };
+
+    const boardColumns = () => {
+      if (!board) return 3;
+      if (board.clientWidth < 860) return 2;
+      return 3;
+    };
+
+    const boardHeightFor = (visible, archivedCount, activeCount) => {
+      const columns = boardColumns();
+      const rows = Math.ceil(archivedCount / columns) + Math.ceil(activeCount / columns);
+      const autoHeight = Math.max(760, 130 + rows * 250);
+      const manualHeight = visible.reduce((max, note) => {
+        const position = notePosition(note);
+        return position ? Math.max(max, position.y + 260) : max;
+      }, 0);
+      return Math.max(autoHeight, manualHeight);
+    };
 
     const palettes = [
       'var(--color-accent)',
@@ -188,42 +289,67 @@ const { lang, title, subtitle } = Astro.props;
     let authed = loadAuth();
     let captcha = seedCaptcha();
     let editingId = null;
+    let viewingId = null;
+    let deletingId = null;
+    let searchTerm = '';
+    let boardRect = null;
+    let dragState = null;
 
-    const splitNotes = () => {
+    const splitNotes = (list = notes) => {
       const active = [];
       const archived = [];
-      for (const note of [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())) {
+      for (const note of [...list].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())) {
         if (isActive(note)) active.push(note);
         else archived.push(note);
       }
       return { active, archived };
     };
 
-    const layoutActive = (note, index, total) => {
+    const autoLayout = (note, index, rowOffset, active) => {
+      const columns = boardColumns();
+      const rand = active
+        ? seeded(`active-group|${notes.filter((item) => isActive(item)).length}|${note.id}|${note.content}|${note.updatedAt}`)
+        : seeded(`archive|${note.id}|${note.createdAt}`);
+      const width = active ? 230 + rand() * 86 : 190 + rand() * 70;
+      const maxX = Math.max(32, (board?.clientWidth || 1120) - width - 64);
+      const col = index % columns;
+      const row = Math.floor(index / columns) + rowOffset;
+      const colStep = columns === 1 ? 0 : maxX / (columns - 1);
+      const x = 32 + col * colStep + rand() * 18 - 9;
+      const y = 42 + row * 238 + rand() * 24;
+      const rotate = active ? rand() * 8 - 4 : rand() * 4 - 2;
+      const scale = active ? 1 + rand() * 0.12 : 0.95;
+      const palette = buildPalette(rand, active);
+      const outline = active ? palette.accent : 'var(--color-border)';
+      return { width, x, y, rotate, scale, fill: palette.fill, accent: palette.accent, outline };
+    };
+
+    const layoutActive = (note, index, total, rowOffset) => {
+      const manual = notePosition(note);
+      if (manual && !isNarrow()) {
+        const auto = autoLayout(note, index, rowOffset, true);
+        return { ...auto, x: manual.x, y: manual.y, z: 30 + index };
+      }
       const groupSeed = `active-group|${total}|${notes.filter((item) => isActive(item)).length}`;
       const rand = seeded(`${groupSeed}|${note.id}|${note.content}|${note.updatedAt}`);
-      const width = 210 + rand() * 110;
-      const xBase = 5 + (index % 2) * 22;
-      const yBase = 7 + Math.floor(index / 2) * 17;
-      const x = xBase + rand() * 14;
-      const y = yBase + rand() * 12;
-      const rotate = rand() * 10 - 5;
-      const scale = 0.98 + rand() * 0.2;
+      const base = autoLayout(note, index, rowOffset, true);
       const palette = buildPalette(rand, true);
       const outline = palette.accent;
-      return { width, x, y, rotate, scale, fill: palette.fill, accent: palette.accent, outline, z: 30 + index };
+      return { ...base, fill: palette.fill, accent: palette.accent, outline, z: 30 + index };
     };
 
     const layoutArchived = (note, index) => {
+      const manual = notePosition(note);
+      if (manual && !isNarrow()) {
+        const auto = autoLayout(note, index, 0, false);
+        return { ...auto, x: manual.x, y: manual.y, z: 1 + index };
+      }
       const rand = seeded(`archive|${note.id}|${note.createdAt}`);
-      const width = 180 + rand() * 80;
-      const x = 4 + (index % 3) * 28 + rand() * 8;
-      const y = 6 + Math.floor(index / 3) * 32 + rand() * 6;
-      const rotate = rand() * 4 - 2;
+      const base = autoLayout(note, index, 0, false);
       const palette = buildPalette(rand, false);
       const fill = palette.fill;
       const outline = 'var(--color-border)';
-      return { width, x, y, rotate, scale: 0.95, fill, accent: palette.accent, outline, z: 1 + index };
+      return { ...base, fill, accent: palette.accent, outline, z: 1 + index };
     };
 
     const noteTime = (note) => new Date(note.updatedAt || note.createdAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
@@ -232,22 +358,29 @@ const { lang, title, subtitle } = Astro.props;
     });
 
     const render = () => {
-      const { active, archived } = splitNotes();
-      countEl.textContent = String(notes.length);
+      const visible = notes.filter(matchesSearch);
+      const { active, archived } = splitNotes(visible);
+      countEl.textContent = String(visible.length);
+      if (searchMeta) {
+        searchMeta.textContent = searchTerm ? ui.searchCount(visible.length, notes.length) : '';
+      }
       board.innerHTML = '';
+      board.style.removeProperty('--notes-board-height');
 
-      if (!notes.length) {
-        board.innerHTML = `<p class="notes-empty">${ui.noteEmpty}</p>`;
+      if (!visible.length) {
+        board.innerHTML = `<p class="notes-empty">${notes.length ? ui.noResult : ui.noteEmpty}</p>`;
         return;
       }
 
+      board.style.setProperty('--notes-board-height', `${boardHeightFor(visible, archived.length, active.length)}px`);
       const fragments = [];
       archived.forEach((note, index) => {
         const layout = layoutArchived(note, index);
         fragments.push(noteCard(note, layout));
       });
+      const activeRowOffset = Math.ceil(archived.length / boardColumns());
       active.forEach((note, index) => {
-        const layout = layoutActive(note, index, active.length);
+        const layout = layoutActive(note, index, active.length, activeRowOffset);
         fragments.push(noteCard(note, layout));
       });
       fragments.forEach((el) => board.appendChild(el));
@@ -258,8 +391,8 @@ const { lang, title, subtitle } = Astro.props;
       article.className = 'note-block';
       article.dataset.id = note.id;
       article.dataset.state = isActive(note) ? 'recent' : 'archive';
-      article.style.setProperty('--note-x', `${layout.x}%`);
-      article.style.setProperty('--note-y', `${layout.y}%`);
+      article.style.setProperty('--note-x', `${layout.x}px`);
+      article.style.setProperty('--note-y', `${layout.y}px`);
       article.style.setProperty('--note-rotate', `${layout.rotate}deg`);
       article.style.setProperty('--note-scale', `${layout.scale}`);
       article.style.setProperty('--note-width', `${layout.width}px`);
@@ -267,9 +400,17 @@ const { lang, title, subtitle } = Astro.props;
       article.style.setProperty('--note-accent', layout.accent);
       article.style.setProperty('--note-outline', layout.outline);
       article.style.setProperty('--note-z', String(layout.z));
+      article.setAttribute('tabindex', '0');
+      article.setAttribute('aria-label', `${ui.open}: ${note.content}`);
 
       const head = document.createElement('div');
       head.className = 'note-head';
+
+      const dragHandle = document.createElement('div');
+      dragHandle.className = `note-drag-handle ui-font ${authed ? '' : 'is-locked'}`;
+      dragHandle.dataset.dragHandle = note.id;
+      dragHandle.title = ui.drag;
+      dragHandle.textContent = ui.drag;
 
       const chip = document.createElement('span');
       chip.className = 'note-chip ui-font';
@@ -279,7 +420,7 @@ const { lang, title, subtitle } = Astro.props;
       state.className = 'note-state ui-font';
       state.textContent = isActive(note) ? ui.recent : ui.archive;
 
-      head.append(chip, state);
+      head.append(dragHandle, chip, state);
 
       const content = document.createElement('p');
       content.textContent = note.content;
@@ -324,10 +465,50 @@ const { lang, title, subtitle } = Astro.props;
       if (composeDialog.open) composeDialog.close();
     };
 
+    const openViewer = (noteId) => {
+      const note = notes.find((item) => item.id === noteId);
+      if (!note) return;
+      viewingId = noteId;
+      viewDate.textContent = noteTime(note);
+      viewState.textContent = isActive(note) ? ui.recent : ui.archive;
+      viewContent.textContent = note.content;
+      viewEdit.hidden = !authed;
+      viewDialog.showModal();
+    };
+
+    const closeViewer = () => {
+      viewingId = null;
+      if (viewDialog.open) viewDialog.close();
+    };
+
+    const requestDelete = (noteId) => {
+      const note = notes.find((item) => item.id === noteId);
+      if (!note || !authed) return;
+      deletingId = noteId;
+      const preview = String(note.content).replace(/\s+/g, ' ').slice(0, 32);
+      confirmText.textContent = ui.confirmDelete(preview);
+      confirmDialog.showModal();
+    };
+
+    const closeConfirm = () => {
+      deletingId = null;
+      if (confirmDialog.open) confirmDialog.close();
+    };
+
+    const deleteConfirmed = () => {
+      if (!deletingId || !authed) return;
+      notes = notes.filter((note) => note.id !== deletingId);
+      saveNotes(notes);
+      if (viewingId === deletingId) closeViewer();
+      closeConfirm();
+      render();
+    };
+
     const syncAuthUI = () => {
       fab.hidden = !authed;
       authPanel.hidden = authed;
       if (authed) authPanel.classList.remove('is-open');
+      if (viewEdit) viewEdit.hidden = !authed || !viewingId;
     };
 
     const refreshCaptcha = () => {
@@ -340,6 +521,18 @@ const { lang, title, subtitle } = Astro.props;
     captchaChip?.addEventListener('click', refreshCaptcha);
     fab?.addEventListener('click', () => openComposer());
     composeCancel?.addEventListener('click', closeComposer);
+    viewClose?.addEventListener('click', closeViewer);
+    viewEdit?.addEventListener('click', () => {
+      if (!viewingId || !authed) return;
+      closeViewer();
+      openComposer(viewingId);
+    });
+    confirmCancel?.addEventListener('click', closeConfirm);
+    confirmDelete?.addEventListener('click', deleteConfirmed);
+    searchInput?.addEventListener('input', (event) => {
+      searchTerm = normalize(event.target.value);
+      render();
+    });
 
     authForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -352,6 +545,7 @@ const { lang, title, subtitle } = Astro.props;
         authed = true;
         saveAuth(true);
         syncAuthUI();
+        render();
         refreshCaptcha();
       } else {
         alert(ui.loginFail);
@@ -382,18 +576,96 @@ const { lang, title, subtitle } = Astro.props;
       if (!(target instanceof HTMLElement)) return;
       const editId = target.dataset.edit;
       const delId = target.dataset.del;
+      const dragHandle = target.closest('[data-drag-handle]');
+      if (dragHandle && authed) return;
       if (editId && authed) openComposer(editId);
-      if (delId && authed) {
-        notes = notes.filter((note) => note.id !== delId);
+      if (delId && authed) requestDelete(delId);
+      if (editId || delId) return;
+      const card = target.closest('.note-block');
+      if (card?.dataset.id) openViewer(card.dataset.id);
+    });
+
+    board?.addEventListener('keydown', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.classList.contains('note-block')) return;
+      if ((event.key === 'Enter' || event.key === ' ') && target.dataset.id) {
+        event.preventDefault();
+        openViewer(target.dataset.id);
+      }
+    });
+
+    board?.addEventListener('pointerdown', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !authed || isNarrow()) return;
+      const handle = target.closest('[data-drag-handle]');
+      if (!(handle instanceof HTMLElement)) return;
+      const card = handle.closest('.note-block');
+      if (!(card instanceof HTMLElement) || !card.dataset.id || !board) return;
+      event.preventDefault();
+      boardRect = board.getBoundingClientRect();
+      const rect = card.getBoundingClientRect();
+      dragState = {
+        id: card.dataset.id,
+        pointerId: event.pointerId,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top
+      };
+      card.classList.add('is-dragging');
+      card.setPointerCapture(event.pointerId);
+    });
+
+    board?.addEventListener('pointermove', (event) => {
+      if (!dragState || !boardRect || !board) return;
+      const card = board.querySelector(`[data-id="${CSS.escape(dragState.id)}"]`);
+      if (!(card instanceof HTMLElement)) return;
+      const maxX = Math.max(0, board.clientWidth - card.offsetWidth - 26);
+      const maxY = Math.max(0, board.clientHeight - card.offsetHeight - 26);
+      const x = Math.min(maxX, Math.max(18, event.clientX - boardRect.left - dragState.offsetX));
+      const y = Math.min(maxY, Math.max(18, event.clientY - boardRect.top - dragState.offsetY));
+      card.style.setProperty('--note-x', `${x}px`);
+      card.style.setProperty('--note-y', `${y}px`);
+    });
+
+    const finishDrag = () => {
+      if (!dragState || !boardRect || !board) return;
+      const card = board.querySelector(`[data-id="${CSS.escape(dragState.id)}"]`);
+      if (card instanceof HTMLElement) {
+        const rect = card.getBoundingClientRect();
+        const x = Math.round(rect.left - boardRect.left);
+        const y = Math.round(rect.top - boardRect.top);
+        notes = notes.map((note) => note.id === dragState.id ? { ...note, position: { x, y } } : note);
         saveNotes(notes);
+        card.classList.remove('is-dragging');
+        if (card.hasPointerCapture?.(dragState.pointerId)) {
+          card.releasePointerCapture(dragState.pointerId);
+        }
         render();
       }
+      dragState = null;
+      boardRect = null;
+    };
+
+    board?.addEventListener('pointerup', finishDrag);
+    board?.addEventListener('pointercancel', finishDrag);
+
+    viewDialog?.addEventListener('click', (event) => {
+      const rect = viewDialog.getBoundingClientRect();
+      const inside = rect.top <= event.clientY && event.clientY <= rect.top + rect.height && rect.left <= event.clientX && event.clientX <= rect.left + rect.width;
+      if (!inside) closeViewer();
+    });
+
+    confirmDialog?.addEventListener('click', (event) => {
+      const rect = confirmDialog.getBoundingClientRect();
+      const inside = rect.top <= event.clientY && event.clientY <= rect.top + rect.height && rect.left <= event.clientX && event.clientX <= rect.left + rect.width;
+      if (!inside) closeConfirm();
     });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && composeDialog.open) {
         closeComposer();
       }
+      if (event.key === 'Escape' && viewDialog.open) closeViewer();
+      if (event.key === 'Escape' && confirmDialog.open) closeConfirm();
     });
 
     composeDialog?.addEventListener('click', (event) => {
@@ -517,11 +789,66 @@ const { lang, title, subtitle } = Astro.props;
       transform: rotate(-1deg);
     }
 
+    .notes-tools {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 22px;
+    }
+
+    .notes-search {
+      display: grid;
+      grid-template-columns: auto minmax(220px, 420px);
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: var(--border-doodle);
+      border-radius: 24px 17px 28px 16px / 18px 26px 14px 24px;
+      background: color-mix(in srgb, var(--color-surface-strong) 72%, var(--color-surface));
+      box-shadow: var(--shadow-doodle-small);
+      font-size: 20px;
+      font-weight: 700;
+      transform: rotate(0.8deg);
+    }
+
+    .notes-search input {
+      min-width: 0;
+      width: 100%;
+      padding: 8px 12px;
+      border: 2px solid var(--color-border);
+      border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+      background: var(--color-bg);
+      color: var(--color-text);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-shadow) 12%, transparent);
+      font-family: 'Noto Serif SC', serif;
+      font-size: 17px;
+      outline: none;
+    }
+
+    .notes-search input:focus {
+      border-color: var(--color-accent);
+      box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--color-shadow) 12%, transparent),
+        0 0 0 4px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    }
+
+    .notes-search-meta {
+      min-height: 28px;
+      margin: 0;
+      color: var(--color-muted);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
     .notes-board {
       position: relative;
       z-index: 1;
       isolation: isolate;
-      min-height: 760px;
+      min-height: var(--notes-board-height, 760px);
       margin-top: 36px;
       padding: 28px 18px 56px;
       border: var(--border-doodle);
@@ -576,8 +903,8 @@ const { lang, title, subtitle } = Astro.props;
 
     .note-block {
       position: absolute;
-      left: calc(var(--note-x) + 0%);
-      top: calc(var(--note-y) + 0%);
+      left: var(--note-x);
+      top: var(--note-y);
       z-index: var(--note-z);
       width: min(var(--note-width), 260px);
       padding: 20px 14px 12px;
@@ -591,6 +918,8 @@ const { lang, title, subtitle } = Astro.props;
         inset -5px -7px 0 color-mix(in srgb, var(--color-bg) 26%, transparent);
       transform: rotate(var(--note-rotate)) scale(var(--note-scale));
       transition: box-shadow 160ms ease, transform 160ms ease, filter 160ms ease;
+      cursor: zoom-in;
+      touch-action: none;
     }
 
     .note-block::before {
@@ -633,12 +962,52 @@ const { lang, title, subtitle } = Astro.props;
       transform: rotate(calc(var(--note-rotate) - 1deg)) scale(calc(var(--note-scale) + 0.03));
     }
 
+    .note-block:focus-visible {
+      outline: 4px dashed var(--color-accent-2);
+      outline-offset: 5px;
+    }
+
+    .note-block.is-dragging {
+      z-index: 80;
+      cursor: grabbing;
+      filter: saturate(1.08);
+      transform: rotate(0deg) scale(1.05);
+    }
+
     .note-head,
     .note-tail {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+    }
+
+    .note-head {
+      align-items: stretch;
+    }
+
+    .note-drag-handle {
+      flex: 1 1 auto;
+      min-width: 54px;
+      padding: 2px 10px;
+      border: 2px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+      border-radius: 13px 9px 14px 8px / 9px 13px 8px 14px;
+      background:
+        repeating-linear-gradient(93deg, color-mix(in srgb, var(--note-accent) 44%, var(--color-surface)) 0 10px, color-mix(in srgb, var(--color-surface) 72%, transparent) 11px 18px);
+      box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-shadow) 38%, transparent);
+      color: var(--color-text);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .note-drag-handle.is-locked {
+      cursor: zoom-in;
+    }
+
+    .note-drag-handle:active {
+      cursor: grabbing;
     }
 
     .note-chip {
@@ -690,6 +1059,7 @@ const { lang, title, subtitle } = Astro.props;
     .note-controls button,
     .primary,
     .ghost,
+    .danger,
     .auth-badge,
     .captcha-chip,
     .compose-fab {
@@ -704,13 +1074,17 @@ const { lang, title, subtitle } = Astro.props;
     }
 
     .note-controls button,
-    .compose-actions button {
+    .auth-actions button,
+    .compose-actions button,
+    .confirm-actions button,
+    .note-view-actions button {
       padding: 4px 10px;
     }
 
     .note-controls button:hover,
     .primary:hover,
     .ghost:hover,
+    .danger:hover,
     .auth-badge:hover,
     .captcha-chip:hover,
     .compose-fab:hover {
@@ -718,6 +1092,11 @@ const { lang, title, subtitle } = Astro.props;
       box-shadow: 1px 1px 0 var(--color-shadow);
       color: #fffdf3;
       transform: translate(2px, 2px) rotate(-2deg);
+    }
+
+    .danger {
+      background: color-mix(in srgb, var(--color-accent) 78%, var(--color-surface));
+      color: #fffdf3;
     }
 
     .notes-auth {
@@ -737,7 +1116,9 @@ const { lang, title, subtitle } = Astro.props;
     }
 
     .auth-card,
-    .compose-card {
+    .compose-card,
+    .note-view-card,
+    .confirm-card {
       position: relative;
       display: grid;
       gap: 12px;
@@ -751,7 +1132,9 @@ const { lang, title, subtitle } = Astro.props;
     }
 
     .auth-card::before,
-    .compose-card::before {
+    .compose-card::before,
+    .note-view-card::before,
+    .confirm-card::before {
       position: absolute;
       top: -12px;
       left: 28px;
@@ -778,7 +1161,8 @@ const { lang, title, subtitle } = Astro.props;
     }
 
     .auth-card h2,
-    .compose-card h2 {
+    .compose-card h2,
+    .confirm-card h2 {
       margin: 0;
       font-family: 'Gaegu', 'DM Sans', sans-serif;
       font-size: 28px;
@@ -817,7 +1201,9 @@ const { lang, title, subtitle } = Astro.props;
     }
 
     .auth-actions,
-    .compose-actions {
+    .compose-actions,
+    .confirm-actions,
+    .note-view-actions {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -830,19 +1216,86 @@ const { lang, title, subtitle } = Astro.props;
       line-height: 1.5;
     }
 
-    .compose-dialog {
+    .compose-dialog,
+    .note-view-dialog,
+    .confirm-dialog {
       padding: 0;
       border: 0;
       background: transparent;
     }
 
-    .compose-dialog::backdrop {
+    .compose-dialog::backdrop,
+    .note-view-dialog::backdrop,
+    .confirm-dialog::backdrop {
       background: rgba(0, 0, 0, 0.38);
     }
 
-    .compose-dialog[open] {
+    .compose-dialog[open],
+    .note-view-dialog[open],
+    .confirm-dialog[open] {
       display: grid;
       place-items: center;
+    }
+
+    .note-view-card {
+      width: min(92vw, 680px);
+      max-height: min(82vh, 720px);
+      overflow: auto;
+      padding: 28px 24px 22px;
+      background:
+        radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--color-accent-2) 18%, transparent) 0 44px, transparent 45px),
+        linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 92%, var(--color-accent-bg)) 0%, var(--color-surface) 100%);
+      transform: rotate(-0.7deg);
+    }
+
+    .note-view-close {
+      justify-self: end;
+      padding: 5px 12px;
+      border: 2px solid var(--color-border);
+      border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+      background: var(--color-surface);
+      box-shadow: 3px 3px 0 var(--color-shadow);
+      color: var(--color-text);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .note-view-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--color-muted);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .note-view-meta span {
+      padding: 3px 9px;
+      border: 2px solid var(--color-border);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--color-accent-bg) 64%, var(--color-surface));
+    }
+
+    .note-view-card p {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 42px);
+      font-weight: 700;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .confirm-card {
+      width: min(92vw, 420px);
+      transform: rotate(0.9deg);
+    }
+
+    .confirm-card p {
+      margin: 0;
+      color: var(--color-muted);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.6;
     }
 
     .compose-card textarea {
@@ -889,6 +1342,7 @@ const { lang, title, subtitle } = Astro.props;
         width: 100%;
         margin-bottom: 14px;
         transform: rotate(var(--note-rotate)) scale(1);
+        touch-action: auto;
       }
 
       .note-block:hover {
@@ -902,8 +1356,25 @@ const { lang, title, subtitle } = Astro.props;
         justify-items: stretch;
       }
 
+      .notes-search {
+        grid-template-columns: 1fr;
+        width: 100%;
+        transform: none;
+      }
+
+      .note-head {
+        flex-wrap: wrap;
+      }
+
+      .note-drag-handle {
+        flex-basis: 100%;
+        cursor: zoom-in;
+      }
+
       .auth-card,
-      .compose-card {
+      .compose-card,
+      .note-view-card,
+      .confirm-card {
         width: 100%;
       }
 
