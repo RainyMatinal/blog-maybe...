@@ -10,6 +10,7 @@ export const ui = {
   zh: {
     'nav.home': '首页',
     'nav.blog': '博客',
+    'nav.notes': '笔记',
     'nav.about': '关于',
     'post.readTime': '阅读',
     'post.publishedAt': '发布于',
@@ -25,6 +26,7 @@ export const ui = {
   en: {
     'nav.home': 'Home',
     'nav.blog': 'Blog',
+    'nav.notes': 'Notes',
     'nav.about': 'About',
     'post.readTime': 'Read',
     'post.publishedAt': 'Published',

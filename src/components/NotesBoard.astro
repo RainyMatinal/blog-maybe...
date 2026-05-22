@@ -1,0 +1,916 @@
+---
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  subtitle: string;
+}
+
+const { lang, title, subtitle } = Astro.props;
+---
+
+<section class="notes-shell" data-notes-app data-lang={lang}>
+  <header class="notes-head site-shell">
+    <div>
+      <p class="eyebrow ui-font">{subtitle}</p>
+      <h1 class="ui-font">{title}</h1>
+    </div>
+    <div class="notes-meta ui-font">
+      <span data-note-count>0</span>
+      <span>{lang === 'zh' ? '可见 / 可编辑' : 'Visible / Editable'}</span>
+    </div>
+  </header>
+
+  <section class="site-shell notes-intro">
+    <p>
+      {lang === 'zh'
+        ? '不登录可以看，登录后才可以发布、修改和删除。新增笔记会轻微扰动最近 3 天的块位，旧笔记保持稳定。'
+        : 'You can browse without signing in. After login you can publish, edit, and delete. New notes slightly reshuffle the last 3 days only, while older notes stay fixed.'}
+    </p>
+  </section>
+
+  <section class="site-shell notes-board" data-notes-board aria-label={title}></section>
+
+  <aside class="notes-auth" data-auth-panel>
+    <button class="auth-badge ui-font" type="button" data-auth-toggle>
+      {lang === 'zh' ? '登录' : 'Login'}
+    </button>
+    <form class="auth-card" data-auth-form>
+      <h2 class="ui-font">{lang === 'zh' ? '写笔记' : 'Write Notes'}</h2>
+      <label>
+        <span>{lang === 'zh' ? '账号' : 'Account'}</span>
+        <input type="email" name="email" autocomplete="username" required />
+      </label>
+      <label>
+        <span>{lang === 'zh' ? '密码' : 'Password'}</span>
+        <input type="password" name="password" autocomplete="current-password" required />
+      </label>
+      <label>
+        <span>{lang === 'zh' ? '验证码' : 'Captcha'}</span>
+        <div class="captcha-row">
+          <input type="text" name="captcha" inputmode="numeric" required />
+          <button class="captcha-chip ui-font" type="button" data-captcha-chip></button>
+        </div>
+      </label>
+      <div class="auth-actions">
+        <button class="primary ui-font" type="submit">{lang === 'zh' ? '进入' : 'Enter'}</button>
+        <button class="ghost ui-font" type="button" data-auth-close>{lang === 'zh' ? '关闭' : 'Close'}</button>
+      </div>
+      <p class="auth-hint">{lang === 'zh' ? '登录后内容只保存在当前浏览器。' : 'Content is saved only in this browser.'}</p>
+    </form>
+  </aside>
+
+  <button class="compose-fab ui-font" type="button" data-compose-fab hidden>
+    {lang === 'zh' ? '新建' : 'New'}
+  </button>
+
+  <dialog class="compose-dialog" data-compose-dialog>
+    <form method="dialog" class="compose-card" data-compose-form>
+      <h2 class="ui-font">{lang === 'zh' ? '编辑笔记' : 'Edit Note'}</h2>
+      <label>
+        <span>{lang === 'zh' ? '内容' : 'Content'}</span>
+        <textarea name="content" rows="8" required></textarea>
+      </label>
+      <div class="compose-actions">
+        <button class="primary ui-font" value="save" type="submit">{lang === 'zh' ? '保存' : 'Save'}</button>
+        <button class="ghost ui-font" value="cancel" type="button" data-compose-cancel>{lang === 'zh' ? '取消' : 'Cancel'}</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script is:inline>
+    const STORAGE_KEY = 'notes-board-v1';
+    const AUTH_KEY = 'notes-auth-v1';
+    const KNOWN_USER = '15372028397@163.com';
+    const PASSWORD_HASH = 'a2b8862b692f5b07a36cbc20bfb870b200380e7f431c579411c39fdca50b970b';
+
+    const root = document.querySelector('[data-notes-app]');
+    if (!root) throw new Error('Missing notes app root');
+
+    const lang = root.dataset.lang === 'en' ? 'en' : 'zh';
+    const board = root.querySelector('[data-notes-board]');
+    const countEl = root.querySelector('[data-note-count]');
+    const authPanel = root.querySelector('[data-auth-panel]');
+    const authForm = root.querySelector('[data-auth-form]');
+    const authToggle = root.querySelector('[data-auth-toggle]');
+    const authClose = root.querySelector('[data-auth-close]');
+    const captchaChip = root.querySelector('[data-captcha-chip]');
+    const fab = root.querySelector('[data-compose-fab]');
+    const composeDialog = root.querySelector('[data-compose-dialog]');
+    const composeForm = root.querySelector('[data-compose-form]');
+    const composeCancel = root.querySelector('[data-compose-cancel]');
+
+    const ui = {
+      zh: {
+        loginFail: '账号、密码或验证码不对',
+        noteEmpty: '还没有笔记，先写一条吧。',
+        recent: '最近 3 天',
+        archive: '归档',
+        edit: '编辑',
+        del: '删除'
+      },
+      en: {
+        loginFail: 'Wrong account, password, or captcha',
+        noteEmpty: 'No notes yet. Write the first one.',
+        recent: 'Last 3 days',
+        archive: 'Archive',
+        edit: 'Edit',
+        del: 'Delete'
+      }
+    }[lang];
+
+    const seedCaptcha = () => Math.floor(1000 + Math.random() * 9000).toString();
+
+    const seeded = (input) => {
+      let h = 2166136261;
+      for (let i = 0; i < input.length; i++) {
+        h ^= input.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return () => {
+        h += h << 13;
+        h ^= h >>> 7;
+        h += h << 3;
+        h ^= h >>> 17;
+        h += h << 5;
+        return (h >>> 0) / 4294967296;
+      };
+    };
+
+    const today = Date.now();
+    const day = 86400000;
+
+    const loadNotes = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (Array.isArray(parsed)) return parsed;
+      } catch {}
+      const at = (offset) => new Date(today - offset * day).toISOString();
+      return [
+        { id: 'a', createdAt: at(0), updatedAt: at(0), content: lang === 'zh' ? '今天先放一块柔软的蓝色。' : 'Put a soft blue block here today.' },
+        { id: 'b', createdAt: at(1), updatedAt: at(1), content: lang === 'zh' ? '昨天记下一个更轻的标题。' : 'Yesterday I noted a lighter headline.' },
+        { id: 'c', createdAt: at(2), updatedAt: at(2), content: lang === 'zh' ? '再往前一点，排版开始变得安静。' : 'A bit further back, the layout grows quiet.' },
+        { id: 'd', createdAt: at(5), updatedAt: at(5), content: lang === 'zh' ? '更早的笔记会稳稳留在原地。' : 'Older notes keep their place.' },
+        { id: 'e', createdAt: at(10), updatedAt: at(10), content: lang === 'zh' ? '旧段落像贴在墙上的便签。' : 'Old paragraphs stick like notes on a wall.' }
+      ];
+    };
+
+    const saveNotes = (notes) => localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    const loadAuth = () => localStorage.getItem(AUTH_KEY) === '1';
+    const saveAuth = (value) => localStorage.setItem(AUTH_KEY, value ? '1' : '0');
+    const ageDays = (date) => Math.floor((Date.now() - new Date(date).getTime()) / day);
+    const isActive = (note) => ageDays(note.updatedAt || note.createdAt) < 3;
+
+    const palettes = [
+      'var(--color-accent)',
+      'var(--color-accent-2)',
+      'var(--color-accent-3)',
+      'var(--color-surface-strong)'
+    ];
+
+    const buildPalette = (rand, active) => {
+      const accent = palettes[Math.floor(rand() * palettes.length)];
+      const fill = active
+        ? `color-mix(in srgb, ${accent} ${58 + rand() * 12}%, var(--color-surface))`
+        : `color-mix(in srgb, ${accent} ${30 + rand() * 10}%, var(--color-surface))`;
+      return { accent, fill };
+    };
+
+    const hash = async (value) => {
+      const bytes = new TextEncoder().encode(value);
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(digest)).map((n) => n.toString(16).padStart(2, '0')).join('');
+    };
+
+    let notes = loadNotes();
+    let authed = loadAuth();
+    let captcha = seedCaptcha();
+    let editingId = null;
+
+    const splitNotes = () => {
+      const active = [];
+      const archived = [];
+      for (const note of [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())) {
+        if (isActive(note)) active.push(note);
+        else archived.push(note);
+      }
+      return { active, archived };
+    };
+
+    const layoutActive = (note, index, total) => {
+      const groupSeed = `active-group|${total}|${notes.filter((item) => isActive(item)).length}`;
+      const rand = seeded(`${groupSeed}|${note.id}|${note.content}|${note.updatedAt}`);
+      const width = 210 + rand() * 110;
+      const xBase = 5 + (index % 2) * 22;
+      const yBase = 7 + Math.floor(index / 2) * 17;
+      const x = xBase + rand() * 14;
+      const y = yBase + rand() * 12;
+      const rotate = rand() * 10 - 5;
+      const scale = 0.98 + rand() * 0.2;
+      const palette = buildPalette(rand, true);
+      const outline = palette.accent;
+      return { width, x, y, rotate, scale, fill: palette.fill, accent: palette.accent, outline, z: 30 + index };
+    };
+
+    const layoutArchived = (note, index) => {
+      const rand = seeded(`archive|${note.id}|${note.createdAt}`);
+      const width = 180 + rand() * 80;
+      const x = 4 + (index % 3) * 28 + rand() * 8;
+      const y = 6 + Math.floor(index / 3) * 32 + rand() * 6;
+      const rotate = rand() * 4 - 2;
+      const palette = buildPalette(rand, false);
+      const fill = palette.fill;
+      const outline = 'var(--color-border)';
+      return { width, x, y, rotate, scale: 0.95, fill, accent: palette.accent, outline, z: 1 + index };
+    };
+
+    const noteTime = (note) => new Date(note.updatedAt || note.createdAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+
+    const render = () => {
+      const { active, archived } = splitNotes();
+      countEl.textContent = String(notes.length);
+      board.innerHTML = '';
+
+      if (!notes.length) {
+        board.innerHTML = `<p class="notes-empty">${ui.noteEmpty}</p>`;
+        return;
+      }
+
+      const fragments = [];
+      archived.forEach((note, index) => {
+        const layout = layoutArchived(note, index);
+        fragments.push(noteCard(note, layout));
+      });
+      active.forEach((note, index) => {
+        const layout = layoutActive(note, index, active.length);
+        fragments.push(noteCard(note, layout));
+      });
+      fragments.forEach((el) => board.appendChild(el));
+    };
+
+    const noteCard = (note, layout) => {
+      const article = document.createElement('article');
+      article.className = 'note-block';
+      article.dataset.id = note.id;
+      article.dataset.state = isActive(note) ? 'recent' : 'archive';
+      article.style.setProperty('--note-x', `${layout.x}%`);
+      article.style.setProperty('--note-y', `${layout.y}%`);
+      article.style.setProperty('--note-rotate', `${layout.rotate}deg`);
+      article.style.setProperty('--note-scale', `${layout.scale}`);
+      article.style.setProperty('--note-width', `${layout.width}px`);
+      article.style.setProperty('--note-fill', layout.fill);
+      article.style.setProperty('--note-accent', layout.accent);
+      article.style.setProperty('--note-outline', layout.outline);
+      article.style.setProperty('--note-z', String(layout.z));
+
+      const head = document.createElement('div');
+      head.className = 'note-head';
+
+      const chip = document.createElement('span');
+      chip.className = 'note-chip ui-font';
+      chip.textContent = noteTime(note);
+
+      const state = document.createElement('span');
+      state.className = 'note-state ui-font';
+      state.textContent = isActive(note) ? ui.recent : ui.archive;
+
+      head.append(chip, state);
+
+      const content = document.createElement('p');
+      content.textContent = note.content;
+
+      const tail = document.createElement('div');
+      tail.className = 'note-tail';
+
+      const trace = document.createElement('span');
+      trace.className = 'note-trace';
+      trace.setAttribute('aria-hidden', 'true');
+
+      const controls = document.createElement('div');
+      controls.className = `note-controls ${authed ? '' : 'is-hidden'}`;
+
+      const edit = document.createElement('button');
+      edit.type = 'button';
+      edit.dataset.edit = note.id;
+      edit.className = 'ui-font';
+      edit.textContent = ui.edit;
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.dataset.del = note.id;
+      del.className = 'ui-font';
+      del.textContent = ui.del;
+
+      controls.append(edit, del);
+      tail.append(trace, controls);
+      article.append(head, content, tail);
+      return article;
+    };
+
+    const openComposer = (noteId = null) => {
+      if (!authed) return;
+      editingId = noteId;
+      const note = notes.find((item) => item.id === noteId);
+      composeForm.content.value = note?.content || '';
+      composeDialog.showModal();
+    };
+
+    const closeComposer = () => {
+      if (composeDialog.open) composeDialog.close();
+    };
+
+    const syncAuthUI = () => {
+      fab.hidden = !authed;
+      authPanel.hidden = authed;
+      if (authed) authPanel.classList.remove('is-open');
+    };
+
+    const refreshCaptcha = () => {
+      captcha = seedCaptcha();
+      captchaChip.textContent = captcha;
+    };
+
+    authToggle?.addEventListener('click', () => authPanel.classList.add('is-open'));
+    authClose?.addEventListener('click', () => authPanel.classList.remove('is-open'));
+    captchaChip?.addEventListener('click', refreshCaptcha);
+    fab?.addEventListener('click', () => openComposer());
+    composeCancel?.addEventListener('click', closeComposer);
+
+    authForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = new FormData(authForm);
+      const email = String(form.get('email') || '').trim();
+      const password = String(form.get('password') || '');
+      const typedCaptcha = String(form.get('captcha') || '').trim();
+      const secret = await hash(`${email}:${password}`);
+      if (email === KNOWN_USER && secret === PASSWORD_HASH && typedCaptcha === captcha) {
+        authed = true;
+        saveAuth(true);
+        syncAuthUI();
+        refreshCaptcha();
+      } else {
+        alert(ui.loginFail);
+        refreshCaptcha();
+      }
+    });
+
+    composeForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!authed) return;
+      const form = new FormData(composeForm);
+      const content = String(form.get('content') || '').trim();
+      if (!content) return;
+      const now = new Date().toISOString();
+      if (editingId) {
+        notes = notes.map((note) => note.id === editingId ? { ...note, content, updatedAt: now } : note);
+      } else {
+        notes = [{ id: crypto.randomUUID(), createdAt: now, updatedAt: now, content }, ...notes];
+      }
+      saveNotes(notes);
+      render();
+      closeComposer();
+      editingId = null;
+    });
+
+    board?.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const editId = target.dataset.edit;
+      const delId = target.dataset.del;
+      if (editId && authed) openComposer(editId);
+      if (delId && authed) {
+        notes = notes.filter((note) => note.id !== delId);
+        saveNotes(notes);
+        render();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && composeDialog.open) {
+        closeComposer();
+      }
+    });
+
+    composeDialog?.addEventListener('click', (event) => {
+      const rect = composeDialog.getBoundingClientRect();
+      const inside = rect.top <= event.clientY && event.clientY <= rect.top + rect.height && rect.left <= event.clientX && event.clientX <= rect.left + rect.width;
+      if (!inside) closeComposer();
+    });
+
+    refreshCaptcha();
+    syncAuthUI();
+    render();
+  </script>
+
+  <style is:global>
+    .notes-shell {
+      position: relative;
+      isolation: isolate;
+      padding-bottom: 84px;
+    }
+
+    .notes-shell::before,
+    .notes-shell::after {
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+      content: '';
+    }
+
+    .notes-shell::before {
+      top: 122px;
+      right: max(-80px, calc((100vw - 1120px) / 2 - 180px));
+      width: 360px;
+      height: 170px;
+      border: 3px solid color-mix(in srgb, var(--color-accent) 72%, transparent);
+      border-radius: 58% 42% 61% 39% / 43% 49% 51% 57%;
+      background:
+        linear-gradient(104deg, transparent 0 36%, color-mix(in srgb, var(--color-accent) 26%, transparent) 36% 45%, transparent 45%),
+        radial-gradient(circle at 30% 55%, color-mix(in srgb, var(--color-surface-strong) 38%, transparent) 0 18%, transparent 19%);
+      transform: rotate(11deg);
+    }
+
+    .notes-shell::after {
+      bottom: 120px;
+      left: max(-100px, calc((100vw - 1120px) / 2 - 220px));
+      width: 420px;
+      height: 96px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--color-accent-2) 56%, transparent) 0 8px, transparent 9px),
+        repeating-linear-gradient(96deg, color-mix(in srgb, var(--color-accent-3) 22%, transparent) 0 18px, transparent 19px 35px);
+      transform: rotate(-12deg);
+    }
+
+    .notes-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      padding-top: 84px;
+    }
+
+    .notes-head .eyebrow {
+      width: fit-content;
+      margin: 0 0 10px;
+      padding: 2px 12px;
+      border: 2px solid var(--color-border);
+      border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+      background: var(--color-accent-2);
+      box-shadow: var(--shadow-doodle-small);
+      color: #fffdf3;
+      font-size: 18px;
+      font-weight: 700;
+      transform: rotate(-2deg);
+    }
+
+    .notes-head h1 {
+      margin: 0;
+      font-family: 'Gaegu', 'DM Sans', sans-serif;
+      font-size: 76px;
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: 0;
+      text-shadow:
+        4px 4px 0 var(--color-surface-strong),
+        -2px 2px 0 color-mix(in srgb, var(--color-accent-2) 44%, transparent);
+    }
+
+    .notes-meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .notes-meta span:first-child {
+      padding: 4px 10px;
+      border: 2px solid var(--color-border);
+      border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+      background: var(--color-surface-strong);
+      box-shadow: var(--shadow-doodle-small);
+    }
+
+    .notes-intro p {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 760px);
+      margin: 18px 0 0;
+      padding: 16px 18px;
+      border: var(--border-doodle);
+      border-radius: 26px 15px 30px 16px / 16px 28px 14px 24px;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-doodle);
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.7;
+      transform: rotate(-1deg);
+    }
+
+    .notes-board {
+      position: relative;
+      z-index: 1;
+      isolation: isolate;
+      min-height: 760px;
+      margin-top: 36px;
+      padding: 28px 18px 56px;
+      border: var(--border-doodle);
+      border-radius: 34px 22px 38px 20px / 20px 34px 18px 30px;
+      background:
+        radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--color-accent) 14%, transparent) 0 6px, transparent 7px 100%),
+        radial-gradient(circle at 88% 74%, color-mix(in srgb, var(--color-accent-2) 12%, transparent) 0 7px, transparent 8px 100%),
+        linear-gradient(135deg, color-mix(in srgb, var(--color-surface) 92%, var(--color-bg)) 0%, color-mix(in srgb, var(--color-surface-strong) 24%, var(--color-surface)) 100%);
+      box-shadow:
+        var(--shadow-doodle),
+        inset 0 0 0 7px color-mix(in srgb, var(--color-bg) 62%, transparent);
+      overflow: hidden;
+    }
+
+    .notes-board::before,
+    .notes-board::after {
+      position: absolute;
+      z-index: 0;
+      pointer-events: none;
+      content: '';
+    }
+
+    .notes-board::before {
+      inset: 20px 18px 22px;
+      border: 2px dashed color-mix(in srgb, var(--color-border) 46%, transparent);
+      border-radius: 30px 20px 36px 18px / 18px 32px 16px 28px;
+      transform: rotate(-0.7deg);
+    }
+
+    .notes-board::after {
+      right: -54px;
+      bottom: 54px;
+      width: 330px;
+      height: 132px;
+      border: 3px solid color-mix(in srgb, var(--color-accent-3) 58%, transparent);
+      border-radius: 58% 42% 47% 53% / 50% 35% 65% 50%;
+      background:
+        radial-gradient(circle at 18% 48%, color-mix(in srgb, var(--color-accent-3) 28%, transparent) 0 12px, transparent 13px),
+        radial-gradient(circle at 52% 40%, color-mix(in srgb, var(--color-accent) 24%, transparent) 0 8px, transparent 9px),
+        linear-gradient(100deg, transparent 0 42%, color-mix(in srgb, var(--color-accent-2) 16%, transparent) 42% 54%, transparent 54%);
+      transform: rotate(-10deg);
+    }
+
+    .notes-empty {
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      padding: 18px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .note-block {
+      position: absolute;
+      left: calc(var(--note-x) + 0%);
+      top: calc(var(--note-y) + 0%);
+      z-index: var(--note-z);
+      width: min(var(--note-width), 260px);
+      padding: 20px 14px 12px;
+      border: 3px solid var(--note-outline);
+      border-radius: 24px 18px 28px 16px / 18px 24px 16px 26px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--note-fill) 88%, var(--color-bg)) 0%, var(--note-fill) 100%),
+        repeating-linear-gradient(0deg, transparent 0 29px, color-mix(in srgb, var(--color-border) 8%, transparent) 30px 31px);
+      box-shadow:
+        var(--shadow-doodle),
+        inset -5px -7px 0 color-mix(in srgb, var(--color-bg) 26%, transparent);
+      transform: rotate(var(--note-rotate)) scale(var(--note-scale));
+      transition: box-shadow 160ms ease, transform 160ms ease, filter 160ms ease;
+    }
+
+    .note-block::before {
+      position: absolute;
+      top: -14px;
+      left: 22px;
+      width: 82px;
+      height: 25px;
+      border: 2px solid color-mix(in srgb, var(--color-border) 66%, transparent);
+      border-radius: 11px 8px 13px 7px / 8px 12px 7px 13px;
+      background:
+        repeating-linear-gradient(94deg, color-mix(in srgb, var(--note-accent) 42%, var(--color-surface)) 0 10px, color-mix(in srgb, var(--color-surface) 72%, transparent) 11px 18px);
+      box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-shadow) 42%, transparent);
+      transform: rotate(-4deg);
+      content: '';
+    }
+
+    .note-block::after {
+      position: absolute;
+      right: -3px;
+      bottom: -3px;
+      width: 31px;
+      height: 31px;
+      border-top: 3px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+      border-left: 3px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+      border-radius: 16px 0 18px 0;
+      background: color-mix(in srgb, var(--note-accent) 34%, var(--color-bg));
+      box-shadow: -3px -3px 0 color-mix(in srgb, var(--color-shadow) 18%, transparent);
+      content: '';
+    }
+
+    .note-block[data-state='archive'] {
+      filter: saturate(0.82);
+    }
+
+    .note-block:hover {
+      box-shadow:
+        10px 10px 0 var(--color-shadow),
+        inset -5px -7px 0 color-mix(in srgb, var(--color-bg) 26%, transparent);
+      transform: rotate(calc(var(--note-rotate) - 1deg)) scale(calc(var(--note-scale) + 0.03));
+    }
+
+    .note-head,
+    .note-tail {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .note-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 2px solid var(--color-border);
+      border-radius: 999px;
+      background: var(--color-surface);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .note-state {
+      padding: 2px 7px;
+      border: 2px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+      border-radius: 13px 9px 14px 8px / 9px 13px 8px 14px;
+      background: color-mix(in srgb, var(--note-accent) 34%, var(--color-surface));
+      font-size: 14px;
+      font-weight: 700;
+      transform: rotate(2deg);
+      white-space: nowrap;
+    }
+
+    .note-block p {
+      margin: 12px 0 0;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .note-tail {
+      margin-top: 12px;
+    }
+
+    .note-trace {
+      width: 58px;
+      height: 12px;
+      border-bottom: 4px solid var(--note-accent);
+      border-radius: 0 0 70% 50%;
+      transform: rotate(-3deg);
+    }
+
+    .note-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .note-controls button,
+    .primary,
+    .ghost,
+    .auth-badge,
+    .captcha-chip,
+    .compose-fab {
+      border: 2px solid var(--color-border);
+      border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+      background: var(--color-surface);
+      box-shadow: 3px 3px 0 var(--color-shadow);
+      color: var(--color-text);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .note-controls button,
+    .compose-actions button {
+      padding: 4px 10px;
+    }
+
+    .note-controls button:hover,
+    .primary:hover,
+    .ghost:hover,
+    .auth-badge:hover,
+    .captcha-chip:hover,
+    .compose-fab:hover {
+      background: var(--color-accent);
+      box-shadow: 1px 1px 0 var(--color-shadow);
+      color: #fffdf3;
+      transform: translate(2px, 2px) rotate(-2deg);
+    }
+
+    .notes-auth {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 30;
+      display: grid;
+      gap: 10px;
+      align-items: end;
+      justify-items: end;
+    }
+
+    .auth-badge {
+      padding: 10px 16px;
+      font-size: 18px;
+    }
+
+    .auth-card,
+    .compose-card {
+      position: relative;
+      display: grid;
+      gap: 12px;
+      width: min(92vw, 340px);
+      padding: 16px;
+      border: var(--border-doodle);
+      border-radius: 28px 18px 32px 16px / 18px 30px 16px 26px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 94%, var(--color-accent-bg)) 0%, var(--color-surface) 100%);
+      box-shadow: var(--shadow-doodle);
+    }
+
+    .auth-card::before,
+    .compose-card::before {
+      position: absolute;
+      top: -12px;
+      left: 28px;
+      width: 90px;
+      height: 23px;
+      border: 2px solid color-mix(in srgb, var(--color-border) 68%, transparent);
+      border-radius: 10px 7px 12px 8px / 8px 12px 7px 10px;
+      background: color-mix(in srgb, var(--color-accent-2) 42%, var(--color-surface));
+      box-shadow: 2px 2px 0 color-mix(in srgb, var(--color-shadow) 44%, transparent);
+      transform: rotate(-3deg);
+      content: '';
+    }
+
+    .notes-auth:not(.is-open) .auth-card {
+      display: none;
+    }
+
+    .notes-auth:not(.is-open) .auth-badge {
+      display: inline-flex;
+    }
+
+    .notes-auth.is-open .auth-badge {
+      display: none;
+    }
+
+    .auth-card h2,
+    .compose-card h2 {
+      margin: 0;
+      font-family: 'Gaegu', 'DM Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .auth-card label,
+    .compose-card label {
+      display: grid;
+      gap: 6px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .auth-card input,
+    .compose-card textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid var(--color-border);
+      border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+      background: var(--color-bg);
+      color: var(--color-text);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-shadow) 12%, transparent);
+    }
+
+    .captcha-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .captcha-chip {
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .auth-actions,
+    .compose-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .auth-hint {
+      margin: 0;
+      color: var(--color-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .compose-dialog {
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .compose-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.38);
+    }
+
+    .compose-dialog[open] {
+      display: grid;
+      place-items: center;
+    }
+
+    .compose-card textarea {
+      resize: vertical;
+      min-height: 180px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      line-height: 1.7;
+    }
+
+    .compose-fab {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 28;
+      padding: 12px 18px;
+      background: var(--color-accent-3);
+      color: var(--color-bg);
+      font-size: 18px;
+    }
+
+    .is-hidden {
+      display: none;
+    }
+
+    @media (max-width: 720px) {
+      .notes-head {
+        padding-top: 74px;
+      }
+
+      .notes-head h1 {
+        font-size: 52px;
+      }
+
+      .notes-board {
+        min-height: auto;
+        padding: 22px 14px 48px;
+      }
+
+      .note-block {
+        position: relative;
+        left: auto;
+        top: auto;
+        width: 100%;
+        margin-bottom: 14px;
+        transform: rotate(var(--note-rotate)) scale(1);
+      }
+
+      .note-block:hover {
+        transform: rotate(var(--note-rotate)) scale(1.01);
+      }
+
+      .notes-auth {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        justify-items: stretch;
+      }
+
+      .auth-card,
+      .compose-card {
+        width: 100%;
+      }
+
+      .compose-fab {
+        right: 12px;
+        bottom: 12px;
+      }
+    }
+  </style>
+</section>

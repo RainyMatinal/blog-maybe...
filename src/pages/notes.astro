@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import NotesBoard from '@/components/NotesBoard.astro';
+
+const lang = 'zh';
+---
+
+<BaseLayout lang={lang} title="笔记" description="随手写下的小块笔记，登录后可发布和修改。" switchTo="/en/notes">
+  <NotesBoard lang={lang} title="笔记" subtitle="Doodle Notes" />
+</BaseLayout>
