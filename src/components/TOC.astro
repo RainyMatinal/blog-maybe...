@@ -48,23 +48,30 @@ const filtered = headings.filter((heading) => heading.depth === 2 || heading.dep
     display: none;
     align-self: start;
     width: 220px;
+    padding: 14px;
+    border: var(--border-doodle);
+    border-radius: 22px 15px 26px 14px / 16px 25px 14px 22px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-doodle-small);
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: 16px;
+    font-weight: 700;
     line-height: 1.6;
+    transform: rotate(1deg);
   }
 
   .toc strong {
     display: block;
     margin-bottom: 12px;
     color: var(--color-text);
-    font-weight: 500;
-    letter-spacing: 0.05em;
+    font-size: 20px;
+    font-weight: 700;
   }
 
   .toc nav {
     display: grid;
     gap: 8px;
-    border-left: 1px solid var(--color-border);
+    border-left: 3px dashed var(--color-border);
     padding-left: 14px;
   }
 
@@ -75,6 +82,7 @@ const filtered = headings.filter((heading) => heading.depth === 2 || heading.dep
   .toc a.active,
   .toc a:hover {
     color: var(--color-accent);
+    transform: translateX(3px) rotate(-1deg);
   }
 
   .toc .depth-3 {

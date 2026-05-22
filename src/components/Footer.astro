@@ -26,7 +26,9 @@ const rssHref = lang === 'zh' ? '/rss.xml' : '/en/rss.xml';
 <style>
   .footer {
     margin-top: 96px;
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-doodle);
+    background: var(--color-surface);
+    box-shadow: 0 -5px 0 var(--color-shadow);
   }
 
   .footer-inner {
@@ -35,8 +37,9 @@ const rssHref = lang === 'zh' ? '/rss.xml' : '/en/rss.xml';
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    color: var(--color-muted);
-    font-size: 13px;
+    color: var(--color-text);
+    font-size: 18px;
+    font-weight: 700;
   }
 
   .footer-links {
@@ -46,10 +49,21 @@ const rssHref = lang === 'zh' ? '/rss.xml' : '/en/rss.xml';
 
   .footer-links a {
     display: grid;
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
     place-items: center;
-    border: 1px solid var(--color-border);
+    border: 2px solid var(--color-border);
+    border-radius: 16px 10px 18px 12px / 10px 16px 12px 18px;
+    background: var(--color-surface-strong);
+    box-shadow: var(--shadow-doodle-small);
+    color: #171411;
+  }
+
+  .footer-links a:hover {
+    background: var(--color-accent);
+    box-shadow: 2px 2px 0 var(--color-shadow);
+    color: #fffdf3;
+    transform: translate(2px, 2px) rotate(-4deg);
   }
 
   .footer-links svg {

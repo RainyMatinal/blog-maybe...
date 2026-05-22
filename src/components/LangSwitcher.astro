@@ -24,14 +24,20 @@ const href = to ?? localizedPath(targetLang, '/');
     min-height: 36px;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
-    color: var(--color-muted);
-    font-size: 13px;
-    letter-spacing: 0.04em;
+    border: 2px solid var(--color-border);
+    border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-doodle-small);
+    color: var(--color-text);
+    font-size: 17px;
+    font-weight: 700;
   }
 
   .lang-switch:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: var(--color-accent-2);
+    box-shadow: 2px 2px 0 var(--color-shadow);
+    color: #fffdf3;
+    transform: translate(2px, 2px) rotate(2deg);
   }
+
 </style>

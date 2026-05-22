@@ -34,15 +34,19 @@
     width: 36px;
     height: 36px;
     place-items: center;
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-muted);
+    border: 2px solid var(--color-border);
+    border-radius: 45% 55% 48% 52% / 50% 44% 56% 50%;
+    background: var(--color-surface-strong);
+    box-shadow: var(--shadow-doodle-small);
+    color: #171411;
     cursor: pointer;
   }
 
   .theme-toggle:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: var(--color-accent);
+    box-shadow: 2px 2px 0 var(--color-shadow);
+    color: #fffdf3;
+    transform: translate(2px, 2px) rotate(-5deg);
   }
 
   .theme-toggle svg {
