@@ -69,7 +69,7 @@ const { lang, title, subtitle } = Astro.props;
         <button class="primary ui-font" type="submit">{lang === 'zh' ? '进入' : 'Enter'}</button>
         <button class="ghost ui-font" type="button" data-auth-close>{lang === 'zh' ? '关闭' : 'Close'}</button>
       </div>
-      <p class="auth-hint">{lang === 'zh' ? '登录后内容只保存在当前浏览器。' : 'Content is saved only in this browser.'}</p>
+      <p class="auth-hint">{lang === 'zh' ? '本次页面有效，刷新或重新进入都需要重新登录。' : 'Valid for this page view only. Refresh or revisit to log in again.'}</p>
     </form>
   </aside>
 
@@ -125,10 +125,15 @@ const { lang, title, subtitle } = Astro.props;
   </dialog>
 
   <script is:inline>
-    const STORAGE_KEY = 'notes-board-v1';
-    const AUTH_KEY = 'notes-auth-v1';
+    const LEGACY_STORAGE_KEY = 'notes-board-v1';
+    const LEGACY_AUTH_KEY = 'notes-auth-v1';
     const KNOWN_USER = '15372028397@163.com';
     const PASSWORD_HASH = 'a2b8862b692f5b07a36cbc20bfb870b200380e7f431c579411c39fdca50b970b';
+
+    try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_AUTH_KEY);
+    } catch {}
 
     const root = document.querySelector('[data-notes-app]');
     if (!root) throw new Error('Missing notes app root');
@@ -209,11 +214,6 @@ const { lang, title, subtitle } = Astro.props;
     const day = 86400000;
 
     const loadNotes = () => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : null;
-        if (Array.isArray(parsed)) return parsed;
-      } catch {}
       const at = (offset) => new Date(today - offset * day).toISOString();
       return [
         { id: 'a', createdAt: at(0), updatedAt: at(0), content: lang === 'zh' ? '今天先放一块柔软的蓝色。' : 'Put a soft blue block here today.' },
@@ -224,9 +224,6 @@ const { lang, title, subtitle } = Astro.props;
       ];
     };
 
-    const saveNotes = (notes) => localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-    const loadAuth = () => localStorage.getItem(AUTH_KEY) === '1';
-    const saveAuth = (value) => localStorage.setItem(AUTH_KEY, value ? '1' : '0');
     const ageDays = (date) => Math.floor((Date.now() - new Date(date).getTime()) / day);
     const isActive = (note) => ageDays(note.updatedAt || note.createdAt) < 3;
     const isNarrow = () => matchMedia('(max-width: 720px)').matches;
@@ -286,7 +283,7 @@ const { lang, title, subtitle } = Astro.props;
     };
 
     let notes = loadNotes();
-    let authed = loadAuth();
+    let authed = false;
     let captcha = seedCaptcha();
     let editingId = null;
     let viewingId = null;
@@ -498,7 +495,6 @@ const { lang, title, subtitle } = Astro.props;
     const deleteConfirmed = () => {
       if (!deletingId || !authed) return;
       notes = notes.filter((note) => note.id !== deletingId);
-      saveNotes(notes);
       if (viewingId === deletingId) closeViewer();
       closeConfirm();
       render();
@@ -543,7 +539,6 @@ const { lang, title, subtitle } = Astro.props;
       const secret = await hash(`${email}:${password}`);
       if (email === KNOWN_USER && secret === PASSWORD_HASH && typedCaptcha === captcha) {
         authed = true;
-        saveAuth(true);
         syncAuthUI();
         render();
         refreshCaptcha();
@@ -565,7 +560,6 @@ const { lang, title, subtitle } = Astro.props;
       } else {
         notes = [{ id: crypto.randomUUID(), createdAt: now, updatedAt: now, content }, ...notes];
       }
-      saveNotes(notes);
       render();
       closeComposer();
       editingId = null;
@@ -634,7 +628,6 @@ const { lang, title, subtitle } = Astro.props;
         const x = Math.round(rect.left - boardRect.left);
         const y = Math.round(rect.top - boardRect.top);
         notes = notes.map((note) => note.id === dragState.id ? { ...note, position: { x, y } } : note);
-        saveNotes(notes);
         card.classList.remove('is-dragging');
         if (card.hasPointerCapture?.(dragState.pointerId)) {
           card.releasePointerCapture(dragState.pointerId);
