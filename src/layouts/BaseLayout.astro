@@ -13,7 +13,7 @@ interface Props {
 }
 
 const { lang, title, description, image = '/images/og-image.svg' } = Astro.props;
-const siteName = '生活与设计笔记';
+const siteName = 'RainyMatinal的博客网站';
 const pageTitle = title === siteName ? title : `${title} — ${siteName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
 const ogImage = new URL(image, Astro.site ?? Astro.url.origin).toString();

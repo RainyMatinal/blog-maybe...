@@ -1,4 +1,4 @@
-# 生活与设计博客
+# RainyMatinal的博客网站
 
 一个使用 Astro 4、Content Collections、MDX、Tailwind CSS v4、Shiki 和 Motion 搭建的中文个人博客。站点使用单一中文路径与单一浅色手绘风格。
 
