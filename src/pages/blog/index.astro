@@ -7,7 +7,7 @@ const lang = 'zh';
 const posts = await getPosts(lang);
 ---
 
-<BaseLayout lang={lang} title="博客" description="生活随笔、设计思考、旅行记录与产品评测。" switchTo="/en/blog">
+<BaseLayout lang={lang} title="博客" description="生活随笔、设计思考、旅行记录与产品评测。">
   <section class="site-shell page-head">
     <p class="ui-font eyebrow">{posts.length} 篇文章</p>
     <h1 class="ui-font">博客</h1>

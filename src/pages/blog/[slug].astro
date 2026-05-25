@@ -4,7 +4,7 @@ import Cover from '@/components/Cover.astro';
 import ReadingTime from '@/components/ReadingTime.astro';
 import TOC from '@/components/TOC.astro';
 import TagPill from '@/components/TagPill.astro';
-import { formatDate, getPostSlug, getPosts, getTranslation, type BlogPost } from '@/lib/posts';
+import { formatDate, getPostSlug, getPosts, type BlogPost } from '@/lib/posts';
 import { localizedPath } from '@/i18n/utils';
 
 export async function getStaticPaths() {
@@ -20,12 +20,10 @@ const posts = await getPosts('zh');
 const index = posts.findIndex((entry) => entry.id === post.id);
 const prevPost = posts[index + 1];
 const nextPost = posts[index - 1];
-const translation = await getTranslation(post, 'en');
 const { Content, headings } = await post.render();
-const switchTo = translation ? localizedPath('en', `/blog/${getPostSlug(translation)}`) : '/en/';
 ---
 
-<BaseLayout lang="zh" title={post.data.title} description={post.data.description} image={post.data.cover} switchTo={switchTo}>
+<BaseLayout lang="zh" title={post.data.title} description={post.data.description} image={post.data.cover}>
   <article>
     <header class="reading-width post-head">
       <nav class="breadcrumb ui-font" aria-label="面包屑">
@@ -42,7 +40,6 @@ const switchTo = translation ? localizedPath('en', `/blog/${getPostSlug(translat
       <div class="meta ui-font">
         <span>发布于 {formatDate(post.data.pubDate, 'zh')}</span>
         <span>阅读 <ReadingTime text={post.body} lang="zh" /></span>
-        <a href={switchTo}>EN</a>
       </div>
     </header>
 

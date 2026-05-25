@@ -1,7 +1,7 @@
 import { defaultLang, ui, type Lang } from './ui';
 
 export function isLang(value: string | undefined): value is Lang {
-  return value === 'zh' || value === 'en';
+  return value === 'zh';
 }
 
 export function getLangFromUrl(url: URL): Lang {
@@ -15,11 +15,7 @@ export function useTranslations(lang: Lang) {
   };
 }
 
-export function localizedPath(lang: Lang, path = '/'): string {
+export function localizedPath(_lang: Lang, path = '/'): string {
   const cleanPath = path === '/' ? '' : `/${path.replace(/^\/|\/$/g, '')}`;
-  return lang === defaultLang ? `${cleanPath || '/'}` : `/en${cleanPath || '/'}`;
-}
-
-export function otherLang(lang: Lang): Lang {
-  return lang === 'zh' ? 'en' : 'zh';
+  return cleanPath || '/';
 }

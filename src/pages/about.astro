@@ -9,11 +9,11 @@ if (!about) throw new Error('Missing zh about content');
 const { Content } = await about.render();
 ---
 
-<BaseLayout lang={lang} title={about.data.title} description={about.data.description} switchTo="/en/about">
+<BaseLayout lang={lang} title={about.data.title} description={about.data.description}>
   <section class="site-shell about-hero">
     <Image src="/images/profile.svg" alt="博主头像：柔和纸色背景上的抽象侧影" width={360} height={360} loading="eager" />
     <div>
-      <p class="ui-font eyebrow">Creator / Visual Notes</p>
+      <p class="ui-font eyebrow">视觉笔记</p>
       <h1 class="ui-font">你好，我是 Lin。</h1>
       <p>喜欢把生活过得慢一点，也喜欢把设计看得清一点。</p>
     </div>

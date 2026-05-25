@@ -8,7 +8,7 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     tags: z.array(z.string()),
     cover: z.string().optional(),
-    lang: z.enum(['zh', 'en']),
+    lang: z.literal('zh'),
     translationSlug: z.string(),
     draft: z.boolean().default(false)
   })
@@ -19,7 +19,7 @@ const about = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    lang: z.enum(['zh', 'en'])
+    lang: z.literal('zh')
   })
 });
 

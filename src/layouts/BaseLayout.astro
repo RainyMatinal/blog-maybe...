@@ -10,11 +10,10 @@ interface Props {
   title: string;
   description: string;
   image?: string;
-  switchTo?: string;
 }
 
-const { lang, title, description, image = '/images/og-image.svg', switchTo } = Astro.props;
-const siteName = lang === 'zh' ? '生活与设计笔记' : 'Life & Design Notes';
+const { lang, title, description, image = '/images/og-image.svg' } = Astro.props;
+const siteName = '生活与设计笔记';
 const pageTitle = title === siteName ? title : `${title} — ${siteName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
 const ogImage = new URL(image, Astro.site ?? Astro.url.origin).toString();
@@ -34,25 +33,14 @@ const ogImage = new URL(image, Astro.site ?? Astro.url.origin).toString();
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="alternate" type="application/rss+xml" title={lang === 'zh' ? '中文 RSS' : 'English RSS'} href={lang === 'zh' ? '/rss.xml' : '/en/rss.xml'} />
-    <script is:inline>
-      (() => {
-        try {
-          const saved = localStorage.getItem('theme');
-          if (saved === 'light' || saved === 'dark') {
-            document.documentElement.dataset.theme = saved;
-          }
-        } catch {
-        }
-      })();
-    </script>
+    <link rel="alternate" type="application/rss+xml" title="中文 RSS" href="/rss.xml" />
     <ViewTransitions />
   </head>
   <body>
-    <Nav lang={lang} switchTo={switchTo} />
+    <Nav lang={lang} />
     <main>
       <slot />
     </main>
-    <Footer lang={lang} />
+    <Footer />
   </body>
 </html>

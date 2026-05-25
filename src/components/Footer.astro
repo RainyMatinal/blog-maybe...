@@ -1,19 +1,11 @@
 ---
-import type { Lang } from '@/i18n/ui';
-
-interface Props {
-  lang: Lang;
-}
-
-const { lang } = Astro.props;
-const rssHref = lang === 'zh' ? '/rss.xml' : '/en/rss.xml';
 ---
 
 <footer class="footer">
   <div class="site-shell footer-inner">
-    <p class="ui-font">© {new Date().getFullYear()} {lang === 'zh' ? '生活与设计笔记' : 'Life & Design Notes'}</p>
+    <p class="ui-font">© {new Date().getFullYear()} 生活与设计笔记</p>
     <div class="footer-links">
-      <a href={rssHref} aria-label="RSS">
+      <a href="/rss.xml" aria-label="RSS">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5c7.7 0 14 6.3 14 14M5 11c4.4 0 8 3.6 8 8" /><circle cx="6" cy="18" r="1" /></svg>
       </a>
       <a href="mailto:hello@example.com" aria-label="Email">

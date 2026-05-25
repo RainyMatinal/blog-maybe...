@@ -17,11 +17,6 @@ export async function getPostBySlug(lang: Lang, slug: string): Promise<BlogPost 
   return posts.find((post) => getPostSlug(post) === slug);
 }
 
-export async function getTranslation(post: BlogPost, lang: Lang): Promise<BlogPost | undefined> {
-  const posts = await getPosts(lang);
-  return posts.find((entry) => entry.data.translationSlug === post.data.translationSlug);
-}
-
 export function getAllTags(posts: BlogPost[]): string[] {
   return [...new Set(posts.flatMap((post) => post.data.tags))].sort((a, b) => a.localeCompare(b));
 }
@@ -32,10 +27,10 @@ export function getReadingMinutes(text: string): number {
   return Math.max(1, Math.ceil((cjk + latin) / 300));
 }
 
-export function formatDate(date: Date, lang: Lang): string {
-  return new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-US', {
+export function formatDate(date: Date, _lang: Lang): string {
+  return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
-    month: lang === 'zh' ? 'long' : 'short',
+    month: 'long',
     day: 'numeric'
   }).format(date);
 }

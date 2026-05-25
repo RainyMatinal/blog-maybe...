@@ -7,7 +7,7 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: 'Noto Serif SC', serif;
@@ -40,12 +40,6 @@ body::before {
     linear-gradient(112deg, transparent 0 62%, color-mix(in srgb, var(--color-surface-strong) 22%, transparent) 62% 64%, transparent 64%),
     linear-gradient(14deg, transparent 0 76%, color-mix(in srgb, var(--color-accent-2) 18%, transparent) 76% 78%, transparent 78%);
   content: '';
-}
-
-body:lang(en) {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 20px;
-  line-height: 1.85;
 }
 
 a {
@@ -202,33 +196,9 @@ input {
   font-family: 'JetBrains Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .astro-code,
-  :root:not([data-theme='light']) .astro-code span {
-    color: var(--shiki-dark) !important;
-    background-color: var(--color-surface) !important;
-    font-style: var(--shiki-dark-font-style) !important;
-    font-weight: var(--shiki-dark-font-weight) !important;
-    text-decoration: var(--shiki-dark-text-decoration) !important;
-  }
-}
-
-:root[data-theme='dark'] .astro-code,
-:root[data-theme='dark'] .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--color-surface) !important;
-  font-style: var(--shiki-dark-font-style) !important;
-  font-weight: var(--shiki-dark-font-weight) !important;
-  text-decoration: var(--shiki-dark-text-decoration) !important;
-}
-
 @media (max-width: 640px) {
   body {
     font-size: 17px;
-  }
-
-  body:lang(en) {
-    font-size: 19px;
   }
 
   .section-space {

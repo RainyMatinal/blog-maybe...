@@ -14,8 +14,8 @@ const tags = getAllTags(posts);
 ---
 
 <section class="post-list" data-post-list>
-  <div class="tag-row" aria-label={lang === 'zh' ? '标签筛选' : 'Filter by tag'}>
-    <button class="ui-font tag-all active" type="button" data-tag-filter="all">{lang === 'zh' ? '全部' : 'All'}</button>
+  <div class="tag-row" aria-label="标签筛选">
+    <button class="ui-font tag-all active" type="button" data-tag-filter="all">全部</button>
     {tags.map((tag) => <TagPill tag={tag} asButton />)}
   </div>
   <div class="entries">

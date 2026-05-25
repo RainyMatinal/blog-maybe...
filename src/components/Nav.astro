@@ -1,15 +1,12 @@
 ---
-import LangSwitcher from '@/components/LangSwitcher.astro';
-import ThemeToggle from '@/components/ThemeToggle.astro';
 import type { Lang } from '@/i18n/ui';
 import { localizedPath, useTranslations } from '@/i18n/utils';
 
 interface Props {
   lang: Lang;
-  switchTo?: string;
 }
 
-const { lang, switchTo } = Astro.props;
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 const links = [
   { href: localizedPath(lang, '/'), label: t('nav.home') },
@@ -21,13 +18,9 @@ const links = [
 
 <header class="site-nav">
   <nav class="site-shell nav-inner" aria-label="Primary">
-    <a class="ui-font brand" href={localizedPath(lang, '/')}>{lang === 'zh' ? '生活与设计' : 'Life & Design'}</a>
+    <a class="ui-font brand" href={localizedPath(lang, '/')}>生活与设计</a>
     <div class="nav-links">
       {links.map((link) => <a class="ui-font" href={link.href}>{link.label}</a>)}
-    </div>
-    <div class="nav-actions">
-      <ThemeToggle />
-      <LangSwitcher lang={lang} to={switchTo} />
     </div>
   </nav>
 </header>
@@ -45,7 +38,7 @@ const links = [
 
   .nav-inner {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: auto 1fr;
     min-height: 72px;
     align-items: center;
     gap: 24px;
@@ -72,15 +65,14 @@ const links = [
     transform: rotate(-2deg);
   }
 
-  .nav-links,
-  .nav-actions {
+  .nav-links {
     display: flex;
     align-items: center;
     gap: 18px;
   }
 
   .nav-links {
-    justify-content: center;
+    justify-content: flex-end;
   }
 
   .nav-links a {
@@ -97,11 +89,6 @@ const links = [
     background: var(--color-accent-bg);
     color: var(--color-accent);
     transform: rotate(-2deg) translateY(-1px);
-  }
-
-  .nav-actions {
-    justify-content: flex-end;
-    gap: 10px;
   }
 
   @media (max-width: 680px) {

@@ -1,14 +1,13 @@
 ---
 import { getReadingMinutes } from '@/lib/posts';
-import type { Lang } from '@/i18n/ui';
 
 interface Props {
   text: string;
-  lang: Lang;
+  lang?: string;
 }
 
-const { text, lang } = Astro.props;
+const { text } = Astro.props;
 const minutes = getReadingMinutes(text);
 ---
 
-<span>{lang === 'zh' ? `${minutes} 分钟` : `${minutes} min`}</span>
+<span>{minutes} 分钟</span>

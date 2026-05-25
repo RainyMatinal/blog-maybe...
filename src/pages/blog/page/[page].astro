@@ -12,7 +12,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 const page = Astro.props.page as Page<BlogPost>;
 ---
 
-<BaseLayout lang="zh" title={`博客 第 ${page.currentPage} 页`} description="生活随笔、设计思考、旅行记录与产品评测。" switchTo="/en/blog">
+<BaseLayout lang="zh" title={`博客 第 ${page.currentPage} 页`} description="生活随笔、设计思考、旅行记录与产品评测。">
   <section class="site-shell page-head">
     <p class="ui-font eyebrow">{page.total} 篇文章</p>
     <h1 class="ui-font">博客</h1>

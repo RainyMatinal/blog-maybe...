@@ -1,6 +1,5 @@
 export const languages = {
-  zh: '中文',
-  en: 'English'
+  zh: '中文'
 } as const;
 
 export const defaultLang = 'zh';
@@ -20,23 +19,6 @@ export const ui = {
     'home.latestPosts': '近期写作',
     'home.viewAll': '查看全部',
     'about.title': '关于',
-    'about.description': '一个关于生活美学、视觉设计与温柔日常的个人空间。',
-    'lang.switch': 'EN'
-  },
-  en: {
-    'nav.home': 'Home',
-    'nav.blog': 'Blog',
-    'nav.notes': 'Notes',
-    'nav.about': 'About',
-    'post.readTime': 'Read',
-    'post.publishedAt': 'Published',
-    'post.tags': 'Tags',
-    'post.prevPost': 'Previous',
-    'post.nextPost': 'Next',
-    'home.latestPosts': 'Recent Writing',
-    'home.viewAll': 'View all',
-    'about.title': 'About',
-    'about.description': 'A quiet personal space for life aesthetics, visual design, and attentive everyday notes.',
-    'lang.switch': '中文'
+    'about.description': '一个关于生活美学、视觉设计与温柔日常的个人空间。'
   }
 } as const;
