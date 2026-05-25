@@ -26,7 +26,7 @@ npm run preview
 title: "标题"
 description: "文章描述，用于 SEO 和卡片摘要"
 pubDate: 2025-06-01
-tags: ["生活", "设计"]
+tags: ["记录", "悔恨"]
 cover: "/images/hello-world.jpg"
 lang: "zh"
 draft: false
