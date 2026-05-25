@@ -16,6 +16,8 @@ export async function getStaticPaths() {
 }
 
 const post = Astro.props.post as BlogPost;
+const slug = getPostSlug(post);
+const isBlogDeparture = slug === 'blog-departure';
 const posts = await getPosts('zh');
 const index = posts.findIndex((entry) => entry.id === post.id);
 const prevPost = posts[index + 1];
@@ -24,7 +26,7 @@ const { Content, headings } = await post.render();
 ---
 
 <BaseLayout lang="zh" title={post.data.title} description={post.data.description} image={post.data.cover}>
-  <article>
+  <article class:list={['post-article', { 'blog-departure-page': isBlogDeparture }]}>
     <header class="reading-width post-head">
       <nav class="breadcrumb ui-font" aria-label="面包屑">
         <a href="/">首页</a>
@@ -53,7 +55,7 @@ const { Content, headings } = await post.render();
       <div class="article-prose">
         <Content />
       </div>
-      <TOC headings={headings} title="目录" />
+      {!isBlogDeparture && <TOC headings={headings} title="目录" />}
     </div>
 
     <footer class="reading-width post-footer">
@@ -78,6 +80,171 @@ const { Content, headings } = await post.render();
   .post-head {
     position: relative;
     padding-top: 78px;
+  }
+
+  .blog-departure-page {
+    --candy-ink: #4e3458;
+    --candy-rose: #ff77b7;
+    --candy-petal: #ffd8eb;
+    --candy-lavender: #c9b7ff;
+    --candy-mint: #9debcf;
+    --candy-sky: #a7ddff;
+    --candy-cream: #fff8fd;
+    --candy-line: rgba(255, 255, 255, 0.74);
+  }
+
+  .blog-departure-page .post-head {
+    width: min(100% - 32px, 980px);
+    padding: 82px 26px 34px;
+    border: 3px solid rgba(255, 255, 255, 0.86);
+    border-radius: 34px 28px 38px 24px / 26px 34px 24px 36px;
+    background:
+      radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.56) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 18%, rgba(157, 235, 207, 0.5) 0 64px, transparent 65px),
+      radial-gradient(circle at 16% 92%, rgba(167, 221, 255, 0.48) 0 84px, transparent 85px),
+      linear-gradient(135deg, #fff9fd 0%, #ffe2f0 45%, #f3ecff 100%);
+    box-shadow:
+      0 20px 0 rgba(255, 119, 183, 0.18),
+      0 30px 60px rgba(111, 57, 94, 0.16);
+    color: var(--candy-ink);
+    overflow: hidden;
+  }
+
+  .blog-departure-page .post-head::before,
+  .blog-departure-page .post-head::after {
+    position: absolute;
+    pointer-events: none;
+    content: '';
+  }
+
+  .blog-departure-page .post-head::before {
+    top: 26px;
+    right: 32px;
+    width: 116px;
+    height: 58px;
+    border: 3px dashed var(--candy-rose);
+    border-radius: 50%;
+    transform: rotate(-11deg);
+  }
+
+  .blog-departure-page .post-head::after {
+    left: 28px;
+    bottom: 24px;
+    width: 160px;
+    height: 18px;
+    border-radius: 999px;
+    background:
+      repeating-linear-gradient(90deg, var(--candy-rose) 0 18px, var(--candy-mint) 18px 36px, var(--candy-sky) 36px 54px, var(--candy-lavender) 54px 72px);
+    opacity: 0.78;
+    transform: rotate(2deg);
+  }
+
+  .blog-departure-page .breadcrumb,
+  .blog-departure-page .meta {
+    color: var(--candy-ink);
+  }
+
+  .blog-departure-page .breadcrumb a,
+  .blog-departure-page .breadcrumb span,
+  .blog-departure-page .meta span {
+    border: 2px solid rgba(78, 52, 88, 0.2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 5px 0 rgba(255, 119, 183, 0.18);
+    backdrop-filter: blur(6px);
+  }
+
+  .blog-departure-page h1 {
+    width: min(100%, 720px);
+    margin-top: 26px;
+    color: var(--candy-rose);
+    font-family: 'Gaegu', 'ZCOOL KuaiLe', 'Noto Serif SC', sans-serif;
+    font-size: clamp(54px, 9vw, 108px);
+    font-weight: 700;
+    line-height: 0.9;
+    text-shadow:
+      2px 2px 0 #fff,
+      5px 5px 0 rgba(201, 183, 255, 0.76),
+      0 0 18px rgba(255, 255, 255, 0.85);
+    transform: rotate(-1.2deg);
+    -webkit-line-clamp: unset;
+  }
+
+  .blog-departure-page .tag-row {
+    position: relative;
+    z-index: 1;
+  }
+
+  .blog-departure-page :global(.tag-pill) {
+    border-color: rgba(78, 52, 88, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.68);
+    box-shadow: 0 5px 0 rgba(255, 119, 183, 0.16);
+    color: var(--candy-ink);
+  }
+
+  .blog-departure-page :global(.tag-pill:hover),
+  .blog-departure-page :global(.tag-pill.active) {
+    border-color: rgba(255, 119, 183, 0.48);
+    background: var(--candy-petal);
+    box-shadow: 0 3px 0 rgba(255, 119, 183, 0.18);
+    color: var(--candy-ink);
+  }
+
+  .blog-departure-page .meta {
+    position: relative;
+    z-index: 1;
+  }
+
+  .blog-departure-page .cover-wrap {
+    width: min(100% - 32px, 980px);
+    margin-top: 38px;
+    padding: 14px;
+    border: 3px dashed rgba(255, 255, 255, 0.9);
+    border-radius: 32px 24px 38px 22px / 22px 36px 20px 34px;
+    background: linear-gradient(135deg, rgba(255, 247, 252, 0.9), rgba(242, 236, 255, 0.82));
+    box-shadow: 0 18px 40px rgba(111, 57, 94, 0.14);
+    transform: rotate(0.7deg);
+  }
+
+  .blog-departure-page .cover-wrap :global(.cover) {
+    border: 0;
+    border-radius: 28px 20px 34px 18px / 20px 32px 18px 30px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .blog-departure-page .cover-wrap :global(.cover::after) {
+    inset: 14px;
+    border-color: rgba(255, 255, 255, 0.75);
+    border-radius: 24px;
+  }
+
+  .blog-departure-page .cover-wrap :global(img) {
+    filter: saturate(1.08) contrast(1.02);
+  }
+
+  .blog-departure-page .article-grid {
+    display: block;
+    width: min(100% - 32px, 1080px);
+    margin-top: 50px;
+    margin-inline: auto;
+  }
+
+  .blog-departure-page .article-prose {
+    width: 100%;
+    max-width: none;
+  }
+
+  .blog-departure-page .post-footer {
+    width: min(100% - 32px, 980px);
+    border-top: 3px dashed rgba(255, 119, 183, 0.52);
+  }
+
+  .blog-departure-page .post-nav div {
+    border-color: rgba(78, 52, 88, 0.24);
+    background: linear-gradient(135deg, #fff8fd, #ffe3f1);
+    box-shadow: 7px 7px 0 rgba(255, 119, 183, 0.18);
   }
 
   .breadcrumb,
