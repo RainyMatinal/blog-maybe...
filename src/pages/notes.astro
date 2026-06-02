@@ -1,10 +1,12 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import LedgerRows from '@/components/LedgerRows.astro';
 import NotesBoard from '@/components/NotesBoard.astro';
 
 const lang = 'zh';
 ---
 
-<BaseLayout lang={lang} title="笔记" description="随手写下的小块笔记，登录后可发布和修改。">
+<BaseLayout lang={lang} title="笔记" description="随手写下的小块笔记与源文件维护的手账。">
   <NotesBoard lang={lang} title="笔记" subtitle="手绘笔记" />
+  <LedgerRows />
 </BaseLayout>

@@ -1,0 +1,186 @@
+---
+import { ledgerEntries } from '@/content/ledger';
+
+const formatter = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Hong_Kong'
+});
+
+const entries = [...ledgerEntries].sort(
+  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+);
+---
+
+<section class="site-shell ledger-section" aria-labelledby="ledger-title">
+  <div class="ledger-head">
+    <p class="eyebrow ui-font">source-only ledger</p>
+    <h2 id="ledger-title" class="ui-font">手账</h2>
+    <p>这里按一排一排显示手账。内容只来自源文件，不在网页中新增或修改。</p>
+  </div>
+
+  <div class="ledger-list">
+    {entries.map((entry, index) => (
+      <article class="ledger-row" id={entry.id}>
+        <div class="ledger-index ui-font">{String(index + 1).padStart(2, '0')}</div>
+        <div class="ledger-body">
+          <time datetime={entry.publishedAt}>{formatter.format(new Date(entry.publishedAt))}</time>
+          {entry.title && <h3>{entry.title}</h3>}
+          <p>{entry.body}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .ledger-section {
+    position: relative;
+    margin-top: clamp(44px, 8vw, 90px);
+    padding: clamp(26px, 5vw, 46px);
+    border: var(--border-doodle);
+    border-radius: 34px 22px 38px 20px / 20px 34px 18px 30px;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent 0 38px,
+        var(--color-paper-line) 39px 40px
+      ),
+      linear-gradient(135deg, var(--color-surface), color-mix(in srgb, var(--color-accent-bg) 55%, var(--color-surface)));
+    box-shadow: var(--shadow-doodle);
+  }
+
+  .ledger-section::before {
+    position: absolute;
+    top: -16px;
+    left: clamp(22px, 8vw, 96px);
+    width: 118px;
+    height: 30px;
+    border: 2px solid var(--color-border);
+    border-radius: 14px 10px 16px 9px / 10px 16px 9px 14px;
+    background: color-mix(in srgb, var(--color-accent-2) 34%, var(--color-surface));
+    box-shadow: var(--shadow-doodle-small);
+    content: '';
+    transform: rotate(-3deg);
+  }
+
+  .ledger-head {
+    display: grid;
+    gap: 10px;
+    max-width: 780px;
+    margin-bottom: 28px;
+  }
+
+  .ledger-head .eyebrow {
+    width: fit-content;
+    margin: 0;
+    padding: 3px 12px;
+    border: 2px solid var(--color-border);
+    border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+    background: var(--color-accent-3);
+    box-shadow: var(--shadow-doodle-small);
+    color: var(--color-surface);
+    font-size: 18px;
+    font-weight: 700;
+    transform: rotate(-1deg);
+  }
+
+  .ledger-head h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(46px, 9vw, 88px);
+    font-weight: 700;
+    line-height: 0.95;
+    text-shadow:
+      4px 4px 0 var(--color-surface-strong),
+      -2px 2px 0 color-mix(in srgb, var(--color-accent-2) 34%, transparent);
+  }
+
+  .ledger-head p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: clamp(18px, 3vw, 23px);
+    font-weight: 700;
+    line-height: 1.7;
+  }
+
+  .ledger-list {
+    display: grid;
+    gap: 16px;
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    padding: 18px;
+    border: 2px solid var(--color-border);
+    border-radius: 26px 15px 30px 16px / 16px 28px 14px 24px;
+    background: color-mix(in srgb, var(--color-surface) 88%, var(--color-bg));
+    box-shadow: var(--shadow-doodle-small);
+  }
+
+  .ledger-index {
+    min-width: 52px;
+    padding: 6px 8px;
+    border: 2px solid var(--color-border);
+    border-radius: 18px 12px 20px 13px / 12px 18px 10px 16px;
+    background: var(--color-surface-strong);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .ledger-body {
+    min-width: 0;
+  }
+
+  .ledger-body time {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .ledger-body h3 {
+    margin: 0 0 8px;
+    color: var(--color-accent);
+    font-family: var(--font-hand);
+    font-size: clamp(25px, 4vw, 34px);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .ledger-body p {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(17px, 2.5vw, 21px);
+    font-weight: 700;
+    line-height: 1.75;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 640px) {
+    .ledger-section {
+      padding: 22px 14px;
+    }
+
+    .ledger-row {
+      grid-template-columns: 1fr;
+    }
+
+    .ledger-index {
+      width: fit-content;
+    }
+  }
+</style>
