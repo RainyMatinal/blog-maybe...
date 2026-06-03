@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import ArticleSignature from '@/components/ArticleSignature.astro';
 import Cover from '@/components/Cover.astro';
 import ReadingTime from '@/components/ReadingTime.astro';
 import TOC from '@/components/TOC.astro';
@@ -57,6 +58,8 @@ const { Content, headings } = await post.render();
       </div>
       {!isBlogDeparture && <TOC headings={headings} title="目录" />}
     </div>
+
+    <ArticleSignature />
 
     <footer class="reading-width post-footer">
       <div class="post-nav ui-font">

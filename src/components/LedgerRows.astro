@@ -47,13 +47,6 @@ const entries = [...ledgerEntries].sort(
     ))}
   </div>
 
-  <footer class="rainy-signature" aria-label="Rainy signature">
-    <div class="signature-word">Rainy</div>
-    <div class="signature-lines">
-      <p>「雨が美しく描かれているから」</p>
-      <p>近代的自我が揺れる青春の雨</p>
-    </div>
-  </footer>
 </section>
 
 <style>
@@ -228,54 +221,6 @@ const entries = [...ledgerEntries].sort(
     overflow-wrap: anywhere;
   }
 
-  .rainy-signature {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 18px;
-    align-items: end;
-    margin-top: clamp(42px, 8vw, 86px);
-    padding-right: clamp(0px, 4vw, 48px);
-  }
-
-  .signature-word {
-    width: fit-content;
-    color: var(--color-accent);
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(78px, 17vw, 180px);
-    font-style: italic;
-    font-weight: 400;
-    line-height: 0.74;
-    letter-spacing: -0.05em;
-    text-shadow: 0 18px 42px rgba(255, 79, 56, 0.18);
-    transform-origin: left bottom;
-    animation: rainy-sign 3.8s ease-in-out infinite;
-  }
-
-  .signature-lines {
-    display: grid;
-    gap: 4px;
-    max-width: 360px;
-    padding-bottom: 10px;
-    color: var(--color-muted);
-    font-size: clamp(13px, 2vw, 16px);
-    line-height: 1.7;
-    text-align: right;
-  }
-
-  .signature-lines p {
-    margin: 0;
-  }
-
-  @keyframes rainy-sign {
-    0%,
-    100% {
-      transform: rotate(-2deg) translateY(0);
-    }
-    50% {
-      transform: rotate(1deg) translateY(-4px);
-    }
-  }
-
   @media (max-width: 720px) {
     .ledger-cover {
       min-height: 240px;
@@ -286,19 +231,5 @@ const entries = [...ledgerEntries].sort(
       gap: 8px;
     }
 
-    .rainy-signature {
-      grid-template-columns: 1fr;
-      padding-right: 0;
-    }
-
-    .signature-lines {
-      text-align: left;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .signature-word {
-      animation: none;
-    }
   }
 </style>
