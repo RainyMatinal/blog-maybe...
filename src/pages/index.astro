@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import MusicWidget from '@/components/MusicWidget.astro';
 import PostCard from '@/components/PostCard.astro';
 import { getPosts } from '@/lib/posts';
 import { localizedPath } from '@/i18n/utils';
@@ -8,11 +9,16 @@ const lang = 'zh';
 const posts = (await getPosts(lang)).slice(0, 3);
 ---
 
-<BaseLayout lang={lang} title="RainyMatinal的博客网站" description="温柔、有质感、留白充足的生活与设计博客。">
+<BaseLayout lang={lang} title="RainyMatinal的博客网站" description="记录生活、工作、手账和私人阅读。">
   <section class="site-shell hero" data-hero>
-    <p class="ui-font hero-line">Hello，world</p>
-    <p class="ui-font hero-line">goodbye,earth。</p>
+    <p class="ui-font hero-line">Hello, world</p>
+    <p class="ui-font hero-line">goodbye, earth</p>
     <p class="hero-subtitle">记录生活、工作，和第一本日记。</p>
+    <MusicWidget
+      href="https://music.163.com/"
+      title="Rainy 的网易云音乐"
+      description="这里可以换成你的网易云歌单、歌曲或个人主页链接。"
+    />
   </section>
 
   <section class="site-shell section-space latest">
@@ -26,7 +32,7 @@ const posts = (await getPosts(lang)).slice(0, 3);
   </section>
 
   <section class="site-shell about-line">
-    <p class="ui-font">记录一点活着的证明，也记录一点被生活前进的瞬间。</p>
+    <p class="ui-font">记录一点活着的证明，也记录一点被生活推着前进的瞬间。</p>
   </section>
 
   <script>
