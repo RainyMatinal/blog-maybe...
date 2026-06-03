@@ -1,10 +1,10 @@
-<section class="letter-signature-area" aria-label="Rainy signature">
+<section class="letter-signature-area" aria-label="Rainy signature" data-article-signature>
   <div class="signature-svg-wrapper">
     <svg
-      class="rainy-signature-svg is-drawing"
+      class="rainy-signature-svg"
       width="100%"
       height="100%"
-      viewBox="0 0 454 288"
+      viewBox="0 0 500 170"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
@@ -12,17 +12,17 @@
       <path
         pathLength="1"
         class="signature-path path-1"
-        d="M61.991,150.488C48.71,158.424 89.239,147.164 102.17,113.297C106.907,100.89 101.293,98.503 88.174,101.454C41.54,111.947 -6.471,165.58 23.577,186.506C33.707,193.561 46.522,202.485 164.074,122.717C229.683,78.198 288.41,14.308 298.112,3.752C266.595,57.866 268.1,58.407 240.244,114.643C230.908,133.492 215.854,165.985 214.137,162.552C211.119,156.516 239.326,95.533 212.253,85.305C183.887,74.589 113.564,156.832 162.998,150.978C257.829,139.748 402.94,-38.765 362.978,12.096C321.275,65.173 327.451,68.993 282.232,145.864C285.392,139.353 309.448,89.783 339.562,75.885C347.489,72.226 363.856,78.468 346.021,97.417C335.5,108.596 329.128,111.459 303.764,116.258C318.832,117.531 318.989,116.038 330.949,120.295C342.18,124.292 377.743,143.127 421.922,82.883C434.48,65.758 437.624,62.196 434.841,64.311C411.908,81.741 396.772,118.064 399.852,127.024C401.32,131.296 404.43,130.521 449.645,100.378"
+        d="M18 102C40 48 91 28 119 47C145 65 127 104 78 98C123 105 144 122 151 148C143 105 164 55 206 43C238 34 260 49 252 70C243 96 196 101 162 86"
       />
       <path
         pathLength="1"
         class="signature-path path-2"
-        d="M434.708,32.604C435.53,30.992 436.034,32.428 450.558,43.027"
+        d="M252 101C274 60 307 52 318 69C331 89 299 124 276 112C306 124 338 105 356 75C337 124 339 149 357 129C371 113 386 71 399 74C416 78 386 136 401 132C416 127 444 78 454 75C467 71 447 129 462 128C473 127 487 112 494 101"
       />
       <path
         pathLength="1"
         class="signature-path path-3"
-        d="M3,284.584C290.282,169.644 317.235,181.28 431.611,162.552"
+        d="M42 158C126 141 214 139 291 148C350 155 415 153 474 136"
       />
     </svg>
   </div>
@@ -32,19 +32,59 @@
   </div>
 </section>
 
+<script>
+  const signatures = document.querySelectorAll<HTMLElement>('[data-article-signature]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  signatures.forEach((signature) => {
+    if (reduceMotion.matches) {
+      signature.classList.add('has-drawn');
+      return;
+    }
+
+    let intervalId: number | undefined;
+
+    const play = () => {
+      signature.classList.remove('is-drawing');
+      void signature.offsetWidth;
+      signature.classList.add('is-drawing');
+    };
+
+    const stop = () => {
+      if (intervalId) window.clearInterval(intervalId);
+      intervalId = undefined;
+      signature.classList.remove('is-drawing');
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          play();
+          if (!intervalId) intervalId = window.setInterval(play, 5000);
+        } else {
+          stop();
+        }
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(signature);
+  });
+</script>
+
 <style>
   .letter-signature-area {
     display: grid;
-    gap: 12px;
-    width: min(100% - 32px, 720px);
-    margin: clamp(56px, 8vw, 88px) auto 0;
-    color: var(--color-accent);
+    gap: 8px;
+    width: min(100% - 32px, 560px);
+    margin: clamp(44px, 7vw, 72px) auto 0;
+    color: #171411;
   }
 
   .signature-svg-wrapper {
-    width: min(100%, 454px);
+    width: min(100%, 360px);
     height: auto;
-    aspect-ratio: 454 / 288;
+    aspect-ratio: 500 / 170;
     margin-inline: auto;
   }
 
@@ -56,7 +96,7 @@
   .signature-path {
     fill: none;
     stroke: currentColor;
-    stroke-width: 5px;
+    stroke-width: 4px;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-miterlimit: 1.5;
@@ -65,24 +105,28 @@
   }
 
   .is-drawing .path-1 {
-    animation: signature-draw 2.8s ease forwards;
+    animation: signature-draw 1.7s ease forwards;
   }
 
   .is-drawing .path-2 {
-    animation: signature-draw 0.7s ease 2.1s forwards;
+    animation: signature-draw 1.6s ease 1.15s forwards;
   }
 
   .is-drawing .path-3 {
-    animation: signature-draw 1.6s ease 2.55s forwards;
+    animation: signature-draw 0.9s ease 2.45s forwards;
+  }
+
+  .has-drawn .signature-path {
+    stroke-dashoffset: 0;
   }
 
   .signature-slogan {
     display: grid;
-    gap: 2px;
+    gap: 1px;
     justify-items: end;
     color: var(--color-muted);
-    font-size: clamp(13px, 2vw, 16px);
-    line-height: 1.7;
+    font-size: clamp(11px, 1.7vw, 14px);
+    line-height: 1.65;
     text-align: right;
   }
 
@@ -101,6 +145,14 @@
   }
 
   @media (max-width: 640px) {
+    .letter-signature-area {
+      width: min(100% - 32px, 420px);
+    }
+
+    .signature-svg-wrapper {
+      width: min(100%, 300px);
+    }
+
     .signature-slogan {
       justify-items: start;
       text-align: left;
