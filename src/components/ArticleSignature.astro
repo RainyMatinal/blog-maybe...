@@ -44,20 +44,18 @@
     </svg>
   </div>
 
-  <div class="signature-rain-drops" data-signature-drops aria-hidden="true">
-    <svg viewBox="0 0 220 42" xmlns="http://www.w3.org/2000/svg">
-      <path d="M32 8C22 21 18 29 18 34C18 40 24 42 31 42C39 42 45 39 45 33C45 27 41 19 32 8Z" />
-      <path d="M100 2C91 15 87 24 87 30C87 36 93 40 100 40C108 40 114 36 114 30C114 23 109 14 100 2Z" />
-      <path d="M175 10C166 22 162 30 162 35C162 40 168 42 175 42C183 42 188 39 188 34C188 28 184 21 175 10Z" />
+  <div class="signature-rain-lines" data-signature-rain-lines aria-hidden="true">
+    <svg viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 8 10 36" />
+      <path d="M48 2 31 39" />
+      <path d="M72 10 55 46" />
+      <path d="M88 27 74 58" />
     </svg>
   </div>
 
-  <div class="signature-footer-row">
-    <div class="signature-slogan">
-      <p class="slogan-primary">「雨が美しく描かれているから」</p>
-      <p class="slogan-sub">近代的自我が揺れる青春の雨</p>
-    </div>
-    <button class="signature-replay" type="button" data-signature-replay>重放</button>
+  <div class="signature-slogan">
+    <p class="slogan-primary">「雨が美しく描かれているから」</p>
+    <p class="slogan-sub">近代的自我が揺れる青春の雨</p>
   </div>
 </section>
 
@@ -149,8 +147,7 @@
 
       const paths = Array.from(signature.querySelectorAll<SVGPathElement>('[data-signature-path]'));
       const rainCanvas = signature.querySelector<HTMLCanvasElement>('[data-signature-rain]');
-      const rainDrops = signature.querySelector<HTMLElement>('[data-signature-drops]');
-      const replayButton = signature.querySelector<HTMLButtonElement>('[data-signature-replay]');
+      const rainLines = signature.querySelector<HTMLElement>('[data-signature-rain-lines]');
       const svg = signature.querySelector<SVGSVGElement>('.rainy-signature-svg');
 
       if (!paths.length || !svg) return;
@@ -175,14 +172,14 @@
 
       const finish = () => {
         signature.classList.add('has-drawn');
-        rainDrops?.setAttribute('data-visible', 'true');
+        rainLines?.setAttribute('data-visible', 'true');
       };
 
       const reset = () => {
         if (finishTimer) window.clearTimeout(finishTimer);
         finishTimer = undefined;
         signature.classList.remove('is-drawing', 'has-drawn');
-        rainDrops?.removeAttribute('data-visible');
+        rainLines?.removeAttribute('data-visible');
         paths.forEach((path, index) => resetPath(path, pathLengths[index]));
         signature.dataset.signatureRun = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         void svg.getBoundingClientRect();
@@ -218,11 +215,6 @@
         if (replayInterval) window.clearInterval(replayInterval);
         replayInterval = undefined;
       };
-
-      replayButton?.addEventListener('click', () => {
-        play();
-        startReplayLoop();
-      });
 
       reset();
 
@@ -305,33 +297,36 @@
     stroke-width: 3.6px;
   }
 
-  .signature-rain-drops {
-    display: grid;
-    justify-items: center;
+  .signature-rain-lines {
+    position: absolute;
+    top: clamp(10px, 2.6vw, 18px);
+    right: clamp(10px, 3vw, 22px);
+    width: clamp(54px, 12vw, 88px);
+    height: auto;
     color: #171411;
     opacity: 0;
-    transform: translateY(6px);
+    transform: translate3d(8px, -6px, 0);
     transition:
-      opacity 420ms ease,
-      transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 560ms ease,
+      transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .signature-rain-drops[data-visible='true'] {
-    opacity: 0.5;
+  .signature-rain-lines[data-visible='true'] {
+    opacity: 0.55;
     transform: translateY(0);
   }
 
-  .signature-rain-drops svg {
-    width: min(180px, 42vw);
+  .signature-rain-lines svg {
+    display: block;
+    width: 100%;
     height: auto;
-    fill: currentColor;
   }
 
-  .signature-footer-row {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 16px;
+  .signature-rain-lines path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4px;
+    stroke-linecap: round;
   }
 
   .signature-slogan {
@@ -352,34 +347,6 @@
     color: var(--color-text);
   }
 
-  .signature-replay {
-    flex: 0 0 auto;
-    border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
-    border-radius: 999px;
-    padding: 6px 12px;
-    background: color-mix(in srgb, var(--color-surface) 78%, transparent);
-    color: #171411;
-    font: 12px / 1 var(--font-ui);
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition:
-      transform 180ms ease,
-      border-color 180ms ease,
-      background 180ms ease;
-  }
-
-  .signature-replay:hover,
-  .signature-replay:focus-visible {
-    border-color: currentColor;
-    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-    transform: translateY(-1px);
-  }
-
-  .signature-replay:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 3px;
-  }
-
   @media (max-width: 640px) {
     .letter-signature-area {
       width: min(100% - 24px, 440px);
@@ -390,9 +357,9 @@
       width: min(100%, 320px);
     }
 
-    .signature-footer-row {
-      align-items: start;
-      flex-direction: column;
+    .signature-rain-lines {
+      right: 0;
+      width: 54px;
     }
 
     .signature-slogan {
@@ -407,8 +374,7 @@
     }
 
     .signature-path,
-    .signature-rain-drops,
-    .signature-replay {
+    .signature-rain-lines {
       transition: none !important;
     }
   }
