@@ -1,46 +1,58 @@
 <section class="letter-signature-area" aria-label="Rainy signature" data-article-signature>
+  <canvas class="signature-rain-canvas" data-signature-rain aria-hidden="true"></canvas>
+
   <div class="signature-svg-wrapper">
     <svg
       class="rainy-signature-svg"
       width="100%"
       height="100%"
-      viewBox="0 0 500 170"
+      viewBox="0 0 620 210"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
       <path
-        pathLength="1"
-        class="signature-path path-1"
-        d="M35 138C46 96 54 55 61 22"
+        class="signature-path path-r-stem"
+        data-signature-path
+        d="M48 166C62 112 73 61 82 22"
       />
       <path
-        pathLength="1"
-        class="signature-path path-2"
-        d="M61 22C120 12 143 45 120 74C101 98 68 98 49 88C84 94 120 116 139 145"
+        class="signature-path path-r-bloom"
+        data-signature-path
+        d="M82 22C151 7 178 44 153 78C132 106 89 105 66 93C109 99 151 128 174 169"
       />
       <path
-        pathLength="1"
-        class="signature-path path-3"
-        d="M170 92C150 92 136 111 141 126C148 147 180 137 190 105C183 130 184 146 198 139C207 134 216 120 222 108"
+        class="signature-path path-a"
+        data-signature-path
+        d="M216 105C190 102 169 123 174 145C180 174 222 159 236 111C228 151 232 171 249 160C260 153 270 136 279 119"
       />
       <path
-        pathLength="1"
-        class="signature-path path-4"
-        d="M244 91C233 119 227 145 241 139C255 133 267 104 274 89M278 62C282 56 289 57 291 63"
+        class="signature-path path-i"
+        data-signature-path
+        d="M312 104C297 140 291 172 310 162C330 151 344 119 352 100M358 62C363 53 374 54 377 64"
       />
       <path
-        pathLength="1"
-        class="signature-path path-5"
-        d="M306 140C317 101 327 84 337 90C349 98 329 132 341 138C354 144 378 103 388 90"
+        class="signature-path path-n"
+        data-signature-path
+        d="M395 166C411 115 425 95 441 104C458 115 429 158 448 166C468 174 496 119 508 101"
       />
       <path
-        pathLength="1"
-        class="signature-path path-6"
-        d="M410 91C397 123 399 144 414 136C429 128 443 101 452 88C438 132 424 154 402 160C383 165 375 154 389 144C411 128 449 123 482 101"
+        class="signature-path path-y-underline"
+        data-signature-path
+        d="M548 102C530 145 534 173 554 162C574 151 591 116 605 98C585 163 561 194 526 199C497 203 486 183 506 166C536 140 585 137 610 117M109 188C246 168 410 174 590 151"
       />
     </svg>
   </div>
+
+  <div class="signature-rain-lines" data-signature-rain-lines aria-hidden="true">
+    <svg viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 8 10 36" />
+      <path d="M48 2 31 39" />
+      <path d="M72 10 55 46" />
+      <path d="M88 27 74 58" />
+    </svg>
+  </div>
+
   <div class="signature-slogan">
     <p class="slogan-primary">「雨が美しく描かれているから」</p>
     <p class="slogan-sub">近代的自我が揺れる青春の雨</p>
@@ -48,58 +60,221 @@
 </section>
 
 <script>
-  const signatures = document.querySelectorAll<HTMLElement>('[data-article-signature]');
+  const SIGNATURE_TOTAL_DURATION = 2500;
+  const SIGNATURE_REPLAY_INTERVAL = 5000;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  signatures.forEach((signature) => {
-    if (reduceMotion.matches) {
-      signature.classList.add('has-drawn');
-      return;
-    }
+  const resetPath = (path: SVGPathElement, length: number) => {
+    path.style.transition = 'none';
+    path.style.strokeDasharray = `${length}`;
+    path.style.strokeDashoffset = `${length}`;
+  };
 
-    let intervalId: number | undefined;
+  const drawPath = (path: SVGPathElement, duration: number, delay: number) => {
+    path.style.transition = `stroke-dashoffset ${duration}ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`;
+    path.style.strokeDashoffset = '0';
+  };
 
-    const play = () => {
-      signature.classList.remove('is-drawing');
-      void signature.offsetWidth;
-      signature.classList.add('is-drawing');
+  const startRainCanvas = (canvas: HTMLCanvasElement) => {
+    const context = canvas.getContext('2d');
+    if (!context) return () => {};
+
+    let frameId = 0;
+    let running = true;
+    let width = 0;
+    let height = 0;
+    const drops = Array.from({ length: 34 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      length: 8 + Math.random() * 18,
+      speed: 0.0025 + Math.random() * 0.004,
+      opacity: 0.05 + Math.random() * 0.12,
+    }));
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      canvas.width = Math.floor(width * pixelRatio);
+      canvas.height = Math.floor(height * pixelRatio);
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     };
 
-    const stop = () => {
-      if (intervalId) window.clearInterval(intervalId);
-      intervalId = undefined;
-      signature.classList.remove('is-drawing');
-    };
+    const render = () => {
+      if (!running) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          play();
-          if (!intervalId) intervalId = window.setInterval(play, 5000);
-        } else {
-          stop();
+      context.clearRect(0, 0, width, height);
+      context.lineWidth = 1;
+      context.lineCap = 'round';
+
+      drops.forEach((drop) => {
+        drop.y += drop.speed;
+        if (drop.y > 1.12) {
+          drop.y = -0.08;
+          drop.x = Math.random();
         }
-      },
-      { threshold: 0.35 }
-    );
 
-    observer.observe(signature);
-  });
+        const x = drop.x * width;
+        const y = drop.y * height;
+        context.strokeStyle = `rgba(23, 20, 17, ${drop.opacity})`;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(x - 5, y + drop.length);
+        context.stroke();
+      });
+
+      frameId = window.requestAnimationFrame(render);
+    };
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+    frameId = window.requestAnimationFrame(render);
+
+    return () => {
+      running = false;
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', resize);
+    };
+  };
+
+  const initArticleSignatures = () => {
+    const signatures = document.querySelectorAll<HTMLElement>('[data-article-signature]');
+
+    signatures.forEach((signature) => {
+      if (signature.dataset.signatureReady === 'true') return;
+      signature.dataset.signatureReady = 'true';
+
+      const paths = Array.from(signature.querySelectorAll<SVGPathElement>('[data-signature-path]'));
+      const rainCanvas = signature.querySelector<HTMLCanvasElement>('[data-signature-rain]');
+      const rainLines = signature.querySelector<HTMLElement>('[data-signature-rain-lines]');
+      const svg = signature.querySelector<SVGSVGElement>('.rainy-signature-svg');
+
+      if (!paths.length || !svg) return;
+
+      const pathLengths = paths.map((path) => Math.max(path.getTotalLength(), 1));
+      const totalLength = pathLengths.reduce((sum, length) => sum + length, 0);
+      const timings = pathLengths.map((length) => (length / totalLength) * SIGNATURE_TOTAL_DURATION);
+      const delays: number[] = [];
+      let accumulatedDelay = 0;
+      timings.forEach((duration, index) => {
+        delays[index] = accumulatedDelay;
+        accumulatedDelay += duration;
+      });
+
+      let replayInterval: number | undefined;
+      let finishTimer: number | undefined;
+      let cleanupRain = () => {};
+
+      if (rainCanvas && !reduceMotion.matches) {
+        cleanupRain = startRainCanvas(rainCanvas);
+      }
+
+      const finish = () => {
+        signature.classList.add('has-drawn');
+        rainLines?.setAttribute('data-visible', 'true');
+      };
+
+      const reset = () => {
+        if (finishTimer) window.clearTimeout(finishTimer);
+        finishTimer = undefined;
+        signature.classList.remove('is-drawing', 'has-drawn');
+        rainLines?.removeAttribute('data-visible');
+        paths.forEach((path, index) => resetPath(path, pathLengths[index]));
+        signature.dataset.signatureRun = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        void svg.getBoundingClientRect();
+      };
+
+      const play = () => {
+        reset();
+
+        if (reduceMotion.matches) {
+          paths.forEach((path) => {
+            path.style.transition = 'none';
+            path.style.strokeDashoffset = '0';
+          });
+          finish();
+          return;
+        }
+
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            signature.classList.add('is-drawing');
+            paths.forEach((path, index) => drawPath(path, timings[index], delays[index]));
+            finishTimer = window.setTimeout(finish, SIGNATURE_TOTAL_DURATION + 140);
+          });
+        });
+      };
+
+      const startReplayLoop = () => {
+        if (replayInterval) window.clearInterval(replayInterval);
+        replayInterval = window.setInterval(play, SIGNATURE_REPLAY_INTERVAL);
+      };
+
+      const stopReplayLoop = () => {
+        if (replayInterval) window.clearInterval(replayInterval);
+        replayInterval = undefined;
+      };
+
+      reset();
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            play();
+            startReplayLoop();
+          } else {
+            stopReplayLoop();
+          }
+        },
+        { threshold: 0.35 }
+      );
+
+      observer.observe(signature);
+
+      document.addEventListener(
+        'astro:before-swap',
+        () => {
+          stopReplayLoop();
+          if (finishTimer) window.clearTimeout(finishTimer);
+          cleanupRain();
+          observer.disconnect();
+        },
+        { once: true }
+      );
+    });
+  };
+
+  initArticleSignatures();
+  document.addEventListener('astro:page-load', initArticleSignatures);
 </script>
 
 <style>
   .letter-signature-area {
+    position: relative;
     display: grid;
-    gap: 8px;
-    width: min(100% - 32px, 560px);
+    gap: 10px;
+    width: min(100% - 32px, 620px);
     margin: clamp(44px, 7vw, 72px) auto 0;
+    padding: 18px 18px 14px;
     color: #171411;
+    isolation: isolate;
+  }
+
+  .signature-rain-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.45;
   }
 
   .signature-svg-wrapper {
-    width: min(100%, 360px);
+    width: min(100%, 420px);
     height: auto;
-    aspect-ratio: 500 / 170;
+    aspect-ratio: 620 / 210;
     margin-inline: auto;
   }
 
@@ -115,36 +290,43 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-miterlimit: 1.5;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
+    will-change: stroke-dashoffset;
   }
 
-  .is-drawing .path-1 {
-    animation: signature-draw 0.75s ease forwards;
+  .path-y-underline {
+    stroke-width: 3.6px;
   }
 
-  .is-drawing .path-2 {
-    animation: signature-draw 0.95s ease 0.45s forwards;
+  .signature-rain-lines {
+    position: absolute;
+    top: clamp(10px, 2.6vw, 18px);
+    right: clamp(10px, 3vw, 22px);
+    width: clamp(54px, 12vw, 88px);
+    height: auto;
+    color: #171411;
+    opacity: 0;
+    transform: translate3d(8px, -6px, 0);
+    transition:
+      opacity 560ms ease,
+      transform 560ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .is-drawing .path-3 {
-    animation: signature-draw 0.72s ease 1.15s forwards;
+  .signature-rain-lines[data-visible='true'] {
+    opacity: 0.55;
+    transform: translateY(0);
   }
 
-  .is-drawing .path-4 {
-    animation: signature-draw 0.68s ease 1.62s forwards;
+  .signature-rain-lines svg {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 
-  .is-drawing .path-5 {
-    animation: signature-draw 0.74s ease 2.02s forwards;
-  }
-
-  .is-drawing .path-6 {
-    animation: signature-draw 0.9s ease 2.48s forwards;
-  }
-
-  .has-drawn .signature-path {
-    stroke-dashoffset: 0;
+  .signature-rain-lines path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4px;
+    stroke-linecap: round;
   }
 
   .signature-slogan {
@@ -165,19 +347,19 @@
     color: var(--color-text);
   }
 
-  @keyframes signature-draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
   @media (max-width: 640px) {
     .letter-signature-area {
-      width: min(100% - 32px, 420px);
+      width: min(100% - 24px, 440px);
+      padding-inline: 6px;
     }
 
     .signature-svg-wrapper {
-      width: min(100%, 300px);
+      width: min(100%, 320px);
+    }
+
+    .signature-rain-lines {
+      right: 0;
+      width: 54px;
     }
 
     .signature-slogan {
@@ -187,9 +369,13 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .signature-path {
-      stroke-dashoffset: 0;
-      animation: none !important;
+    .signature-rain-canvas {
+      display: none;
+    }
+
+    .signature-path,
+    .signature-rain-lines {
+      transition: none !important;
     }
   }
 </style>
