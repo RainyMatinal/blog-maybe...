@@ -1,0 +1,57 @@
+html {
+  font-size: 16px;
+}
+
+body {
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.75;
+  text-rendering: optimizeLegibility;
+}
+
+:where(h1, h2, h3, h4) {
+  color: var(--text-main);
+  font-family: var(--font-title);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+  margin: 0 0 var(--space-4);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+h1 {
+  font-size: clamp(2.25rem, 6vw, 4.75rem);
+}
+
+h2 {
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+}
+
+a {
+  color: var(--color-old-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+  transition: color 180ms ease, text-shadow 180ms ease;
+}
+
+a:hover {
+  color: var(--color-system-blue);
+  text-shadow: 0 0 8px rgba(94, 200, 255, 0.45);
+}
+
+:where(code, pre, kbd, samp) {
+  font-family: var(--font-mono);
+}
+
+::selection {
+  background: rgba(111, 255, 233, 0.45);
+  color: var(--text-main);
+}

@@ -1,0 +1,90 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+type BlogPostData = {
+  title?: string;
+  description?: string;
+  pubDate?: Date | string;
+  updatedDate?: Date | string;
+  category?: string;
+  status?: string;
+  tags?: string[];
+};
+
+type Props = BlogPostData & {
+  frontmatter?: BlogPostData;
+};
+
+const props = Astro.props as Props;
+const entry = props.frontmatter ?? props;
+
+const title = entry.title ?? "Untitled Field Note";
+const description = entry.description ?? "一条来自个人技术档案馆的学习记录。";
+const category = entry.category ?? "FIELD NOTE";
+const status = entry.status ?? "draft";
+const tags = Array.isArray(entry.tags) ? entry.tags : [];
+
+const formatDate = (date?: Date | string) => {
+  if (!date) return "";
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(date));
+};
+---
+
+<BaseLayout title={title} description={description} bodyClass="blog-post-page">
+  <article class="article-window">
+    <header class="article-header">
+      <div class="article-titlebar">
+        <span class="status-light active" aria-hidden="true"></span>
+        <span>archive-record.log</span>
+      </div>
+      <div class="article-header-body">
+        <p class="article-kicker">{category}</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
+        <dl class="article-meta">
+          {entry.pubDate && (
+            <div>
+              <dt>Date</dt>
+              <dd>{formatDate(entry.pubDate)}</dd>
+            </div>
+          )}
+          {entry.updatedDate && (
+            <div>
+              <dt>Updated</dt>
+              <dd>{formatDate(entry.updatedDate)}</dd>
+            </div>
+          )}
+          <div>
+            <dt>Status</dt>
+            <dd>{status}</dd>
+          </div>
+        </dl>
+        {tags.length > 0 && (
+          <ul class="tag-list" aria-label="文章标签">
+            {tags.map((tag) => (
+              <li><span class="tag">#{tag}</span></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </header>
+
+    <div class="article-grid">
+      <div class="article-content prose">
+        <slot />
+      </div>
+      <aside class="article-side-panel" aria-label="文章状态">
+        <p>RECORD TYPE</p>
+        <strong>{category}</strong>
+        <p>STATUS</p>
+        <strong>{status}</strong>
+        <p>ARCHIVE NODE</p>
+        <strong>personal-log</strong>
+      </aside>
+    </div>
+  </article>
+</BaseLayout>

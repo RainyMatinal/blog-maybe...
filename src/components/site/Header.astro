@@ -1,0 +1,36 @@
+---
+const navItems = [
+  { href: "/", label: "首页", code: "HOME" },
+  { href: "/blog", label: "博客", code: "LOG" },
+  { href: "/archive", label: "归档", code: "ARC" },
+  { href: "/tags", label: "标签", code: "TAG" },
+  { href: "/lab", label: "实验室", code: "LAB" },
+  { href: "/about", label: "关于", code: "ME" },
+];
+---
+
+<header class="site-header">
+  <div class="window-strip" aria-hidden="true">
+    <span class="window-dot dot-red"></span>
+    <span class="window-dot dot-yellow"></span>
+    <span class="window-dot dot-green"></span>
+    <span class="window-title">network-archive://rainymatinal/home</span>
+  </div>
+  <nav class="site-nav" aria-label="主导航">
+    <a class="site-brand" href="/">
+      <span class="brand-mark">RM</span>
+      <span>
+        <span class="brand-name">RainyMatinal</span>
+        <span class="brand-subtitle">Network Archive</span>
+      </span>
+    </a>
+
+    <div class="nav-links">
+      {navItems.map((item) => (
+        <a class="nav-link" href={item.href} aria-label={item.label}>
+          [{item.code}] {item.label}
+        </a>
+      ))}
+    </div>
+  </nav>
+</header>

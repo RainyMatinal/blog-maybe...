@@ -1,0 +1,61 @@
+:root {
+  --color-aero-blue: #5ec8ff;
+  --color-aero-cyan: #6fffe9;
+  --color-glass-green: #9fffd8;
+  --color-system-blue: #2f80ed;
+  --color-archive-navy: #10243e;
+
+  --color-xp-grass: #7ed957;
+  --color-vista-silver: #d7e3ec;
+  --color-old-link: #2454ff;
+  --color-warning-amber: #ffcc66;
+  --color-error-red: #ff6b6b;
+
+  --cat-arch: #5ec8ff;
+  --cat-git: #6fffe9;
+  --cat-code: #9fffd8;
+  --cat-network: #2f80ed;
+  --cat-exam: #ffcc66;
+  --cat-aero: #7ed957;
+
+  --bg-page: #eaf8ff;
+  --bg-page-deep: #d7f1ff;
+  --bg-glass: rgba(255, 255, 255, 0.58);
+  --bg-glass-strong: rgba(255, 255, 255, 0.78);
+  --bg-terminal: #0b1726;
+  --bg-code: #101d2e;
+
+  --text-main: #102033;
+  --text-muted: #5d7188;
+  --text-soft: #7d90a3;
+  --text-invert: #f5fbff;
+
+  --border-glass: rgba(255, 255, 255, 0.75);
+  --border-blue: rgba(94, 200, 255, 0.65);
+  --border-soft: rgba(47, 128, 237, 0.18);
+
+  --shadow-glass: 0 12px 32px rgba(31, 102, 148, 0.18);
+  --shadow-window: 0 18px 40px rgba(16, 36, 62, 0.22);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+
+  --font-sans: "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-title: "LXGW WenKai", "Noto Serif SC", "Source Han Serif SC", serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", "Cascadia Code", monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --content-width: 1120px;
+  --article-width: 780px;
+}
