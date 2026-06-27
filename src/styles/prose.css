@@ -1,7 +1,8 @@
 .prose {
   color: var(--text-main);
   font-size: 1.04rem;
-  line-height: 1.9;
+  line-height: 1.95;
+  overflow-wrap: break-word;
 }
 
 .prose > * + * {
@@ -9,7 +10,21 @@
 }
 
 .prose :where(h2, h3, h4) {
+  color: var(--text-main);
+  line-height: 1.35;
   margin-top: var(--space-7);
+  scroll-margin-top: var(--space-6);
+}
+
+.prose h2 {
+  background: linear-gradient(90deg, rgba(94, 200, 255, 0.16), rgba(111, 255, 233, 0));
+  border-left: 4px solid var(--color-aero-blue);
+  border-radius: 8px;
+  padding: 0.25rem 0.75rem;
+}
+
+.prose h3 {
+  color: #14506b;
 }
 
 .prose p {
@@ -18,6 +33,13 @@
 
 .prose a {
   color: var(--color-old-link);
+  text-decoration-color: rgba(94, 200, 255, 0.58);
+  text-underline-offset: 0.18em;
+}
+
+.prose a:hover {
+  color: var(--color-system-blue);
+  text-shadow: 0 0 8px rgba(94, 200, 255, 0.32);
 }
 
 .prose :where(ul, ol) {
@@ -29,10 +51,10 @@
 }
 
 .prose blockquote {
-  background: rgba(255, 255, 255, 0.52);
+  background: rgba(255, 255, 255, 0.56);
   border: 1px solid var(--border-glass);
   border-left: 4px solid var(--color-aero-blue);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   box-shadow: var(--shadow-inset);
   color: var(--text-muted);
   margin-inline: 0;
@@ -42,28 +64,61 @@
 .prose :not(pre) > code {
   background: rgba(111, 255, 233, 0.18);
   border: 1px solid rgba(94, 200, 255, 0.32);
-  border-radius: var(--radius-sm);
+  border-radius: 7px;
   color: #14506b;
   font-size: 0.92em;
   padding: 0.12em 0.35em;
 }
 
-/* Code blocks are styled like quiet terminal windows for technical notes. */
+/* Fenced Markdown code blocks render as compact terminal windows. */
 .prose pre {
   background: linear-gradient(180deg, var(--bg-code) 0%, var(--bg-terminal) 100%);
-  border: 1px solid rgba(94, 200, 255, 0.35);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-window);
+  border: 1px solid rgba(94, 200, 255, 0.38);
+  border-radius: 14px;
+  box-shadow: var(--shadow-window), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   color: var(--text-invert);
   line-height: 1.7;
   margin: var(--space-6) 0;
   overflow-x: auto;
-  padding: var(--space-5);
+  padding: 3.2rem var(--space-5) var(--space-5);
+  position: relative;
+}
+
+.prose pre::before {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(94, 200, 255, 0.08));
+  border-bottom: 1px solid rgba(94, 200, 255, 0.25);
+  color: rgba(245, 251, 255, 0.72);
+  content: "terminal - markdown block";
+  display: flex;
+  font-family: Tahoma, var(--font-mono);
+  font-size: 0.76rem;
+  inset: 0 0 auto 0;
+  min-height: 2.2rem;
+  padding-left: 4.2rem;
+  position: absolute;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.prose pre::after {
+  background: var(--color-error-red);
+  border-radius: 4px;
+  box-shadow:
+    1.1rem 0 0 var(--color-warning-amber),
+    2.2rem 0 0 var(--color-glass-green);
+  content: "";
+  height: 0.72rem;
+  left: 1rem;
+  position: absolute;
+  top: 0.74rem;
+  width: 0.72rem;
 }
 
 .prose pre code {
   color: inherit;
+  display: block;
   font-size: 0.95rem;
+  min-width: max-content;
 }
 
 .prose table {
@@ -81,4 +136,16 @@
 
 .prose th {
   background: rgba(94, 200, 255, 0.14);
+}
+
+@media (max-width: 640px) {
+  .prose {
+    font-size: 1rem;
+    line-height: 1.9;
+  }
+
+  .prose pre {
+    border-radius: 12px;
+    padding-inline: var(--space-4);
+  }
 }

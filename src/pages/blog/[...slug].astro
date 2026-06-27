@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from "astro:content";
+import BlogPostLayout from "../../layouts/BlogPostLayout.astro";
+
+export async function getStaticPaths() {
+  const slugFromId = (id: string) => id.replace(/\.mdx?$/, "");
+  const postHref = (id: string) => `/blog/${slugFromId(id)}`;
+  const toNavPost = (post, label: string) =>
+    post
+      ? {
+          title: post.data.title,
+          description: post.data.description,
+          href: postHref(post.id),
+          label,
+        }
+      : undefined;
+
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort((a, b) => {
+    const dateDiff = b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+    return dateDiff || slugFromId(a.id).localeCompare(slugFromId(b.id));
+  });
+
+  return posts.map((post, index) => ({
+    params: { slug: slugFromId(post.id) },
+    props: {
+      post,
+      previousPost: toNavPost(posts[index + 1], "上一篇"),
+      nextPost: toNavPost(posts[index - 1], "下一篇"),
+    },
+  }));
+}
+
+const { post, previousPost, nextPost } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BlogPostLayout
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  category={post.data.category}
+  tags={post.data.tags}
+  draft={post.data.draft}
+  heroImage={post.data.heroImage}
+  previousPost={previousPost}
+  nextPost={nextPost}
+>
+  <Content />
+</BlogPostLayout>

@@ -1,70 +1,94 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 
-type BlogPostData = {
-  title?: string;
-  description?: string;
-  pubDate?: Date | string;
-  updatedDate?: Date | string;
-  category?: string;
-  status?: string;
-  tags?: string[];
+type NavPost = {
+  title: string;
+  description: string;
+  href: string;
+  label: string;
 };
 
-type Props = BlogPostData & {
-  frontmatter?: BlogPostData;
+type Props = {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  category: string;
+  tags: string[];
+  draft?: boolean;
+  heroImage?: string;
+  previousPost?: NavPost;
+  nextPost?: NavPost;
 };
 
-const props = Astro.props as Props;
-const entry = props.frontmatter ?? props;
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  category,
+  tags = [],
+  draft = false,
+  previousPost,
+  nextPost,
+} = Astro.props;
 
-const title = entry.title ?? "Untitled Field Note";
-const description = entry.description ?? "一条来自个人技术档案馆的学习记录。";
-const category = entry.category ?? "FIELD NOTE";
-const status = entry.status ?? "draft";
-const tags = Array.isArray(entry.tags) ? entry.tags : [];
-
-const formatDate = (date?: Date | string) => {
-  if (!date) return "";
+const formatDate = (date?: Date) => {
+  if (!date) return "--";
   return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date(date));
+  }).format(date);
 };
+
+const recordId = title
+  .toLowerCase()
+  .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+  .replace(/^-|-$/g, "")
+  .slice(0, 32);
 ---
 
 <BaseLayout title={title} description={description} bodyClass="blog-post-page">
-  <article class="article-window">
-    <header class="article-header">
+  <article class="post-layout" aria-labelledby="post-title">
+    <header class="post-hero article-window">
       <div class="article-titlebar">
-        <span class="status-light active" aria-hidden="true"></span>
-        <span>archive-record.log</span>
+        <span class="window-dot dot-red" aria-hidden="true"></span>
+        <span class="window-dot dot-yellow" aria-hidden="true"></span>
+        <span class="window-dot dot-green" aria-hidden="true"></span>
+        <span>archive://blog/{recordId || "record"}.md</span>
       </div>
-      <div class="article-header-body">
-        <p class="article-kicker">{category}</p>
-        <h1>{title}</h1>
-        <p>{description}</p>
-        <dl class="article-meta">
-          {entry.pubDate && (
-            <div>
-              <dt>Date</dt>
-              <dd>{formatDate(entry.pubDate)}</dd>
-            </div>
-          )}
-          {entry.updatedDate && (
+
+      <div class="post-hero__body">
+        <div class="post-hero__copy">
+          <p class="article-kicker">{category}</p>
+          <h1 id="post-title">{title}</h1>
+          <p class="post-description">{description}</p>
+        </div>
+
+        <dl class="post-meta" aria-label="文章元信息">
+          <div>
+            <dt>Date</dt>
+            <dd>{formatDate(pubDate)}</dd>
+          </div>
+          {updatedDate && (
             <div>
               <dt>Updated</dt>
-              <dd>{formatDate(entry.updatedDate)}</dd>
+              <dd>{formatDate(updatedDate)}</dd>
             </div>
           )}
           <div>
+            <dt>Category</dt>
+            <dd>{category}</dd>
+          </div>
+          <div>
             <dt>Status</dt>
-            <dd>{status}</dd>
+            <dd>{draft ? "draft" : "published"}</dd>
           </div>
         </dl>
+
         {tags.length > 0 && (
-          <ul class="tag-list" aria-label="文章标签">
+          <ul class="tag-list post-tags" aria-label="文章标签">
             {tags.map((tag) => (
               <li><span class="tag">#{tag}</span></li>
             ))}
@@ -73,18 +97,259 @@ const formatDate = (date?: Date | string) => {
       </div>
     </header>
 
-    <div class="article-grid">
-      <div class="article-content prose">
-        <slot />
-      </div>
-      <aside class="article-side-panel" aria-label="文章状态">
-        <p>RECORD TYPE</p>
-        <strong>{category}</strong>
-        <p>STATUS</p>
-        <strong>{status}</strong>
-        <p>ARCHIVE NODE</p>
-        <strong>personal-log</strong>
+    <div class="post-grid">
+      <main class="post-content-window article-window" aria-label="文章正文">
+        <div class="article-titlebar content-titlebar">
+          <span class="window-dot dot-green" aria-hidden="true"></span>
+          <span>markdown-renderer.exe - reading mode</span>
+        </div>
+        <div class="post-content prose">
+          <slot />
+        </div>
+      </main>
+
+      <aside class="post-side" aria-label="文章档案信息">
+        <section class="side-window window-card">
+          <div class="window-titlebar">
+            <span class="window-dot dot-green" aria-hidden="true"></span>
+            <span>record-meta.ini</span>
+          </div>
+          <div class="side-window__body">
+            <p class="side-label">Archive Node</p>
+            <strong>personal-log/blog</strong>
+            <p class="side-label">Protocol</p>
+            <strong>Markdown / Astro</strong>
+            <p class="side-label">Read Mode</p>
+            <strong>CN prose comfort</strong>
+          </div>
+        </section>
       </aside>
     </div>
+
+    {(previousPost || nextPost) && (
+      <nav class="post-nav" aria-label="上一篇和下一篇文章">
+        {previousPost ? (
+          <a class="post-nav__item previous" href={previousPost.href}>
+            <span class="post-nav__label">上一篇</span>
+            <strong>{previousPost.title}</strong>
+            <span>{previousPost.description}</span>
+          </a>
+        ) : (
+          <span class="post-nav__item is-empty">已经是最早的记录</span>
+        )}
+
+        {nextPost ? (
+          <a class="post-nav__item next" href={nextPost.href}>
+            <span class="post-nav__label">下一篇</span>
+            <strong>{nextPost.title}</strong>
+            <span>{nextPost.description}</span>
+          </a>
+        ) : (
+          <span class="post-nav__item is-empty">已经是最新的记录</span>
+        )}
+      </nav>
+    )}
   </article>
 </BaseLayout>
+
+<style>
+  .post-layout {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .post-hero,
+  .post-content-window,
+  .side-window {
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .post-hero__body {
+    background:
+      radial-gradient(circle at 78% 18%, rgba(111, 255, 233, 0.26), transparent 14rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(232, 247, 255, 0.5));
+    overflow: hidden;
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .post-hero__copy {
+    max-width: 48rem;
+  }
+
+  .post-hero h1 {
+    font-size: clamp(2.05rem, 5vw, 3.25rem);
+    line-height: 1.12;
+    margin-bottom: var(--space-4);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+    word-break: break-word;
+  }
+
+  .post-description {
+    color: var(--text-muted);
+    font-size: clamp(1.02rem, 2vw, 1.18rem);
+    line-height: 1.9;
+    margin: 0;
+    max-width: 46rem;
+  }
+
+  .post-meta {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: var(--space-6) 0 0;
+  }
+
+  .post-meta div {
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(94, 200, 255, 0.34);
+    border-radius: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    min-width: 0;
+    padding: var(--space-3);
+  }
+
+  .post-meta dt,
+  .side-label,
+  .post-nav__label {
+    color: var(--text-soft);
+    font-family: Tahoma, var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .post-meta dd {
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    margin: var(--space-1) 0 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+    word-break: break-word;
+  }
+
+  .post-tags {
+    margin-top: var(--space-5);
+  }
+
+  .post-grid {
+    align-items: start;
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: minmax(0, var(--article-width)) minmax(13rem, 1fr);
+  }
+
+  .post-content {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(248, 252, 255, 0.62));
+    min-width: 0;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+  }
+
+  .content-titlebar {
+    border-bottom-color: rgba(94, 200, 255, 0.24);
+  }
+
+  .post-side {
+    display: grid;
+    gap: var(--space-4);
+    position: sticky;
+    top: var(--space-5);
+  }
+
+  .side-window__body {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .side-window strong {
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+    word-break: break-word;
+  }
+
+  .post-nav {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .post-nav__item {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(232, 247, 255, 0.58));
+    border: 1px solid rgba(94, 200, 255, 0.52);
+    border-radius: 12px;
+    box-shadow: var(--shadow-glass), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    color: var(--text-main);
+    display: grid;
+    gap: var(--space-2);
+    min-height: 8.5rem;
+    padding: var(--space-4);
+    text-decoration: none;
+  }
+
+  .post-nav__item:hover {
+    border-color: rgba(111, 255, 233, 0.74);
+    transform: translateY(-2px);
+  }
+
+  .post-nav__item strong {
+    font-family: var(--font-title);
+    font-size: 1.12rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+    word-break: break-word;
+  }
+
+  .post-nav__item span:last-child {
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .post-nav__item.next {
+    text-align: right;
+  }
+
+  .post-nav__item.is-empty {
+    align-content: center;
+    color: var(--text-soft);
+    font-family: var(--font-mono);
+  }
+
+  @media (max-width: 900px) {
+    .post-grid,
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-side {
+      position: static;
+    }
+
+    .post-nav__item.next {
+      text-align: left;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .post-meta {
+      grid-template-columns: 1fr;
+    }
+
+    .post-hero__body,
+    .post-content {
+      padding: var(--space-4);
+    }
+  }
+</style>
