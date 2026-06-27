@@ -3,64 +3,79 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/blog/PostCard.astro";
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+export async function getStaticPaths() {
+  const tagSlug = (tag: string) =>
+    encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"));
 
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
+
+  const tags = new Map<string, string>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      tags.set(tagSlug(tag), tag);
+    }
+  }
+
+  return Array.from(tags.entries()).map(([slug, tag]) => ({
+    params: { tag: slug },
+    props: {
+      tag,
+      posts: posts.filter((post) => post.data.tags.includes(tag)),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
 const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
 const categories = [...new Set(posts.map((post) => post.data.category))];
-const tagCount = new Set(posts.flatMap((post) => post.data.tags)).size;
 ---
 
 <BaseLayout
-  title="Blog Archive"
-  description="RainyMatinal Network Archive 的文章列表，记录 Linux、Git、网络工程和前端学习。"
+  title={`Tag: ${tag}`}
+  description={`RainyMatinal Network Archive 中带有 ${tag} 标签的文章。`}
 >
-  <section class="blog-page" aria-labelledby="blog-title">
-    <header class="blog-hero window-card">
+  <section class="tag-page" aria-labelledby="tag-title">
+    <header class="tag-hero window-card">
       <div class="window-titlebar">
         <span class="window-dot dot-red" aria-hidden="true"></span>
         <span class="window-dot dot-yellow" aria-hidden="true"></span>
         <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>explorer.exe - C:\archive\blog</span>
+        <span>finder.exe - tag://{tag}</span>
       </div>
 
-      <div class="blog-hero__body">
+      <div class="tag-hero__body">
         <div>
-          <p class="section-kicker">Technical Archive / Blog Posts</p>
-          <h1 id="blog-title">博客档案</h1>
-          <p>
-            这里按时间倒序保存所有已经发布的技术笔记：系统安装、Git 现场、网络工程配置和前端学习记录。
-          </p>
+          <p class="section-kicker">Subject Folder</p>
+          <h1 id="tag-title">#{tag}</h1>
+          <p>这个资料夹收纳了所有带有该主题词的公开记录。</p>
         </div>
 
-        <dl class="blog-stats" aria-label="博客统计">
+        <dl class="tag-stats" aria-label="标签统计">
           <div>
-            <dt>Posts</dt>
+            <dt>Records</dt>
             <dd>{posts.length}</dd>
           </div>
           <div>
             <dt>Categories</dt>
             <dd>{categories.length}</dd>
           </div>
-          <div>
-            <dt>Tags</dt>
-            <dd>{tagCount}</dd>
-          </div>
         </dl>
       </div>
     </header>
 
-    <div class="blog-layout">
-      <aside class="blog-sidebar window-card" aria-label="档案索引">
+    <div class="tag-layout">
+      <aside class="tag-side window-card" aria-label="标签资料夹信息">
         <div class="window-titlebar">
           <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>archive-index.ini</span>
+          <span>tag-folder.ini</span>
         </div>
-
-        <div class="blog-sidebar__body">
-          <p class="sidebar-label">Categories</p>
-          <ul class="category-list">
+        <div class="tag-side__body">
+          <p class="side-label">Tag</p>
+          <strong>#{tag}</strong>
+          <p class="side-label">Categories</p>
+          <ul>
             {categories.map((category) => (
               <li>
                 <span class="status-light active" aria-hidden="true"></span>
@@ -68,13 +83,11 @@ const tagCount = new Set(posts.flatMap((post) => post.data.tags)).size;
               </li>
             ))}
           </ul>
-
-          <p class="sidebar-label">Sort</p>
-          <p class="sidebar-note">pubDate DESC / non-draft only</p>
+          <a class="old-button" href="/tags/">返回标签索引</a>
         </div>
       </aside>
 
-      <div class="post-list" aria-label="文章列表">
+      <div class="tag-post-list" aria-label={`${tag} 标签文章列表`}>
         {posts.map((post, index) => (
           <PostCard
             title={post.data.title}
@@ -92,93 +105,98 @@ const tagCount = new Set(posts.flatMap((post) => post.data.tags)).size;
 </BaseLayout>
 
 <style>
-  .blog-page {
+  .tag-page {
     display: grid;
     gap: var(--space-7);
   }
 
-  .blog-hero {
+  .tag-hero,
+  .tag-side {
     overflow: hidden;
   }
 
-  .blog-hero__body {
+  .tag-hero__body {
     align-items: end;
+    background:
+      radial-gradient(circle at 82% 22%, rgba(111, 255, 233, 0.28), transparent 14rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(232, 247, 255, 0.54));
     display: grid;
     gap: var(--space-5);
     grid-template-columns: minmax(0, 1fr) auto;
     padding: clamp(1.5rem, 4vw, 3rem);
   }
 
-  .blog-hero h1 {
-    font-size: clamp(2.4rem, 7vw, 4.7rem);
+  .tag-hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
     margin-bottom: var(--space-3);
+    overflow-wrap: anywhere;
   }
 
-  .blog-hero p {
+  .tag-hero p {
     color: var(--text-muted);
     font-size: 1.08rem;
-    max-width: 44rem;
-  }
-
-  .blog-stats {
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(3, minmax(5.5rem, 1fr));
+    line-height: 1.9;
     margin: 0;
   }
 
-  .blog-stats div {
+  .tag-stats {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(2, minmax(6rem, 1fr));
+    margin: 0;
+  }
+
+  .tag-stats div {
     background: var(--bg-panel-soft);
-    border: 1px solid rgba(42, 126, 231, 0.26);
-    border-radius: 10px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(94, 200, 255, 0.34);
+    border-radius: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
     padding: var(--space-3);
   }
 
-  .blog-stats dt {
+  .tag-stats dt,
+  .side-label {
     color: var(--text-soft);
-    font-family: var(--font-mono);
+    font-family: Tahoma, var(--font-mono);
     font-size: 0.72rem;
+    font-weight: 700;
     text-transform: uppercase;
   }
 
-  .blog-stats dd {
-    color: var(--xp-title-blue, var(--color-system-blue));
+  .tag-stats dd {
+    color: var(--color-system-blue);
     font-family: var(--font-mono);
     font-size: 1.35rem;
     font-weight: 800;
     margin: 0;
   }
 
-  .blog-layout {
+  .tag-layout {
     align-items: start;
     display: grid;
     gap: var(--space-5);
     grid-template-columns: minmax(13rem, 0.28fr) minmax(0, 1fr);
   }
 
-  .blog-sidebar {
-    overflow: hidden;
+  .tag-side {
     position: sticky;
     top: var(--space-5);
   }
 
-  .blog-sidebar__body {
+  .tag-side__body {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
     padding: var(--space-4);
   }
 
-  .sidebar-label {
-    color: var(--xp-title-blue, var(--color-system-blue));
+  .tag-side strong,
+  .tag-side li {
     font-family: var(--font-mono);
-    font-size: 0.76rem;
-    font-weight: 700;
-    margin: 0;
-    text-transform: uppercase;
+    font-size: 0.86rem;
+    overflow-wrap: anywhere;
   }
 
-  .category-list {
+  .tag-side ul {
     display: grid;
     gap: var(--space-2);
     list-style: none;
@@ -186,48 +204,30 @@ const tagCount = new Set(posts.flatMap((post) => post.data.tags)).size;
     padding: 0;
   }
 
-  .category-list li {
+  .tag-side li {
     align-items: center;
-    color: var(--text-main);
     display: flex;
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
     gap: var(--space-2);
   }
 
-  .sidebar-note {
-    background: rgba(16, 36, 62, 0.9);
-    border: 1px solid rgba(94, 200, 255, 0.28);
-    border-radius: 8px;
-    color: var(--text-invert);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    margin: 0;
-    padding: var(--space-3);
-  }
-
-  .post-list {
+  .tag-post-list {
     display: grid;
     gap: var(--space-5);
   }
 
   @media (max-width: 860px) {
-    .blog-hero__body,
-    .blog-layout {
+    .tag-hero__body,
+    .tag-layout {
       grid-template-columns: 1fr;
     }
 
-    .blog-sidebar {
+    .tag-side {
       position: static;
-    }
-
-    .blog-stats {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 560px) {
-    .blog-stats {
+    .tag-stats {
       grid-template-columns: 1fr;
     }
   }

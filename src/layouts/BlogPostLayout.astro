@@ -203,10 +203,10 @@ const recordId = title
   }
 
   .post-meta div {
-    background: rgba(255, 255, 255, 0.62);
+    background: var(--bg-panel-soft);
     border: 1px solid rgba(94, 200, 255, 0.34);
-    border-radius: 8px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    border-radius: var(--radius-control);
+    box-shadow: var(--shadow-inset);
     min-width: 0;
     padding: var(--space-3);
   }
@@ -242,12 +242,12 @@ const recordId = title
     align-items: start;
     display: grid;
     gap: var(--space-5);
-    grid-template-columns: minmax(0, var(--article-width)) minmax(13rem, 1fr);
+    grid-template-columns: minmax(0, var(--article-width)) minmax(12rem, 16rem);
+    justify-content: center;
   }
 
   .post-content {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(248, 252, 255, 0.62));
+    background: var(--bg-window-strong);
     min-width: 0;
     padding: clamp(1.25rem, 3vw, 2.25rem);
   }
@@ -286,10 +286,10 @@ const recordId = title
   }
 
   .post-nav__item {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(232, 247, 255, 0.58));
-    border: 1px solid rgba(94, 200, 255, 0.52);
-    border-radius: 12px;
-    box-shadow: var(--shadow-glass), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    background: var(--bg-window);
+    border: 1px solid var(--border-window);
+    border-radius: var(--radius-window);
+    box-shadow: var(--shadow-glass), var(--shadow-inset);
     color: var(--text-main);
     display: grid;
     gap: var(--space-2);
@@ -300,6 +300,7 @@ const recordId = title
 
   .post-nav__item:hover {
     border-color: rgba(111, 255, 233, 0.74);
+    box-shadow: var(--shadow-hover), var(--shadow-inset);
     transform: translateY(-2px);
   }
 

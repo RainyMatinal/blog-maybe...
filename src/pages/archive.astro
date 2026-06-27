@@ -1,0 +1,331 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+
+const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
+
+const yearGroups = Array.from(
+  posts.reduce((groups, post) => {
+    const year = post.data.pubDate.getFullYear();
+    const list = groups.get(year) ?? [];
+    list.push(post);
+    groups.set(year, list);
+    return groups;
+  }, new Map<number, typeof posts>()),
+).sort(([a], [b]) => b - a);
+
+const totalTags = new Set(posts.flatMap((post) => post.data.tags)).size;
+---
+
+<BaseLayout
+  title="Archive"
+  description="RainyMatinal Network Archive 的年份归档页，按时间保存所有公开技术记录。"
+>
+  <section class="archive-page" aria-labelledby="archive-title">
+    <header class="archive-hero window-card">
+      <div class="window-titlebar">
+        <span class="window-dot dot-red" aria-hidden="true"></span>
+        <span class="window-dot dot-yellow" aria-hidden="true"></span>
+        <span class="window-dot dot-green" aria-hidden="true"></span>
+        <span>explorer.exe - C:\archive\year-index</span>
+      </div>
+
+      <div class="archive-hero__body">
+        <div>
+          <p class="section-kicker">Personal Library / Year Index</p>
+          <h1 id="archive-title">年份归档</h1>
+          <p>
+            像旧系统里的资料柜一样，把每一篇已经发布的技术笔记按年份放回抽屉里。
+          </p>
+        </div>
+
+        <dl class="archive-stats" aria-label="归档统计">
+          <div>
+            <dt>Records</dt>
+            <dd>{posts.length}</dd>
+          </div>
+          <div>
+            <dt>Years</dt>
+            <dd>{yearGroups.length}</dd>
+          </div>
+          <div>
+            <dt>Tags</dt>
+            <dd>{totalTags}</dd>
+          </div>
+        </dl>
+      </div>
+    </header>
+
+    <div class="archive-layout">
+      <aside class="archive-side window-card" aria-label="归档资料库索引">
+        <div class="window-titlebar">
+          <span class="window-dot dot-green" aria-hidden="true"></span>
+          <span>cabinet-tree.ini</span>
+        </div>
+        <div class="archive-side__body">
+          <p class="side-label">Library Root</p>
+          <strong>blog/archive</strong>
+          <p class="side-label">Sort Mode</p>
+          <strong>pubDate DESC</strong>
+          <p class="side-label">Drawers</p>
+          <ul>
+            {yearGroups.map(([year, group]) => (
+              <li>
+                <span class="status-light active" aria-hidden="true"></span>
+                {year} / {group.length} records
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      <div class="year-stack">
+        {yearGroups.map(([year, group]) => (
+          <section class="year-window window-card" aria-labelledby={`year-${year}`}>
+            <div class="window-titlebar">
+              <span class="window-dot dot-yellow" aria-hidden="true"></span>
+              <span>{year}.drawer / {group.length} files</span>
+            </div>
+
+            <div class="year-body">
+              <h2 id={`year-${year}`}>{year}</h2>
+              <ol class="archive-records">
+                {group.map((post, index) => (
+                  <li>
+                    <a href={postHref(post.id)}>
+                      <span class="record-index">{String(index + 1).padStart(2, "0")}</span>
+                      <time datetime={post.data.pubDate.toISOString()}>
+                        {formatDate(post.data.pubDate)}
+                      </time>
+                      <span class="record-main">
+                        <strong>{post.data.title}</strong>
+                        <span>{post.data.description}</span>
+                      </span>
+                      <span class="record-category">[{post.data.category}]</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .archive-page {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .archive-hero,
+  .archive-side,
+  .year-window {
+    overflow: hidden;
+  }
+
+  .archive-hero__body {
+    align-items: end;
+    background:
+      radial-gradient(circle at 84% 22%, rgba(111, 255, 233, 0.28), transparent 14rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(232, 247, 255, 0.54));
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .archive-hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    margin-bottom: var(--space-3);
+  }
+
+  .archive-hero p {
+    color: var(--text-muted);
+    font-size: 1.08rem;
+    line-height: 1.9;
+    margin: 0;
+    max-width: 42rem;
+  }
+
+  .archive-stats {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(3, minmax(5.5rem, 1fr));
+    margin: 0;
+  }
+
+  .archive-stats div {
+    background: var(--bg-panel-soft);
+    border: 1px solid rgba(94, 200, 255, 0.34);
+    border-radius: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    padding: var(--space-3);
+  }
+
+  .archive-stats dt,
+  .side-label {
+    color: var(--text-soft);
+    font-family: Tahoma, var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .archive-stats dd {
+    color: var(--color-system-blue);
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .archive-layout {
+    align-items: start;
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: minmax(13rem, 0.28fr) minmax(0, 1fr);
+  }
+
+  .archive-side {
+    position: sticky;
+    top: var(--space-5);
+  }
+
+  .archive-side__body {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .archive-side strong,
+  .archive-side li {
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+  }
+
+  .archive-side ul {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .archive-side li {
+    align-items: center;
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .year-stack {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .year-body {
+    padding: var(--space-5);
+  }
+
+  .year-body h2 {
+    color: var(--color-system-blue);
+    font-family: var(--font-mono);
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    margin-bottom: var(--space-5);
+  }
+
+  .archive-records {
+    display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .archive-records li {
+    counter-increment: records;
+  }
+
+  .archive-records a {
+    align-items: center;
+    background: var(--bg-panel-soft);
+    border: 1px solid rgba(94, 200, 255, 0.3);
+    border-radius: 10px;
+    color: var(--text-main);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: 2.5rem 4.8rem minmax(0, 1fr) max-content;
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+  }
+
+
+  .archive-records a:hover {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(111, 255, 233, 0.7);
+    transform: translateX(3px);
+  }
+
+  .record-index,
+  .archive-records time,
+  .record-category {
+    color: var(--text-soft);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+
+  .record-index {
+    color: var(--color-system-blue);
+    font-weight: 800;
+  }
+
+  .record-main {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .record-main strong,
+  .record-main span {
+    overflow-wrap: anywhere;
+  }
+
+  .record-main span {
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  @media (max-width: 860px) {
+    .archive-hero__body,
+    .archive-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .archive-side {
+      position: static;
+    }
+
+    .archive-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .archive-stats,
+    .archive-records a {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

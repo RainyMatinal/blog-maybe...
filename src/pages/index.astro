@@ -89,6 +89,10 @@ const techArchive = [
             <p class="hero-intro">
               在蓝绿色旧互联网回声里，记录 Arch Linux、Git、C、Astro、网络工程和长期学习的个人技术档案馆。
             </p>
+            <div class="hero-signal" aria-label="档案节点状态">
+              <span><span class="status-light active" aria-hidden="true"></span> archive node online</span>
+              <span>learning in public / searchable later</span>
+            </div>
             <div class="hero-actions" aria-label="首页快捷入口">
               <a class="old-button" href="#recent-posts">读取最近文章</a>
               <a class="old-button secondary" href="#tech-archive">打开技术档案</a>
@@ -307,19 +311,35 @@ $ display vlan brief
     margin-top: var(--space-6);
   }
 
-  .old-button {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(111, 255, 233, 0.2));
-    border: 1px solid rgba(94, 200, 255, 0.58);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-inset), 0 8px 18px rgba(47, 128, 237, 0.16);
-    color: #14506b;
-    font-family: var(--font-mono);
-    font-size: 0.86rem;
-    padding: 0.72rem 0.95rem;
-    text-decoration: none;
+  .hero-signal {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(94, 200, 255, 0.34);
+    border-radius: var(--radius-control);
+    color: var(--color-deep-teal);
+    display: flex;
+    flex-wrap: wrap;
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-5);
+    padding: 0.58rem 0.75rem;
+    width: fit-content;
   }
 
-  .old-button.secondary {
+  .hero-signal span {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+
+  .hero-actions .old-button {
+    font-size: 0.86rem;
+    min-height: 2.65rem;
+    padding: 0.72rem 0.95rem;
+  }
+
+  .hero-actions .old-button.secondary {
     background: rgba(255, 255, 255, 0.54);
   }
 
@@ -344,7 +364,7 @@ $ display vlan brief
     border: 1px solid rgba(94, 200, 255, 0.58);
     border-radius: var(--radius-pill);
     box-shadow: 0 10px 20px rgba(31, 102, 148, 0.15);
-    color: #14506b;
+    color: var(--color-deep-teal);
     display: inline-flex;
     font-family: var(--font-mono);
     font-size: 0.74rem;
@@ -530,7 +550,7 @@ $ display vlan brief
   }
 
   .post-tags {
-    color: #14506b;
+    color: var(--color-deep-teal);
     display: flex;
     flex-wrap: wrap;
     font-size: 0.76rem;

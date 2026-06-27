@@ -2,6 +2,8 @@
   color: var(--text-main);
   font-size: 1.04rem;
   line-height: 1.95;
+  margin-inline: auto;
+  max-width: 72ch;
   overflow-wrap: break-word;
 }
 
@@ -24,11 +26,15 @@
 }
 
 .prose h3 {
-  color: #14506b;
+  color: var(--color-deep-teal);
 }
 
 .prose p {
   margin: 0;
+}
+
+.prose :where(p, li) {
+  line-height: 1.95;
 }
 
 .prose a {
@@ -51,10 +57,10 @@
 }
 
 .prose blockquote {
-  background: rgba(255, 255, 255, 0.56);
+  background: var(--bg-panel-soft);
   border: 1px solid var(--border-glass);
   border-left: 4px solid var(--color-aero-blue);
-  border-radius: 12px;
+  border-radius: var(--radius-window);
   box-shadow: var(--shadow-inset);
   color: var(--text-muted);
   margin-inline: 0;
@@ -64,8 +70,8 @@
 .prose :not(pre) > code {
   background: rgba(111, 255, 233, 0.18);
   border: 1px solid rgba(94, 200, 255, 0.32);
-  border-radius: 7px;
-  color: #14506b;
+  border-radius: var(--radius-control);
+  color: var(--color-deep-teal);
   font-size: 0.92em;
   padding: 0.12em 0.35em;
 }
@@ -145,7 +151,7 @@
   }
 
   .prose pre {
-    border-radius: 12px;
+    border-radius: var(--radius-window);
     padding-inline: var(--space-4);
   }
 }

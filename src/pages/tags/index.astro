@@ -1,0 +1,161 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const tagSlug = (tag: string) =>
+  encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"));
+
+const tagMap = posts.reduce((map, post) => {
+  for (const tag of post.data.tags) {
+    const current = map.get(tag) ?? {
+      tag,
+      count: 0,
+      categories: new Set<string>(),
+      latest: post,
+    };
+    current.count += 1;
+    current.categories.add(post.data.category);
+    if (post.data.pubDate > current.latest.data.pubDate) {
+      current.latest = post;
+    }
+    map.set(tag, current);
+  }
+  return map;
+}, new Map<string, { tag: string; count: number; categories: Set<string>; latest: (typeof posts)[number] }>());
+
+const tags = Array.from(tagMap.values()).sort(
+  (a, b) => b.count - a.count || a.tag.localeCompare(b.tag),
+);
+---
+
+<BaseLayout
+  title="Tags"
+  description="RainyMatinal Network Archive 的标签索引页，用旧互联网资料库方式浏览主题。"
+>
+  <section class="tags-page" aria-labelledby="tags-title">
+    <header class="tags-hero window-card">
+      <div class="window-titlebar">
+        <span class="window-dot dot-red" aria-hidden="true"></span>
+        <span class="window-dot dot-yellow" aria-hidden="true"></span>
+        <span class="window-dot dot-green" aria-hidden="true"></span>
+        <span>index.exe - C:\archive\tags</span>
+      </div>
+
+      <div class="tags-hero__body">
+        <p class="section-kicker">Old Web Subject Index</p>
+        <h1 id="tags-title">标签索引</h1>
+        <p>
+          这里像早期个人主页的链接目录，把 Arch、Git、网络工程和前端学习的主题词集中成一个可浏览的资料库。
+        </p>
+      </div>
+    </header>
+
+    <div class="tag-index-window window-card">
+      <div class="window-titlebar">
+        <span class="window-dot dot-green" aria-hidden="true"></span>
+        <span>subject-index.dat / {tags.length} tags</span>
+      </div>
+
+      <div class="tag-grid">
+        {tags.map(({ tag, count, categories, latest }) => (
+          <a class="tag-card" href={`/tags/${tagSlug(tag)}/`}>
+            <span class="tag-card__name">#{tag}</span>
+            <span class="tag-card__count">{count} records</span>
+            <span class="tag-card__meta">
+              {Array.from(categories).join(" / ")}
+            </span>
+            <span class="tag-card__latest">latest: {latest.data.title}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .tags-page {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .tags-hero,
+  .tag-index-window {
+    overflow: hidden;
+  }
+
+  .tags-hero__body {
+    background:
+      radial-gradient(circle at 78% 22%, rgba(111, 255, 233, 0.28), transparent 14rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(232, 247, 255, 0.54));
+    padding: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .tags-hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    margin-bottom: var(--space-3);
+  }
+
+  .tags-hero p {
+    color: var(--text-muted);
+    font-size: 1.08rem;
+    line-height: 1.9;
+    margin: 0;
+    max-width: 48rem;
+  }
+
+  .tag-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    padding: var(--space-5);
+  }
+
+  .tag-card {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(226, 244, 255, 0.62));
+    border: 1px solid rgba(94, 200, 255, 0.46);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 10px 24px rgba(31, 102, 148, 0.12);
+    color: var(--text-main);
+    display: grid;
+    gap: var(--space-2);
+    min-height: 10rem;
+    padding: var(--space-4);
+    text-decoration: none;
+  }
+
+  .tag-card:hover {
+    border-color: rgba(111, 255, 233, 0.78);
+    transform: translateY(-2px);
+  }
+
+  .tag-card__name {
+    color: var(--color-deep-teal);
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  .tag-card__count {
+    color: var(--color-system-blue);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .tag-card__meta,
+  .tag-card__latest {
+    color: var(--text-muted);
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+
+  .tag-card__latest {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+</style>
