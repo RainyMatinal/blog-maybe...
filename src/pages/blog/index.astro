@@ -6,75 +6,21 @@ import PostCard from "../../components/blog/PostCard.astro";
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-
 const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
-const categories = [...new Set(posts.map((post) => post.data.category))];
-const tagCount = new Set(posts.flatMap((post) => post.data.tags)).size;
 ---
 
-<BaseLayout
-  title="Blog Archive"
-  description="RainyMatinal Network Archive 的文章列表，记录 Linux、Git、网络工程和前端学习。"
->
-  <section class="blog-page" aria-labelledby="blog-title">
-    <header class="blog-hero window-card">
-      <div class="window-titlebar">
-        <span class="window-dot dot-red" aria-hidden="true"></span>
-        <span class="window-dot dot-yellow" aria-hidden="true"></span>
-        <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>explorer.exe - C:\archive\blog</span>
-      </div>
+<BaseLayout title="来信" description="RainyMatinal 孤星邮局的来信列表。">
+  <section class="page-title-section">
+    <div class="title-overlap-wrapper">
+      <span class="huge-bg-en">DISPATCH</span>
+      <h1 class="solid-fg-cn">来信</h1>
+    </div>
+    <div class="title-divider"></div>
+  </section>
 
-      <div class="blog-hero__body">
-        <div>
-          <p class="section-kicker">Technical Archive / Blog Posts</p>
-          <h1 id="blog-title">博客档案</h1>
-          <p>
-            这里按时间倒序保存所有已经发布的技术笔记：系统安装、Git 现场、网络工程配置和前端学习记录。
-          </p>
-        </div>
-
-        <dl class="blog-stats" aria-label="博客统计">
-          <div>
-            <dt>Posts</dt>
-            <dd>{posts.length}</dd>
-          </div>
-          <div>
-            <dt>Categories</dt>
-            <dd>{categories.length}</dd>
-          </div>
-          <div>
-            <dt>Tags</dt>
-            <dd>{tagCount}</dd>
-          </div>
-        </dl>
-      </div>
-    </header>
-
-    <div class="blog-layout">
-      <aside class="blog-sidebar window-card" aria-label="档案索引">
-        <div class="window-titlebar">
-          <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>archive-index.ini</span>
-        </div>
-
-        <div class="blog-sidebar__body">
-          <p class="sidebar-label">Categories</p>
-          <ul class="category-list">
-            {categories.map((category) => (
-              <li>
-                <span class="status-light active" aria-hidden="true"></span>
-                {category}
-              </li>
-            ))}
-          </ul>
-
-          <p class="sidebar-label">Sort</p>
-          <p class="sidebar-note">pubDate DESC / non-draft only</p>
-        </div>
-      </aside>
-
-      <div class="post-list" aria-label="文章列表">
+  <section class="archive-wrapper compact-list">
+    <div class="archive-content">
+      <div class="ticket-grid">
         {posts.map((post, index) => (
           <PostCard
             title={post.data.title}
@@ -92,142 +38,28 @@ const tagCount = new Set(posts.flatMap((post) => post.data.tags)).size;
 </BaseLayout>
 
 <style>
-  .blog-page {
+  .compact-list {
+    padding-top: 2rem;
+  }
+
+  .archive-wrapper {
+    background-color: var(--bg-color);
+    padding: 2rem 4vw 6rem;
+  }
+
+  .archive-content {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .ticket-grid {
     display: grid;
-    gap: var(--space-7);
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 3.5rem;
   }
 
-  .blog-hero {
-    overflow: hidden;
-  }
-
-  .blog-hero__body {
-    align-items: end;
-    display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding: clamp(1.5rem, 4vw, 3rem);
-  }
-
-  .blog-hero h1 {
-    font-size: clamp(2.4rem, 7vw, 4.7rem);
-    margin-bottom: var(--space-3);
-  }
-
-  .blog-hero p {
-    color: var(--text-muted);
-    font-size: 1.08rem;
-    max-width: 44rem;
-  }
-
-  .blog-stats {
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(3, minmax(5.5rem, 1fr));
-    margin: 0;
-  }
-
-  .blog-stats div {
-    background: var(--bg-panel-soft);
-    border: 1px solid rgba(42, 126, 231, 0.26);
-    border-radius: 10px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
-    padding: var(--space-3);
-  }
-
-  .blog-stats dt {
-    color: var(--text-soft);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-  }
-
-  .blog-stats dd {
-    color: var(--xp-title-blue, var(--color-system-blue));
-    font-family: var(--font-mono);
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin: 0;
-  }
-
-  .blog-layout {
-    align-items: start;
-    display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(13rem, 0.28fr) minmax(0, 1fr);
-  }
-
-  .blog-sidebar {
-    overflow: hidden;
-    position: sticky;
-    top: var(--space-5);
-  }
-
-  .blog-sidebar__body {
-    display: grid;
-    gap: var(--space-4);
-    padding: var(--space-4);
-  }
-
-  .sidebar-label {
-    color: var(--xp-title-blue, var(--color-system-blue));
-    font-family: var(--font-mono);
-    font-size: 0.76rem;
-    font-weight: 700;
-    margin: 0;
-    text-transform: uppercase;
-  }
-
-  .category-list {
-    display: grid;
-    gap: var(--space-2);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .category-list li {
-    align-items: center;
-    color: var(--text-main);
-    display: flex;
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    gap: var(--space-2);
-  }
-
-  .sidebar-note {
-    background: rgba(16, 36, 62, 0.9);
-    border: 1px solid rgba(94, 200, 255, 0.28);
-    border-radius: 8px;
-    color: var(--text-invert);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    margin: 0;
-    padding: var(--space-3);
-  }
-
-  .post-list {
-    display: grid;
-    gap: var(--space-5);
-  }
-
-  @media (max-width: 860px) {
-    .blog-hero__body,
-    .blog-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .blog-sidebar {
-      position: static;
-    }
-
-    .blog-stats {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 560px) {
-    .blog-stats {
+  @media (max-width: 500px) {
+    .ticket-grid {
       grid-template-columns: 1fr;
     }
   }

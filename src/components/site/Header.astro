@@ -1,36 +1,293 @@
 ---
-const navItems = [
-  { href: "/", label: "首页", code: "HOME" },
-  { href: "/blog", label: "博客", code: "LOG" },
-  { href: "/archive", label: "归档", code: "ARC" },
-  { href: "/tags", label: "标签", code: "TAG" },
-  { href: "/lab", label: "实验室", code: "LAB" },
-  { href: "/about", label: "关于", code: "ME" },
+import { getCollection } from "astro:content";
+
+type Props = { isHome?: boolean };
+const { isHome = false } = Astro.props;
+const pathname = Astro.url.pathname;
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
+const searchPosts = posts.map((post) => ({
+  title: post.data.title,
+  excerpt: post.data.description,
+  tags: post.data.tags,
+  url: postHref(post.id),
+}));
+
+const categoryItems = [
+  { href: "/blog/", label: "技术", title: "Linux / Git / Network" },
+  { href: "/tags/", label: "标签", title: "主题频段" },
+  { href: "/archive/", label: "归档", title: "时间索引" },
+  { href: "/about/", label: "手稿", title: "个人说明" },
 ];
+
+const navItems = [
+  { href: "/", label: "邮局", hover: "邮局", key: "home", en: "HOME", cn: "邮局" },
+  { href: "/about/#guestbook", label: "信箱", hover: "留言", key: "guestbook", en: "MESSAGE", cn: "信箱" },
+  { href: "/tags/", label: "星图", hover: "友人", key: "blogroll", en: "FRIENDS", cn: "星图" },
+  { href: "/archive/", label: "往期", hover: "归档", key: "archive", en: "ARCHIVE", cn: "往期" },
+  { href: "/about/", label: "孤星", hover: "关于", key: "about", en: "ABOUT", cn: "孤星" },
+];
+
+const isActive = (href: string) => {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href.replace(/#.*$/, ""));
+};
 ---
 
-<header class="site-header">
-  <div class="window-strip" aria-hidden="true">
-    <span class="window-dot dot-red"></span>
-    <span class="window-dot dot-yellow"></span>
-    <span class="window-dot dot-green"></span>
-    <span class="window-title">network-archive://rainymatinal/home</span>
-  </div>
-  <nav class="site-nav" aria-label="主导航">
-    <a class="site-brand" href="/">
-      <span class="brand-mark">RM</span>
-      <span>
-        <span class="brand-name">RainyMatinal</span>
-        <span class="brand-subtitle">Network Archive</span>
-      </span>
-    </a>
-
-    <div class="nav-links">
-      {navItems.map((item) => (
-        <a class="nav-link" href={item.href} aria-label={item.label}>
-          [{item.code}] {item.label}
-        </a>
-      ))}
+<div class="header-spacer"></div>
+<header id="site-header" class:list={["site-header", { "is-home": isHome }]}>
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="/" class="site-brand" aria-label="RainyMatinal 孤星邮局">
+        <div class="brand-main">
+          <span class="brand-rainy">Rainy</span>
+          <div class="brand-matinal-wrapper">
+            <span class="brand-matinal">Matinal.</span>
+          </div>
+        </div>
+        <span class="brand-subtitle">—— 孤星邮局 ——</span>
+      </a>
     </div>
-  </nav>
+
+    <div class="header-center">
+      <nav class="main-nav" aria-label="主导航">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="/" class:list={["nav-link", { active: pathname === "/" }]} aria-label="首页">邮局</a>
+          </li>
+          <li class="nav-item has-dropdown" id="category-nav-item">
+            <button class="nav-link" type="button" aria-label="分类" id="category-nav-toggle">
+              频段
+              <svg class="nav-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <ul class="dropdown-menu">
+              {categoryItems.map((item) => (
+                <li><a href={item.href} title={item.title}>{item.label}</a></li>
+              ))}
+            </ul>
+          </li>
+          {navItems.slice(1).map((item) => (
+            <li class="nav-item">
+              <a href={item.href} class:list={["nav-link", "swap-link", { active: isActive(item.href) }]} aria-label={item.hover} data-hover={item.hover}>
+                <span class="nav-text">{item.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div class="header-article-title" id="header-article-title">
+        <span></span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="search-btn" aria-label="Search" id="search-trigger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+      <button class="menu-toggle-btn" id="mobile-menu-toggle" aria-label="Toggle Menu">
+        <svg class="sorting-rack-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="4" x2="5" y2="20" class="rack-line line-1"></line>
+          <line x1="12" y1="4" x2="12" y2="20" class="rack-line line-2"></line>
+          <line x1="19" y1="4" x2="19" y2="20" class="rack-line line-3"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu-wrapper" id="mobile-menu">
+    <nav class="mobile-nav" aria-label="移动端导航">
+      <ul class="mobile-nav-list">
+        <li class="m-nav-item">
+          <a href="/" class:list={["m-nav-link", { active: pathname === "/" }]}>
+            <span class="m-en">HOME</span><span class="m-dots"></span><span class="m-cn">邮局</span>
+          </a>
+        </li>
+        <li class="m-nav-item m-has-dropdown" id="m-category-toggle">
+          <button class="m-nav-link" type="button">
+            <span class="m-en">CATEGORY</span><span class="m-dots"></span><span class="m-cn">频段
+              <svg class="nav-arrow mobile-arrow" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+          <ul class="m-sub-menu">
+            {categoryItems.map((item) => (
+              <li><a href={item.href}>{item.label}</a></li>
+            ))}
+          </ul>
+        </li>
+        {navItems.slice(1).map((item) => (
+          <li class="m-nav-item">
+            <a href={item.href} class:list={["m-nav-link", { active: isActive(item.href) }]}>
+              <span class="m-en">{item.en}</span><span class="m-dots"></span><span class="m-cn">{item.cn}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="m-cut-line"></div>
+      <button class="m-search-btn" id="m-search-trigger" type="button">
+        <span class="m-en">SEARCH</span><span class="m-dots"></span><span class="m-cn">检索</span>
+      </button>
+    </nav>
+  </div>
 </header>
+
+<search-controller data-posts={JSON.stringify(searchPosts)}>
+  <div id="search-modal" class="search-modal-wrapper" aria-hidden="true">
+    <div class="search-overlay" id="search-close-bg"></div>
+    <div class="search-container">
+      <div class="search-input-box">
+        <input type="text" id="search-input" placeholder="检索 >" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="search-results-wrapper">
+        <ul id="search-results-list" class="receipt-list"></ul>
+      </div>
+    </div>
+  </div>
+</search-controller>
+
+<script>
+  document.addEventListener("astro:page-load", initRainyHeader);
+  initRainyHeader();
+
+  function initRainyHeader() {
+    const header = document.getElementById("site-header");
+    const articleTitleTarget = document.querySelector("#header-article-title span");
+    const letterTitle = document.querySelector(".letter-title");
+    if (!header || header.dataset.ready === "true") return;
+    header.dataset.ready = "true";
+
+    if (letterTitle && articleTitleTarget) articleTitleTarget.textContent = letterTitle.textContent;
+
+    let lastY = window.scrollY;
+    const threshold = 80;
+    let ticking = false;
+    const updateHeader = () => {
+      const y = window.scrollY;
+      header.classList.toggle("is-scrolled", y > threshold);
+      header.classList.toggle("is-hidden", y > lastY && y > 200 && !header.classList.contains("menu-open-state"));
+      if (letterTitle) {
+        header.classList.toggle("mode-article-title", letterTitle.getBoundingClientRect().bottom < 80);
+      }
+      lastY = y;
+      ticking = false;
+    };
+    window.addEventListener("scroll", () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
+    }, { passive: true });
+    updateHeader();
+
+    const menuButton = document.getElementById("mobile-menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const mobileSearch = document.getElementById("m-search-trigger");
+    const mobileCategory = document.getElementById("m-category-toggle");
+    const categoryButton = document.getElementById("category-nav-toggle");
+    const categoryItem = document.getElementById("category-nav-item");
+    let menuOpen = false;
+
+    const closeMenu = () => {
+      menuOpen = false;
+      mobileMenu?.classList.remove("is-open");
+      header.classList.remove("menu-open-state");
+      document.body.classList.remove("menu-locked");
+      mobileCategory?.classList.remove("is-expanded");
+    };
+
+    const toggleMenu = () => {
+      menuOpen = !menuOpen;
+      mobileMenu?.classList.toggle("is-open", menuOpen);
+      header.classList.toggle("menu-open-state", menuOpen);
+      document.body.classList.toggle("menu-locked", menuOpen);
+      if (!menuOpen) mobileCategory?.classList.remove("is-expanded");
+    };
+
+    menuButton?.addEventListener("click", toggleMenu);
+    mobileCategory?.querySelector(".m-nav-link")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      mobileCategory.classList.toggle("is-expanded");
+    });
+    mobileMenu?.addEventListener("click", (event) => {
+      if (event.target === mobileMenu || event.target.classList?.contains("mobile-nav")) toggleMenu();
+    });
+    mobileSearch?.addEventListener("click", () => {
+      closeMenu();
+      setTimeout(() => window.openSearchModal?.(), 400);
+    });
+    categoryButton?.addEventListener("click", () => categoryItem?.classList.toggle("is-open"));
+    document.getElementById("search-trigger")?.addEventListener("click", () => window.openSearchModal?.());
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 1024 && menuOpen) closeMenu();
+    }, { passive: true });
+  }
+
+  class SearchController extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready === "true") return;
+      this.dataset.ready = "true";
+      const posts = JSON.parse(this.dataset.posts || "[]");
+      const modal = this.querySelector("#search-modal");
+      const closeBg = this.querySelector("#search-close-bg");
+      const input = this.querySelector("#search-input");
+      const list = this.querySelector("#search-results-list");
+      if (!modal || !closeBg || !input || !list) return;
+
+      const close = () => {
+        modal.classList.remove("is-active");
+        modal.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("search-locked");
+      };
+      const open = () => {
+        modal.classList.add("is-active");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("search-locked");
+        setTimeout(() => input.focus(), 100);
+      };
+      window.openSearchModal = open;
+      closeBg.addEventListener("click", close);
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && modal.classList.contains("is-active")) close();
+      });
+      input.addEventListener("input", (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        if (!query) {
+          list.innerHTML = "";
+          return;
+        }
+        const results = posts.filter((post) => {
+          const haystack = `${post.title} ${post.excerpt} ${(post.tags || []).join(" ")}`.toLowerCase();
+          return haystack.includes(query);
+        }).slice(0, 8);
+        list.innerHTML = results.length
+          ? results.map((post) => `<li class="receipt-item"><a href="${post.url}"><h4 class="receipt-title">${escapeHtml(post.title)}</h4><p class="receipt-excerpt">${escapeHtml(post.excerpt)}</p></a></li>`).join("")
+          : `<li class="receipt-item no-results"><p class="receipt-excerpt" style="text-align:center;margin-top:2rem;">[ 子空间通讯未能匹配到该频段信号 ]</p></li>`;
+      });
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    })[char]);
+  }
+
+  if (!customElements.get("search-controller")) {
+    customElements.define("search-controller", SearchController);
+  }
+</script>

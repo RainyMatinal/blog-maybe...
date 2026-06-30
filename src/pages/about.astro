@@ -2,36 +2,12 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const learningItems = [
-  {
-    name: "Linux",
-    status: "daily system",
-    text: "把 Arch Linux 当作长期工作台，从安装、桌面环境、输入法到日常排障一点点记录。",
-  },
-  {
-    name: "Git / GitHub",
-    status: "version habit",
-    text: "学习 SSH、remote、分支、提交和同步，把每一次出错都变成以后能查到的笔记。",
-  },
-  {
-    name: "C 语言",
-    status: "foundation",
-    text: "回到计算机基础，把语法、编译、指针和调试慢慢啃下来。",
-  },
-  {
-    name: "Frontend",
-    status: "site craft",
-    text: "用 Astro、HTML 和 CSS 搭建自己的网络空间，不只做页面，也整理内容结构。",
-  },
-  {
-    name: "Network Engineering",
-    status: "field notes",
-    text: "记录 VLAN、STP、DHCP、H3C 配置和现场排障思路，训练工程化判断。",
-  },
-  {
-    name: "考研路线",
-    status: "long run",
-    text: "把长期学习拆成阶段计划、复盘和资料索引，尽量不让目标只停留在口头上。",
-  },
+  ["Linux", "daily system", "把 Arch Linux 当作长期工作台，记录安装、桌面环境、输入法、包管理和日常排错。"],
+  ["Git / GitHub", "version habit", "练习 SSH、remote、分支、提交和同步，把每一次报错都变成以后能查到的笔记。"],
+  ["C 语言", "foundation", "回到计算机基础，把语法、编译、指针和调试一点点啃下来。"],
+  ["Frontend", "site craft", "用 Astro、HTML 和 CSS 搭建自己的网络空间，同时整理内容结构。"],
+  ["Network", "field notes", "记录 VLAN、STP、DHCP、H3C 配置和现场排障思路。"],
+  ["考研路线", "long run", "把长期学习拆成阶段计划、复盘和资料索引，让目标不只停留在口头上。"],
 ];
 
 const routeSteps = [
@@ -44,136 +20,92 @@ const routeSteps = [
 ];
 
 const categoryNotes = [
-  ["ARCH LOGS", "Linux 安装、桌面环境、输入法、pacman 和系统排障。"],
-  ["GIT FIELD NOTES", "GitHub SSH、remote、提交习惯和仓库同步问题。"],
-  ["C / FRONTEND LAB", "C 语言基础、Astro、HTML、CSS 和组件实验。"],
-  ["NETWORK ENGINEERING", "VLAN、STP、DHCP、H3C 配置和现场问题复盘。"],
-  ["EXAM ROADMAP", "考研路线、阶段计划、学习复盘和资料整理。"],
-  ["AERO ARCHIVE", "旧互联网审美、Frutiger Aero 和个人观察。"],
+  ["LINUX", "系统安装、桌面环境、输入法、包管理和排错记录。"],
+  ["GIT", "GitHub SSH、remote、提交习惯和仓库同步问题。"],
+  ["C / FRONTEND", "C 语言基础、Astro、HTML、CSS 和组件实验。"],
+  ["NETWORK", "VLAN、STP、DHCP、H3C 配置和现场问题复盘。"],
+  ["EXAM", "考研路线、阶段计划、学习复盘和资料整理。"],
+  ["PERSONAL", "旧互联网审美、个人观察和技术之外的随笔。"],
 ];
 
 const futurePlans = [
   "继续补齐 Linux、Git、C、前端和网络工程的基础笔记。",
-  "把每一次真实排障整理成可复查的档案，而不是散落在聊天记录里。",
-  "完善 archive、tags、about、lab 等个人资料库入口。",
+  "把真实排障过程整理成可复查的档案，而不是散落在聊天记录里。",
+  "完善 archive、tags、about 和未来的 lab 入口。",
   "给考研路线建立长期复盘节奏，记录每个阶段的目标和偏差。",
   "保留一点旧互联网的清澈感，让这个站点像一间长期在线的技术房间。",
 ];
 ---
 
-<BaseLayout
-  title="About"
-  description="关于 RainyMatinal Network Archive，一个记录 Linux、Git、C、前端、网络工程和考研路线的个人技术档案馆。"
->
-  <section class="about-page" aria-labelledby="about-title">
-    <header class="about-hero window-card">
-      <div class="window-titlebar">
-        <span class="window-dot dot-red" aria-hidden="true"></span>
-        <span class="window-dot dot-yellow" aria-hidden="true"></span>
-        <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>profile.dat - personal network room</span>
-      </div>
+<BaseLayout title="关于" description="关于 RainyMatinal 孤星邮局，一个记录技术学习路线的个人网络空间。" bodyClass="about-starry-body">
+  <section class="star-page" aria-labelledby="about-title">
+    <div class="star-bg-layer" aria-hidden="true">
+      <span class="planet planet-red"></span>
+      <span class="planet planet-blue"></span>
+      <span class="orbit-line orbit-one"></span>
+      <span class="orbit-line orbit-two"></span>
+    </div>
 
-      <div class="about-hero__body">
-        <div class="about-copy">
-          <p class="section-kicker">Personal Technical Archive</p>
-          <h1 id="about-title">关于这个网络空间</h1>
-          <p>
-            我是一个正在学习 Linux、Git、C 语言、前端、网络工程和考研路线的人。
-            这个博客不是简历，也不是展示橱窗，而是一座慢慢堆起来的个人技术档案馆。
-          </p>
-          <p>
-            它记录配置、报错、命令、复盘和阶段目标。很多内容还很基础，但基础本身也值得被认真保存。
-          </p>
-        </div>
-
-        <div class="profile-orbit" aria-label="学习主题拓扑">
-          <span class="orbit-core">ME</span>
-          <span class="orbit-node node-linux">Linux</span>
-          <span class="orbit-node node-git">Git</span>
-          <span class="orbit-node node-c">C</span>
-          <span class="orbit-node node-net">VLAN</span>
-          <span class="orbit-node node-exam">Exam</span>
-          <span class="orbit-line line-one"></span>
-          <span class="orbit-line line-two"></span>
-          <span class="orbit-line line-three"></span>
-        </div>
+    <header class="page-title-section about-title-section">
+      <div class="title-overlap-wrapper">
+        <span class="huge-bg-en">ABOUT</span>
+        <h1 class="solid-fg-cn" id="about-title">孤星</h1>
       </div>
+      <div class="title-divider"></div>
     </header>
 
-    <section class="about-section" aria-labelledby="learning-title">
-      <div class="section-heading">
-        <p class="section-kicker">Learning Status</p>
-        <h2 id="learning-title">我在学什么</h2>
-      </div>
+    <main class="about-bento">
+      <section class="bento-card intro-card">
+        <p class="card-kicker">PERSONAL NETWORK ROOM</p>
+        <h2>这不是简历，是一间正在搭建的技术房间。</h2>
+        <p>
+          我正在学习 Linux、Git、C 语言、前端、网络工程和考研路线。这个博客是我的个人技术档案馆，记录配置、报错、命令、复盘和那些暂时还不熟练但值得认真保存的过程。
+        </p>
+      </section>
 
-      <div class="learning-grid">
-        {learningItems.map((item) => (
-          <article class="learning-card window-card">
-            <div class="window-titlebar">
-              <span class="window-dot dot-green" aria-hidden="true"></span>
-              <span>{item.name.toLowerCase().replaceAll(" ", "-")}.log</span>
-            </div>
-            <div class="learning-card__body">
-              <span class="learning-status">{item.status}</span>
-              <h3>{item.name}</h3>
-              <p>{item.text}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="about-section why-grid" aria-labelledby="why-title">
-      <article class="why-window window-card">
-        <div class="window-titlebar">
-          <span class="window-dot dot-yellow" aria-hidden="true"></span>
-          <span>why-write-blog.txt</span>
+      <section class="bento-card status-card">
+        <p class="card-kicker">CURRENT SIGNALS</p>
+        <div class="signal-lines">
+          {learningItems.map(([name, status, text]) => (
+            <article>
+              <span>{status}</span>
+              <h3>{name}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
         </div>
-        <div class="why-body">
-          <p class="section-kicker">Why Blog</p>
-          <h2 id="why-title">我为什么写博客</h2>
-          <p>
-            因为学习过程很容易被遗忘。一次配置成功、一次 Git 报错、一次 VLAN 排障，
-            当时看起来只是一个小问题，过几周再遇到就可能又要从头摸索。
-          </p>
-          <p>
-            所以我想把博客当成一个外置记忆：把问题写清楚，把命令留下来，把当时的判断和误区也保存下来。
-            它不是为了显得厉害，而是为了让未来的自己少迷路一点。
-          </p>
-        </div>
-      </article>
+      </section>
 
-      <aside class="terminal-note window-card" aria-label="写作状态终端">
+      <section class="bento-card why-card">
+        <p class="card-kicker">WHY BLOG</p>
+        <h2>把学习过程变成未来能搜索到的记忆。</h2>
+        <p>
+          学习里有很多瞬间很容易消失：一次配置成功、一次 Git 报错、一次 VLAN 排障，当时只是一个小问题，过几周再遇到就可能又要从头摸索。
+        </p>
+        <p>
+          所以我把博客当作外置记忆。把问题写清楚，把命令留下来，把当时的判断和误区也保存下来。它不是为了显得厉害，而是为了让未来的自己少迷路一点。
+        </p>
+      </section>
+
+      <aside class="terminal-card" aria-label="写作状态终端">
         <div class="terminal-titlebar">
           <span class="window-dot dot-red" aria-hidden="true"></span>
           <span class="window-dot dot-yellow" aria-hidden="true"></span>
           <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>terminal - archive reason</span>
+          <span>terminal - memory sync</span>
         </div>
         <pre><code>$ mkdir -p notes/linux notes/git notes/c notes/network notes/exam
-$ touch mistake-log.md
 $ echo "把过程留下来" >> archive.txt
-[ok] memory externalized
+[ok] signal saved
 [ok] future self can search</code></pre>
       </aside>
-    </section>
 
-    <section class="about-section" aria-labelledby="route-title">
-      <div class="section-heading">
-        <p class="section-kicker">Technical Route</p>
-        <h2 id="route-title">技术路线</h2>
-      </div>
-
-      <div class="route-window window-card">
-        <div class="window-titlebar">
-          <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>learning-route.tree</span>
-        </div>
+      <section class="bento-card route-card">
+        <p class="card-kicker">TECHNICAL ROUTE</p>
         <ol class="route-list">
           {routeSteps.map(([number, title, text]) => (
             <li>
-              <span class="route-number">{number}</span>
+              <span>{number}</span>
               <div>
                 <strong>{title}</strong>
                 <p>{text}</p>
@@ -181,33 +113,23 @@ $ echo "把过程留下来" >> archive.txt
             </li>
           ))}
         </ol>
-      </div>
-    </section>
+      </section>
 
-    <section class="about-section" aria-labelledby="category-title">
-      <div class="section-heading">
-        <p class="section-kicker">Archive Categories</p>
-        <h2 id="category-title">文章分类说明</h2>
-      </div>
+      <section class="bento-card category-card">
+        <p class="card-kicker">ARCHIVE CATEGORIES</p>
+        <div class="category-grid">
+          {categoryNotes.map(([code, text]) => (
+            <article>
+              <span>[{code}]</span>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-      <div class="category-note-grid">
-        {categoryNotes.map(([code, text]) => (
-          <article class="category-note">
-            <span>[{code}]</span>
-            <p>{text}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-
-    <section class="about-section future-window window-card" aria-labelledby="future-title">
-      <div class="window-titlebar">
-        <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>future-plan.ini</span>
-      </div>
-      <div class="future-body">
-        <p class="section-kicker">Next Actions</p>
-        <h2 id="future-title">未来计划</h2>
+      <section class="bento-card future-card" id="guestbook">
+        <p class="card-kicker">NEXT ACTIONS</p>
+        <h2>未来计划</h2>
         <ul>
           {futurePlans.map((plan) => (
             <li>
@@ -216,325 +138,274 @@ $ echo "把过程留下来" >> archive.txt
             </li>
           ))}
         </ul>
-      </div>
-    </section>
+      </section>
+    </main>
   </section>
 </BaseLayout>
 
 <style>
-  .about-page {
-    display: grid;
-    gap: var(--space-8);
-  }
-
-  .about-hero,
-  .learning-card,
-  .why-window,
-  .terminal-note,
-  .route-window,
-  .future-window {
-    overflow: hidden;
-  }
-
-  .about-hero__body {
-    align-items: center;
-    background:
-      radial-gradient(circle at 78% 18%, rgba(111, 255, 233, 0.3), transparent 14rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(232, 247, 255, 0.55));
-    display: grid;
-    gap: clamp(1.5rem, 4vw, 3rem);
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
-    min-height: 28rem;
-    padding: clamp(1.5rem, 5vw, 4rem);
-  }
-
-  .about-copy {
-    max-width: 48rem;
-  }
-
-  .about-copy h1 {
-    font-size: clamp(2.2rem, 6vw, 4.2rem);
-    margin-bottom: var(--space-4);
-  }
-
-  .about-copy p,
-  .why-body p,
-  .future-body li,
-  .route-list p {
-    color: var(--text-muted);
-    line-height: 1.9;
-  }
-
-  .profile-orbit {
-    aspect-ratio: 1;
-    background:
-      linear-gradient(90deg, rgba(47, 128, 237, 0.1) 1px, transparent 1px),
-      linear-gradient(rgba(47, 128, 237, 0.1) 1px, transparent 1px),
-      radial-gradient(circle, rgba(111, 255, 233, 0.28), rgba(94, 200, 255, 0.1) 48%, rgba(255, 255, 255, 0.42));
-    background-size: 24px 24px, 24px 24px, auto;
-    border: 1px solid rgba(255, 255, 255, 0.78);
-    border-radius: 50%;
-    box-shadow: var(--shadow-glass), inset 0 0 34px rgba(255, 255, 255, 0.82);
-    min-width: 16rem;
+  .star-page {
     position: relative;
+    overflow: hidden;
+    padding-bottom: 6rem;
   }
 
-  .orbit-core,
-  .orbit-node {
-    align-items: center;
-    border: 1px solid rgba(94, 200, 255, 0.58);
-    box-shadow: 0 10px 20px rgba(31, 102, 148, 0.15);
-    display: inline-flex;
-    font-family: var(--font-mono);
-    justify-content: center;
+  .star-bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(20, 43, 66, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20, 43, 66, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .planet,
+  .orbit-line {
     position: absolute;
-    z-index: 2;
+    border-radius: 50%;
+    opacity: 0.45;
+    mix-blend-mode: multiply;
   }
 
-  .orbit-core {
-    background: linear-gradient(145deg, var(--color-system-blue), var(--color-aero-cyan));
-    border-radius: 10px;
-    color: var(--text-invert);
-    font-weight: 800;
-    height: 4rem;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 4rem;
+  .planet-red {
+    width: 160px;
+    height: 160px;
+    right: 9vw;
+    top: 18vh;
+    background: radial-gradient(circle at 32% 30%, #fff 0 8%, #ffb3a8 9% 24%, var(--theme-persimmonorange) 25% 100%);
   }
 
-  .orbit-node {
-    background: rgba(255, 255, 255, 0.78);
-    border-radius: 999px;
-    color: var(--color-deep-teal);
-    font-size: 0.74rem;
-    min-width: 3.4rem;
-    padding: 0.42rem 0.58rem;
-  }
-
-  .node-linux {
-    left: 10%;
-    top: 22%;
-  }
-
-  .node-git {
-    right: 12%;
-    top: 18%;
-  }
-
-  .node-c {
-    left: 12%;
-    bottom: 22%;
-  }
-
-  .node-net {
-    right: 10%;
-    bottom: 22%;
-  }
-
-  .node-exam {
-    left: 50%;
-    top: 7%;
-    transform: translateX(-50%);
+  .planet-blue {
+    width: 220px;
+    height: 220px;
+    left: 4vw;
+    top: 48vh;
+    background: radial-gradient(circle at 36% 30%, #fff 0 8%, #9edfd9 9% 24%, var(--theme-mintcyan) 25% 100%);
   }
 
   .orbit-line {
-    background: rgba(47, 128, 237, 0.22);
-    height: 1px;
-    left: 18%;
+    border: 1px dashed rgba(20, 43, 66, 0.16);
+    transform: rotate(-12deg);
+  }
+
+  .orbit-one {
+    width: 520px;
+    height: 220px;
+    right: -120px;
+    top: 12vh;
+  }
+
+  .orbit-two {
+    width: 620px;
+    height: 260px;
+    left: -180px;
+    top: 44vh;
+  }
+
+  .about-title-section {
+    padding-bottom: 3rem;
+  }
+
+  .about-bento {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 1.25rem;
+    width: min(1180px, calc(100% - 8vw));
+    margin: 0 auto;
+  }
+
+  .bento-card,
+  .terminal-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(250, 250, 250, 0.82);
+    border: 1px solid var(--theme-line);
+    box-shadow: 0 18px 48px rgba(20, 43, 66, 0.1);
+    backdrop-filter: blur(14px);
+  }
+
+  .bento-card {
+    padding: clamp(1.35rem, 3vw, 2.4rem);
+  }
+
+  .bento-card::after {
+    content: "";
     position: absolute;
-    top: 50%;
-    transform-origin: center;
-    width: 64%;
+    right: -40px;
+    bottom: -40px;
+    width: 120px;
+    height: 120px;
+    border: 2px dashed rgba(178, 58, 58, 0.18);
+    border-radius: 50%;
+    pointer-events: none;
   }
 
-  .line-one {
-    transform: rotate(22deg);
+  .intro-card,
+  .route-card,
+  .category-card,
+  .future-card {
+    grid-column: 1 / -1;
   }
 
-  .line-two {
-    transform: rotate(-28deg);
+  .card-kicker {
+    color: var(--theme-stamp-red);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    margin: 0 0 1rem;
   }
 
-  .line-three {
-    transform: rotate(90deg);
+  .bento-card h2 {
+    color: #111;
+    font-family: var(--font-serif);
+    font-size: clamp(1.55rem, 4vw, 2.7rem);
+    line-height: 1.25;
+    margin: 0 0 1rem;
+    text-wrap: balance;
   }
 
-  .about-section {
+  .bento-card p,
+  .signal-lines p,
+  .route-list p,
+  .category-grid p,
+  .future-card li {
+    color: #666;
+    line-height: 1.9;
+  }
+
+  .signal-lines {
     display: grid;
-    gap: var(--space-5);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
   }
 
-  .section-heading h2 {
-    font-size: clamp(1.8rem, 4vw, 2.7rem);
+  .signal-lines article,
+  .category-grid article {
+    border: 1px dashed rgba(20, 43, 66, 0.16);
+    background: rgba(255, 255, 255, 0.55);
+    padding: 1rem;
   }
 
-  .learning-grid,
-  .category-note-grid {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .learning-card__body {
-    display: grid;
-    gap: var(--space-2);
-    padding: var(--space-4);
-  }
-
-  .learning-status,
-  .category-note span,
-  .route-number {
-    color: var(--color-system-blue);
+  .signal-lines span,
+  .category-grid span,
+  .route-list li > span {
+    color: var(--theme-blue);
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 800;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  .learning-card h3 {
-    font-size: 1.35rem;
-    margin: 0;
+  .signal-lines h3 {
+    color: #111;
+    font-size: 1.1rem;
+    margin: 0.45rem 0;
   }
 
-  .learning-card p,
-  .category-note p {
-    color: var(--text-muted);
-    line-height: 1.75;
-    margin: 0;
-  }
-
-  .why-grid {
-    align-items: stretch;
-    grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.58fr);
-  }
-
-  .why-body,
-  .future-body {
-    padding: clamp(1.25rem, 3vw, 2.25rem);
-  }
-
-  .why-body h2,
-  .future-body h2 {
-    font-size: clamp(1.8rem, 4vw, 2.7rem);
-  }
-
-  .terminal-note {
-    background: rgba(16, 36, 62, 0.92);
-    border-color: rgba(94, 200, 255, 0.32);
+  .terminal-card {
+    align-self: stretch;
+    background: linear-gradient(180deg, #172333, #101820);
+    color: #fafafa;
   }
 
   .terminal-titlebar {
-    align-items: center;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(94, 200, 255, 0.08));
-    border-bottom: 1px solid rgba(94, 200, 255, 0.24);
-    color: rgba(245, 251, 255, 0.72);
     display: flex;
-    font-family: Tahoma, var(--font-mono);
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.4rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(250, 250, 250, 0.76);
+    font-family: var(--font-mono);
     font-size: 0.78rem;
-    gap: var(--space-2);
-    min-height: 2.2rem;
-    padding: 0 var(--space-4);
   }
 
-  .terminal-note pre {
-    color: var(--text-invert);
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    line-height: 1.8;
+  .terminal-card pre {
     margin: 0;
-    overflow-x: auto;
-    padding: var(--space-5);
+    padding: 1.35rem;
+    overflow: auto;
+    color: #d7fff7;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
   }
 
   .route-list {
     display: grid;
-    gap: var(--space-3);
+    gap: 0.75rem;
     list-style: none;
     margin: 0;
-    padding: var(--space-5);
+    padding: 0;
   }
 
   .route-list li {
-    background: var(--bg-panel-soft);
-    border: 1px solid rgba(94, 200, 255, 0.32);
-    border-radius: 10px;
     display: grid;
-    gap: var(--space-3);
-    grid-template-columns: 3rem minmax(0, 1fr);
-    padding: var(--space-4);
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 1rem;
+    border-top: 1px dashed rgba(20, 43, 66, 0.16);
+    padding-top: 1rem;
   }
 
   .route-list strong {
-    color: var(--text-main);
+    color: #111;
     font-size: 1.05rem;
   }
 
   .route-list p {
-    margin: var(--space-1) 0 0;
+    margin: 0.25rem 0 0;
   }
 
-  .category-note {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(226, 244, 255, 0.6));
-    border: 1px solid rgba(94, 200, 255, 0.42);
-    border-radius: 12px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 10px 24px rgba(31, 102, 148, 0.1);
+  .category-grid {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-4);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
   }
 
-  .future-body ul {
+  .future-card ul {
     display: grid;
-    gap: var(--space-3);
+    gap: 0.85rem;
     list-style: none;
-    margin: var(--space-5) 0 0;
+    margin: 1.25rem 0 0;
     padding: 0;
   }
 
-  .future-body li {
-    align-items: flex-start;
+  .future-card li {
     display: flex;
-    gap: var(--space-3);
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 
-  .future-body .status-light {
+  .future-card .status-light {
     margin-top: 0.55rem;
   }
 
   @media (max-width: 900px) {
-    .about-hero__body,
-    .why-grid {
+    .about-bento,
+    .signal-lines,
+    .category-grid {
       grid-template-columns: 1fr;
     }
 
-    .profile-orbit {
-      max-width: 20rem;
-      width: 100%;
-    }
-
-    .learning-grid,
-    .category-note-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .planet-blue,
+    .planet-red,
+    .orbit-line {
+      opacity: 0.22;
     }
   }
 
-  @media (max-width: 640px) {
-    .about-hero__body,
-    .route-list,
-    .why-body,
-    .future-body {
-      padding: var(--space-4);
+  @media (max-width: 560px) {
+    .about-bento {
+      width: min(100% - 2rem, 1180px);
+      gap: 1rem;
     }
 
-    .learning-grid,
-    .category-note-grid,
     .route-list li {
       grid-template-columns: 1fr;
-    }
-
-    .profile-orbit {
-      min-width: 0;
     }
   }
 </style>

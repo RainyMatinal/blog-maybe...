@@ -33,324 +33,722 @@ const {
   nextPost,
 } = Astro.props;
 
-const formatDate = (date?: Date) => {
-  if (!date) return "--";
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-};
+const formatDate = (date?: Date) =>
+  date
+    ? new Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date).toUpperCase()
+    : "UNKNOWN";
 
-const recordId = title
-  .toLowerCase()
-  .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
-  .replace(/^-|-$/g, "")
-  .slice(0, 32);
+const isoDate = pubDate.toISOString();
+const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
 ---
 
-<BaseLayout title={title} description={description} bodyClass="blog-post-page">
-  <article class="post-layout" aria-labelledby="post-title">
-    <header class="post-hero article-window">
-      <div class="article-titlebar">
-        <span class="window-dot dot-red" aria-hidden="true"></span>
-        <span class="window-dot dot-yellow" aria-hidden="true"></span>
-        <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>archive://blog/{recordId || "record"}.md</span>
-      </div>
+<BaseLayout title={title} description={description} bodyClass="article-desk">
+  <article class="mail-envelope" id="article-container" aria-labelledby="article-title">
+    <div class="enclosure-image" aria-hidden="true">
+      <div class="placeholder-image article-cover-placeholder" data-label="PLACEHOLDER COVER"></div>
+    </div>
 
-      <div class="post-hero__body">
-        <div class="post-hero__copy">
-          <p class="article-kicker">{category}</p>
-          <h1 id="post-title">{title}</h1>
-          <p class="post-description">{description}</p>
+    <div class="article-shell">
+      <aside class="toc-sidebar-wrapper" aria-label="文章目录">
+        <div class="toc-card">
+          <p class="toc-kicker">CONTENTS</p>
+          <ol class="toc-list" id="article-toc"></ol>
+        </div>
+      </aside>
+
+      <main class="letter-paper">
+        <div class="ribbon-wrapper blog-pin-ribbon">
+          <span class="category-ribbon">{category}</span>
         </div>
 
-        <dl class="post-meta" aria-label="文章元信息">
-          <div>
-            <dt>Date</dt>
-            <dd>{formatDate(pubDate)}</dd>
-          </div>
-          {updatedDate && (
-            <div>
-              <dt>Updated</dt>
-              <dd>{formatDate(updatedDate)}</dd>
+        <div class="letter-content-inner">
+          <header class="letter-header-centered">
+            <p class="letter-eyebrow">SEALED MARKDOWN DISPATCH</p>
+            <h1 class="letter-title" id="article-title">{title}</h1>
+            <p class="letter-description">{description}</p>
+
+            <div class="letter-meta">
+              <span class="meta-author">From RainyMatinal</span>
+              <span class="punched-hole" aria-hidden="true"></span>
+              <time datetime={isoDate}>{formatDate(pubDate)}</time>
+              {updateLabel && (
+                <>
+                  <span class="punched-hole" aria-hidden="true"></span>
+                  <span>UPDATED {updateLabel}</span>
+                </>
+              )}
+              {draft && (
+                <>
+                  <span class="punched-hole" aria-hidden="true"></span>
+                  <span>DRAFT</span>
+                </>
+              )}
             </div>
-          )}
-          <div>
-            <dt>Category</dt>
-            <dd>{category}</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd>{draft ? "draft" : "published"}</dd>
-          </div>
-        </dl>
 
-        {tags.length > 0 && (
-          <ul class="tag-list post-tags" aria-label="文章标签">
-            {tags.map((tag) => (
-              <li><span class="tag">#{tag}</span></li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </header>
+            {tags.length > 0 && (
+              <ul class="article-tags" aria-label="文章标签">
+                {tags.map((tag) => (
+                  <li><a href={`/tags/${encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"))}/`}>#{tag}</a></li>
+                ))}
+              </ul>
+            )}
 
-    <div class="post-grid">
-      <main class="post-content-window article-window" aria-label="文章正文">
-        <div class="article-titlebar content-titlebar">
-          <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>markdown-renderer.exe - reading mode</span>
-        </div>
-        <div class="post-content prose">
-          <slot />
+            <div class="letter-divider" aria-hidden="true"></div>
+          </header>
+
+          <div class="prose article-prose">
+            <slot />
+          </div>
+
+          <footer class="letter-signature-area" aria-label="RainyMatinal 文章签名">
+            <svg class="rainy-signature article-signature" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label="RainyMatinal">
+              <text x="50%" y="92" text-anchor="middle" font-family="Niconne, Brush Script MT, cursive" font-size="78">RainyMatinal</text>
+              <path pathLength="1" class="sig-underline" d="M104 128 C 240 168, 470 154, 622 120" />
+            </svg>
+            <p>Archived by RainyMatinal. Keep the signal readable.</p>
+          </footer>
         </div>
       </main>
 
-      <aside class="post-side" aria-label="文章档案信息">
-        <section class="side-window window-card">
-          <div class="window-titlebar">
-            <span class="window-dot dot-green" aria-hidden="true"></span>
-            <span>record-meta.ini</span>
-          </div>
-          <div class="side-window__body">
-            <p class="side-label">Archive Node</p>
-            <strong>personal-log/blog</strong>
-            <p class="side-label">Protocol</p>
-            <strong>Markdown / Astro</strong>
-            <p class="side-label">Read Mode</p>
-            <strong>CN prose comfort</strong>
-          </div>
-        </section>
-      </aside>
+      <div class="article-out-meta">
+        <div>
+          <span>TRANSMISSION</span>
+          <strong>{category}</strong>
+        </div>
+        <div>
+          <span>FORMAT</span>
+          <strong>Markdown / Astro</strong>
+        </div>
+        <div>
+          <span>STATUS</span>
+          <strong>{draft ? "Draft" : "Public"}</strong>
+        </div>
+      </div>
+
+      {(previousPost || nextPost) && (
+        <nav class="article-nav" aria-label="上一篇和下一篇">
+          {previousPost ? (
+            <a class="nav-entry prev-entry" href={previousPost.href} data-search-title={previousPost.title} data-search-desc={previousPost.description}>
+              <span>{previousPost.label}</span>
+              <strong>{previousPost.title}</strong>
+              <small>{previousPost.description}</small>
+            </a>
+          ) : (
+            <span class="nav-entry is-empty">已经是最早的一封来信</span>
+          )}
+
+          {nextPost ? (
+            <a class="nav-entry next-entry" href={nextPost.href} data-search-title={nextPost.title} data-search-desc={nextPost.description}>
+              <span>{nextPost.label}</span>
+              <strong>{nextPost.title}</strong>
+              <small>{nextPost.description}</small>
+            </a>
+          ) : (
+            <span class="nav-entry is-empty next-entry">已经是最新的一封来信</span>
+          )}
+        </nav>
+      )}
     </div>
 
-    {(previousPost || nextPost) && (
-      <nav class="post-nav" aria-label="上一篇和下一篇文章">
-        {previousPost ? (
-          <a class="post-nav__item previous" href={previousPost.href}>
-            <span class="post-nav__label">上一篇</span>
-            <strong>{previousPost.title}</strong>
-            <span>{previousPost.description}</span>
-          </a>
-        ) : (
-          <span class="post-nav__item is-empty">已经是最早的记录</span>
-        )}
+    <button class="mobile-toc-button" type="button" id="mobile-toc-button" aria-label="打开文章目录">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-        {nextPost ? (
-          <a class="post-nav__item next" href={nextPost.href}>
-            <span class="post-nav__label">下一篇</span>
-            <strong>{nextPost.title}</strong>
-            <span>{nextPost.description}</span>
-          </a>
-        ) : (
-          <span class="post-nav__item is-empty">已经是最新的记录</span>
-        )}
-      </nav>
-    )}
+    <div class="mobile-toc-drawer" id="mobile-toc-drawer" aria-hidden="true">
+      <div class="mobile-toc-panel">
+        <button class="mobile-toc-close" type="button" id="mobile-toc-close" aria-label="关闭目录">×</button>
+        <p class="toc-kicker">CONTENTS</p>
+        <ol class="toc-list" id="mobile-article-toc"></ol>
+      </div>
+    </div>
+
+    <button class="back-to-top-btn" type="button" id="back-to-top" aria-label="回到顶部">
+      <svg class="progress-ring" viewBox="0 0 48 48" aria-hidden="true">
+        <circle class="progress-ring-bg" cx="24" cy="24" r="20"></circle>
+        <circle class="progress-ring-fill" cx="24" cy="24" r="20"></circle>
+      </svg>
+      <span>↑</span>
+    </button>
   </article>
 </BaseLayout>
 
+<script>
+  document.addEventListener("astro:page-load", initArticleDesk);
+  initArticleDesk();
+
+  function initArticleDesk() {
+    const article = document.getElementById("article-container");
+    if (!article || article.dataset.ready === "true") return;
+    article.dataset.ready = "true";
+
+    const headings = Array.from(article.querySelectorAll(".article-prose h2, .article-prose h3"));
+    const tocTargets = [document.getElementById("article-toc"), document.getElementById("mobile-article-toc")].filter(Boolean);
+    const slugify = (text, index) =>
+      String(text || `section-${index + 1}`)
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]+/g, "-")
+        .replace(/^-|-$/g, "") || `section-${index + 1}`;
+
+    headings.forEach((heading, index) => {
+      if (!heading.id) heading.id = slugify(heading.textContent, index);
+    });
+
+    const tocMarkup = headings.length
+      ? headings.map((heading) => `<li class="${heading.tagName.toLowerCase()}"><a href="#${heading.id}">${heading.textContent}</a></li>`).join("")
+      : `<li><span>这封来信没有二级目录</span></li>`;
+    tocTargets.forEach((toc) => { toc.innerHTML = tocMarkup; });
+
+    const tocLinks = Array.from(article.querySelectorAll(".toc-list a"));
+    if (headings.length && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        tocLinks.forEach((link) => link.classList.toggle("is-active", link.getAttribute("href") === `#${visible.target.id}`));
+      }, { rootMargin: "-15% 0px -68% 0px", threshold: [0, 0.3, 0.7] });
+      headings.forEach((heading) => observer.observe(heading));
+    }
+
+    const tocButton = document.getElementById("mobile-toc-button");
+    const tocDrawer = document.getElementById("mobile-toc-drawer");
+    const tocClose = document.getElementById("mobile-toc-close");
+    const openToc = () => {
+      tocDrawer?.classList.add("is-open");
+      tocDrawer?.setAttribute("aria-hidden", "false");
+      document.body.classList.add("toc-locked");
+    };
+    const closeToc = () => {
+      tocDrawer?.classList.remove("is-open");
+      tocDrawer?.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("toc-locked");
+    };
+    tocButton?.addEventListener("click", openToc);
+    tocClose?.addEventListener("click", closeToc);
+    tocDrawer?.addEventListener("click", (event) => {
+      if (event.target === tocDrawer) closeToc();
+    });
+    tocDrawer?.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeToc));
+
+    const topButton = document.getElementById("back-to-top");
+    const progress = topButton?.querySelector(".progress-ring-fill");
+    const circumference = 2 * Math.PI * 20;
+    if (progress) {
+      progress.style.strokeDasharray = `${circumference}`;
+      progress.style.strokeDashoffset = `${circumference}`;
+    }
+    const updateProgress = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+      topButton?.classList.toggle("is-visible", window.scrollY > 360);
+      if (progress) progress.style.strokeDashoffset = `${circumference - ratio * circumference}`;
+    };
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+    topButton?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  }
+</script>
+
 <style>
-  .post-layout {
-    display: grid;
-    gap: var(--space-6);
+  .mail-envelope {
+    position: relative;
+    min-height: 100vh;
+    padding-bottom: 6rem;
   }
 
-  .post-hero,
-  .post-content-window,
-  .side-window {
+  .enclosure-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    min-height: 300px;
     overflow: hidden;
-    padding: 0;
+    background: var(--theme-envelope);
   }
 
-  .post-hero__body {
-    background:
-      radial-gradient(circle at 78% 18%, rgba(111, 255, 233, 0.26), transparent 14rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(232, 247, 255, 0.5));
-    overflow: hidden;
-    padding: clamp(1.5rem, 4vw, 3rem);
+  .article-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    border-radius: 0;
   }
 
-  .post-hero__copy {
-    max-width: 48rem;
-  }
-
-  .post-hero h1 {
-    font-size: clamp(2.05rem, 5vw, 3.25rem);
-    line-height: 1.12;
-    margin-bottom: var(--space-4);
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    text-wrap: balance;
-    word-break: break-word;
-  }
-
-  .post-description {
-    color: var(--text-muted);
-    font-size: clamp(1.02rem, 2vw, 1.18rem);
-    line-height: 1.9;
-    margin: 0;
-    max-width: 46rem;
-  }
-
-  .post-meta {
+  .article-shell {
+    position: relative;
     display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin: var(--space-6) 0 0;
+    grid-template-columns: minmax(0, 960px);
+    justify-content: center;
+    gap: 3rem;
+    width: min(100%, 1180px);
+    margin: -6rem auto 0;
+    padding: 0 4vw;
   }
 
-  .post-meta div {
-    background: var(--bg-panel-soft);
-    border: 1px solid rgba(94, 200, 255, 0.34);
-    border-radius: var(--radius-control);
-    box-shadow: var(--shadow-inset);
-    min-width: 0;
-    padding: var(--space-3);
+  .letter-paper {
+    position: relative;
+    z-index: 3;
+    background: #fff;
+    border: 1px solid #e5e1d8;
+    box-shadow: 0 28px 64px rgba(20, 43, 66, 0.18);
+    transform-origin: top center;
+    animation: paperUnfold 0.9s cubic-bezier(0.18, 0.8, 0.2, 1) both;
   }
 
-  .post-meta dt,
-  .side-label,
-  .post-nav__label {
-    color: var(--text-soft);
-    font-family: Tahoma, var(--font-mono);
+  .letter-paper::before {
+    content: "";
+    position: absolute;
+    inset: 18px;
+    z-index: -1;
+    border: 1px dashed rgba(20, 43, 66, 0.12);
+    pointer-events: none;
+  }
+
+  .blog-pin-ribbon {
+    position: absolute;
+    top: 2.2rem;
+    left: -0.75rem;
+    z-index: 6;
+    filter: drop-shadow(3px 5px 6px rgba(20, 43, 66, 0.18));
+  }
+
+  .category-ribbon {
+    display: block;
+    min-width: 5.4rem;
+    background: var(--theme-blue);
+    clip-path: polygon(0 0, 100% 0, 86% 50%, 100% 100%, 0 100%);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    padding: 0.42rem 1.2rem 0.42rem 0.8rem;
+    text-align: center;
+  }
+
+  .letter-content-inner {
+    padding: clamp(2rem, 6vw, 5rem) clamp(1.5rem, 7vw, 6.5rem) clamp(2rem, 6vw, 4rem);
+  }
+
+  .letter-header-centered {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .letter-eyebrow,
+  .toc-kicker {
+    color: var(--theme-stamp-red);
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    margin: 0 0 1.3rem;
+  }
+
+  .letter-title {
+    max-width: 760px;
+    color: #111;
+    font-family: var(--font-serif);
+    font-size: clamp(2.25rem, 6vw, 4.6rem);
+    font-weight: 900;
     letter-spacing: 0;
+    line-height: 1.16;
     margin: 0;
+    text-wrap: balance;
+  }
+
+  .letter-description {
+    max-width: 680px;
+    color: #666;
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.9;
+    margin: 1.25rem 0 0;
+  }
+
+  .letter-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem 1rem;
+    margin-top: 1.8rem;
+    color: #777;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
-  .post-meta dd {
-    color: var(--text-main);
-    font-family: var(--font-mono);
-    font-size: 0.86rem;
-    margin: var(--space-1) 0 0;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    text-wrap: balance;
-    word-break: break-word;
+  .punched-hole {
+    width: 0.52rem;
+    height: 0.52rem;
+    border-radius: 50%;
+    background: var(--bg-color);
+    box-shadow: inset 0 1px 4px rgba(20, 43, 66, 0.25);
   }
 
-  .post-tags {
-    margin-top: var(--space-5);
-  }
-
-  .post-grid {
-    align-items: start;
-    display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(0, var(--article-width)) minmax(12rem, 16rem);
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 0.7rem;
+    list-style: none;
+    margin: 1.6rem 0 0;
+    padding: 0;
   }
 
-  .post-content {
-    background: var(--bg-window-strong);
-    min-width: 0;
-    padding: clamp(1.25rem, 3vw, 2.25rem);
-  }
-
-  .content-titlebar {
-    border-bottom-color: rgba(94, 200, 255, 0.24);
-  }
-
-  .post-side {
-    display: grid;
-    gap: var(--space-4);
-    position: sticky;
-    top: var(--space-5);
-  }
-
-  .side-window__body {
-    display: grid;
-    gap: var(--space-3);
-    padding: var(--space-4);
-  }
-
-  .side-window strong {
-    color: var(--text-main);
-    font-family: var(--font-mono);
-    font-size: 0.86rem;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    text-wrap: balance;
-    word-break: break-word;
-  }
-
-  .post-nav {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .post-nav__item {
-    background: var(--bg-window);
-    border: 1px solid var(--border-window);
-    border-radius: var(--radius-window);
-    box-shadow: var(--shadow-glass), var(--shadow-inset);
-    color: var(--text-main);
-    display: grid;
-    gap: var(--space-2);
-    min-height: 8.5rem;
-    padding: var(--space-4);
+  .article-tags a {
+    display: inline-flex;
+    border: 1px dashed #c9c5bb;
+    border-radius: 2px;
+    color: #777;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 0.25rem 0.7rem;
     text-decoration: none;
+    transition: border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
   }
 
-  .post-nav__item:hover {
-    border-color: rgba(111, 255, 233, 0.74);
-    box-shadow: var(--shadow-hover), var(--shadow-inset);
+  .article-tags a:hover {
+    border-color: var(--theme-blue);
+    color: var(--theme-blue);
     transform: translateY(-2px);
   }
 
-  .post-nav__item strong {
-    font-family: var(--font-title);
-    font-size: 1.12rem;
-    max-width: 100%;
-    overflow-wrap: anywhere;
+  .letter-divider {
+    width: min(240px, 42vw);
+    height: 3px;
+    margin: 2.4rem 0 3rem;
+    background-image: linear-gradient(to right, #c9c5bb 40%, transparent 40%);
+    background-size: 14px 3px;
+  }
+
+  .article-prose {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .letter-signature-area {
+    display: grid;
+    justify-items: center;
+    margin: 4rem auto 0;
+    max-width: 500px;
+    color: #888;
+    font-size: 0.86rem;
+    text-align: center;
+  }
+
+  .article-signature {
+    height: 120px;
+    max-width: 500px;
+  }
+
+  .toc-sidebar-wrapper {
+    position: absolute;
+    top: 3rem;
+    right: calc(100% + 2rem);
+    width: 220px;
+    z-index: 2;
+  }
+
+  .toc-card {
+    position: sticky;
+    top: 7rem;
+    background: rgba(250, 250, 250, 0.82);
+    border: 1px solid var(--theme-line);
+    box-shadow: 0 16px 42px rgba(20, 43, 66, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+  }
+
+  .toc-list {
+    display: grid;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-list li {
+    min-width: 0;
+  }
+
+  .toc-list li.h3 {
+    padding-left: 1rem;
+  }
+
+  .toc-list a,
+  .toc-list span {
+    display: block;
+    overflow: hidden;
+    color: #777;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.55;
+    padding: 0.35rem 0;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.25s ease, transform 0.25s ease;
+  }
+
+  .toc-list a:hover,
+  .toc-list a.is-active {
+    color: var(--theme-blue);
+    transform: translateX(4px);
+  }
+
+  .article-out-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .article-out-meta div,
+  .nav-entry {
+    background: #fff;
+    border: 1px solid var(--theme-line);
+    box-shadow: 0 12px 28px rgba(20, 43, 66, 0.08);
+    padding: 1rem;
+  }
+
+  .article-out-meta span,
+  .nav-entry span {
+    display: block;
+    color: #999;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+  }
+
+  .article-out-meta strong {
+    color: #222;
+    font-size: 0.9rem;
+  }
+
+  .article-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .nav-entry {
+    min-height: 9rem;
+    color: #111;
+    text-decoration: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .nav-entry:hover {
+    border-color: var(--theme-blue);
+    box-shadow: 0 20px 40px rgba(20, 43, 66, 0.14);
+    transform: translateY(-4px);
+  }
+
+  .nav-entry strong {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.35;
     text-wrap: balance;
-    word-break: break-word;
   }
 
-  .post-nav__item span:last-child {
-    color: var(--text-muted);
+  .nav-entry small {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #666;
+    font-size: 0.88rem;
     line-height: 1.7;
+    margin-top: 0.75rem;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
-  .post-nav__item.next {
+  .next-entry {
     text-align: right;
   }
 
-  .post-nav__item.is-empty {
+  .is-empty {
+    display: grid;
     align-content: center;
-    color: var(--text-soft);
+    color: #888;
     font-family: var(--font-mono);
+    font-size: 0.86rem;
   }
 
-  @media (max-width: 900px) {
-    .post-grid,
-    .post-nav {
+  .mobile-toc-button {
+    position: fixed;
+    right: 1rem;
+    bottom: 5.2rem;
+    z-index: 80;
+    display: none;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border: 1px solid var(--theme-line);
+    background: rgba(250, 250, 250, 0.9);
+    box-shadow: 0 14px 30px rgba(20, 43, 66, 0.12);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+  }
+
+  .mobile-toc-button span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    margin: 3px auto;
+    background: var(--theme-ink);
+  }
+
+  .mobile-toc-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    align-items: end;
+    background: rgba(20, 43, 66, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .mobile-toc-drawer.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-toc-panel {
+    max-height: 70vh;
+    overflow: auto;
+    background: #fff;
+    border-top: 1px solid var(--theme-line);
+    box-shadow: 0 -18px 50px rgba(20, 43, 66, 0.18);
+    padding: 1.2rem;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-toc-drawer.is-open .mobile-toc-panel {
+    transform: translateY(0);
+  }
+
+  .mobile-toc-close {
+    float: right;
+    border: 1px solid var(--theme-line);
+    background: #fff;
+    color: #111;
+    font-size: 1.4rem;
+    line-height: 1;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+  }
+
+  .back-to-top-btn {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 80;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--theme-blue);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .back-to-top-btn.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .progress-ring {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+  }
+
+  .progress-ring-bg,
+  .progress-ring-fill {
+    fill: rgba(250, 250, 250, 0.82);
+    stroke-width: 3;
+  }
+
+  .progress-ring-bg {
+    stroke: var(--theme-line);
+  }
+
+  .progress-ring-fill {
+    fill: none;
+    stroke: var(--theme-blue);
+    stroke-linecap: round;
+  }
+
+  .back-to-top-btn > span {
+    position: relative;
+    z-index: 1;
+    font-size: 1.2rem;
+    font-weight: 900;
+  }
+
+  body.toc-locked {
+    overflow: hidden;
+  }
+
+  @media (max-width: 1280px) {
+    .toc-sidebar-wrapper {
+      display: none;
+    }
+
+    .mobile-toc-button {
+      display: grid;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .enclosure-image {
+      aspect-ratio: 4 / 3;
+      min-height: 260px;
+    }
+
+    .article-shell {
+      margin-top: -3rem;
+      padding: 0 1rem;
+      gap: 2rem;
+    }
+
+    .letter-content-inner {
+      padding: 3rem 1.2rem 2.2rem;
+    }
+
+    .blog-pin-ribbon {
+      top: 1.2rem;
+      left: -0.45rem;
+    }
+
+    .article-out-meta,
+    .article-nav {
       grid-template-columns: 1fr;
     }
 
-    .post-side {
-      position: static;
-    }
-
-    .post-nav__item.next {
+    .next-entry {
       text-align: left;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .post-meta {
-      grid-template-columns: 1fr;
-    }
-
-    .post-hero__body,
-    .post-content {
-      padding: var(--space-4);
     }
   }
 </style>

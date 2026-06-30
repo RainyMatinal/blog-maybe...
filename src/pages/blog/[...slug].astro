@@ -1,11 +1,20 @@
 ---
 import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import BlogPostLayout from "../../layouts/BlogPostLayout.astro";
+
+type BlogEntry = CollectionEntry<"blog">;
 
 export async function getStaticPaths() {
   const slugFromId = (id: string) => id.replace(/\.mdx?$/, "");
-  const postHref = (id: string) => `/blog/${slugFromId(id)}`;
-  const toNavPost = (post, label: string) =>
+  const postHref = (id: string) => `/blog/${slugFromId(id)}/`;
+
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort((a, b) => {
+    const dateDiff = b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+    return dateDiff || slugFromId(a.id).localeCompare(slugFromId(b.id));
+  });
+
+  const toNavPost = (post: BlogEntry | undefined, label: string) =>
     post
       ? {
           title: post.data.title,
@@ -15,17 +24,12 @@ export async function getStaticPaths() {
         }
       : undefined;
 
-  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort((a, b) => {
-    const dateDiff = b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
-    return dateDiff || slugFromId(a.id).localeCompare(slugFromId(b.id));
-  });
-
   return posts.map((post, index) => ({
     params: { slug: slugFromId(post.id) },
     props: {
       post,
-      previousPost: toNavPost(posts[index + 1], "上一篇"),
-      nextPost: toNavPost(posts[index - 1], "下一篇"),
+      previousPost: toNavPost(posts[index + 1], "上一篇来信"),
+      nextPost: toNavPost(posts[index - 1], "下一篇来信"),
     },
   }));
 }

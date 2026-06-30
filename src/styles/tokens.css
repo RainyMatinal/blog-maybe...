@@ -1,64 +1,70 @@
 :root {
-  --color-aero-blue: #5ec8ff;
-  --color-aero-cyan: #6fffe9;
-  --color-glass-green: #9fffd8;
-  --color-system-blue: #2f80ed;
-  --color-archive-navy: #10243e;
+  --black: 15, 18, 25;
+  --gray: 96, 115, 159;
+  --gray-light: 229, 233, 240;
+  --gray-dark: 34, 41, 57;
+  --theme-ink: #142b42;
+  --bg-color: #f2efe9;
+  --theme-white: #fafafa;
+  --theme-red: #d9383a;
+  --theme-blue: #1e3a8a;
+  --theme-mintcyan: #3ba69e;
+  --theme-persimmonorange: #ff6f61;
+  --theme-envelope: #efebe0;
+  --theme-stamp-red: #b23a3a;
+  --theme-line: #dcdad4;
+  --theme-line-light: #ebe9e4;
 
-  --color-xp-grass: #7ed957;
-  --color-vista-silver: #d7e3ec;
-  --color-old-link: #2454ff;
-  --color-warning-amber: #ffcc66;
-  --color-error-red: #ff6b6b;
-  --color-deep-teal: #14506b;
+  --font-base: "Lexend", "Noto Sans SC", "SF Pro SC", "PingFang SC", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, "Source Han Sans CN", "Noto Sans JP", sans-serif;
+  --font-serif: "Noto Serif", "Noto Serif SC", "Source Han Serif SC", "Palatino Linotype", "Book Antiqua", "Palatino", "Georgia", "Hoefler Text", "Songti SC", "STSong", "SimSun", serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, "Courier New", Courier, monospace;
+  --font-script: "Niconne", "Brush Script MT", cursive;
 
-  --cat-arch: #5ec8ff;
-  --cat-git: #6fffe9;
-  --cat-code: #9fffd8;
-  --cat-network: #2f80ed;
-  --cat-exam: #ffcc66;
-  --cat-aero: #7ed957;
+  --content-width: 1440px;
+  --article-width: 960px;
+  --card-theme-color: var(--theme-ink);
 
-  --bg-page: #eaf8ff;
-  --bg-page-deep: #d7f1ff;
-  --bg-glass: rgba(255, 255, 255, 0.58);
-  --bg-glass-strong: rgba(255, 255, 255, 0.78);
-  --bg-terminal: #0b1726;
-  --bg-code: #101d2e;
-  --bg-window: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(232, 247, 255, 0.6));
-  --bg-window-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(226, 244, 255, 0.66));
-  --bg-titlebar: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(215, 227, 236, 0.7) 52%, rgba(174, 224, 247, 0.5));
-  --bg-control: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(194, 235, 255, 0.66));
-  --bg-control-hover: linear-gradient(180deg, #ffffff, rgba(111, 255, 233, 0.32));
-  --bg-panel-soft: rgba(255, 255, 255, 0.64);
-
-  --text-main: #102033;
-  --text-muted: #5d7188;
-  --text-soft: #7d90a3;
-  --text-invert: #f5fbff;
-
-  --border-glass: rgba(255, 255, 255, 0.75);
-  --border-blue: rgba(94, 200, 255, 0.65);
-  --border-soft: rgba(47, 128, 237, 0.18);
-  --border-window: rgba(94, 200, 255, 0.58);
-  --border-control: rgba(94, 200, 255, 0.52);
-
-  --shadow-glass: 0 12px 32px rgba(31, 102, 148, 0.18);
-  --shadow-window: 0 18px 40px rgba(16, 36, 62, 0.22);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.86);
-  --shadow-hover: 0 18px 42px rgba(31, 102, 148, 0.24);
-
-  --font-sans: "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-title: "LXGW WenKai", "Noto Serif SC", "Source Han Serif SC", serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", "Cascadia Code", monospace;
-  --font-ui: Tahoma, "Microsoft YaHei", var(--font-mono);
-
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
+  /* Compatibility aliases for old component code that may still exist. */
+  --paper: var(--bg-color);
+  --paper-soft: var(--theme-white);
+  --paper-deep: var(--theme-envelope);
+  --ink: var(--theme-ink);
+  --stamp-red: var(--theme-stamp-red);
+  --stamp-blue: var(--theme-blue);
+  --stamp-green: var(--theme-mintcyan);
+  --stamp-gold: #e67e22;
+  --night: var(--theme-ink);
+  --terminal: #101820;
+  --color-aero-blue: var(--theme-blue);
+  --color-aero-cyan: var(--theme-mintcyan);
+  --color-glass-green: var(--theme-mintcyan);
+  --color-system-blue: var(--theme-blue);
+  --color-warning-amber: #e67e22;
+  --color-error-red: var(--theme-red);
+  --color-deep-teal: var(--theme-ink);
+  --text-main: #111;
+  --text-muted: #666;
+  --text-soft: #888;
+  --text-invert: #fafafa;
+  --bg-page: var(--bg-color);
+  --bg-window: #fafafa;
+  --bg-window-strong: #fafafa;
+  --bg-titlebar: #fafafa;
+  --bg-control: transparent;
+  --bg-control-hover: #00000005;
+  --border-window: var(--theme-line-light);
+  --border-control: var(--theme-line);
+  --shadow-glass: 0 15px 35px rgba(20, 43, 66, 0.12);
+  --shadow-paper: 0 15px 35px rgba(20, 43, 66, 0.12);
+  --shadow-window: 0 24px 48px rgba(124, 127, 147, 0.16);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-hover: 0 24px 48px rgba(20, 43, 66, 0.22);
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
   --radius-pill: 999px;
-  --radius-window: 14px;
-  --radius-control: 8px;
+  --radius-window: 4px;
+  --radius-ticket: 4px;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -68,7 +74,5 @@
   --space-6: 2rem;
   --space-7: 3rem;
   --space-8: 4rem;
-
-  --content-width: 1120px;
-  --article-width: 780px;
+  --space-9: 6rem;
 }

@@ -6,12 +6,12 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
-const tagSlug = (tag: string) =>
-  encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"));
+const tagSlug = (tag: string) => encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"));
 
-const tagMap = posts.reduce((map, post) => {
+const tagMap = new Map<string, { tag: string; count: number; categories: Set<string>; latest: (typeof posts)[number] }>();
+for (const post of posts) {
   for (const tag of post.data.tags) {
-    const current = map.get(tag) ?? {
+    const current = tagMap.get(tag) ?? {
       tag,
       count: 0,
       categories: new Set<string>(),
@@ -19,143 +19,178 @@ const tagMap = posts.reduce((map, post) => {
     };
     current.count += 1;
     current.categories.add(post.data.category);
-    if (post.data.pubDate > current.latest.data.pubDate) {
-      current.latest = post;
-    }
-    map.set(tag, current);
+    if (post.data.pubDate > current.latest.data.pubDate) current.latest = post;
+    tagMap.set(tag, current);
   }
-  return map;
-}, new Map<string, { tag: string; count: number; categories: Set<string>; latest: (typeof posts)[number] }>());
+}
 
-const tags = Array.from(tagMap.values()).sort(
-  (a, b) => b.count - a.count || a.tag.localeCompare(b.tag),
-);
+const tags = Array.from(tagMap.values()).sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 ---
 
-<BaseLayout
-  title="Tags"
-  description="RainyMatinal Network Archive 的标签索引页，用旧互联网资料库方式浏览主题。"
->
-  <section class="tags-page" aria-labelledby="tags-title">
-    <header class="tags-hero window-card">
-      <div class="window-titlebar">
-        <span class="window-dot dot-red" aria-hidden="true"></span>
-        <span class="window-dot dot-yellow" aria-hidden="true"></span>
-        <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>index.exe - C:\archive\tags</span>
-      </div>
+<BaseLayout title="标签索引" description="以旧互联网索引页的方式浏览 RainyMatinal 孤星邮局的主题标签。">
+  <section class="page-title-section tags-title-section">
+    <div class="title-overlap-wrapper">
+      <span class="huge-bg-en">FREQ</span>
+      <h1 class="solid-fg-cn">标签</h1>
+    </div>
+    <div class="title-divider"></div>
+  </section>
 
-      <div class="tags-hero__body">
-        <p class="section-kicker">Old Web Subject Index</p>
-        <h1 id="tags-title">标签索引</h1>
-        <p>
-          这里像早期个人主页的链接目录，把 Arch、Git、网络工程和前端学习的主题词集中成一个可浏览的资料库。
-        </p>
-      </div>
-    </header>
-
-    <div class="tag-index-window window-card">
+  <main class="tag-index-page" aria-labelledby="tag-index-title">
+    <section class="tag-ledger-window">
       <div class="window-titlebar">
         <span class="window-dot dot-green" aria-hidden="true"></span>
         <span>subject-index.dat / {tags.length} tags</span>
       </div>
 
+      <div class="tag-ledger-intro">
+        <h2 id="tag-index-title">主题频段目录</h2>
+        <p>每个标签都是一段频率：Linux、Git、网络工程、前端和长期学习路线，会在这里交叉成一张可回溯的主题地图。</p>
+      </div>
+
       <div class="tag-grid">
-        {tags.map(({ tag, count, categories, latest }) => (
-          <a class="tag-card" href={`/tags/${tagSlug(tag)}/`}>
+        {tags.map(({ tag, count, categories, latest }, index) => (
+          <a
+            class="tag-card"
+            href={`/tags/${tagSlug(tag)}/`}
+            style={`--tag-rotate: ${index % 2 === 0 ? "-0.4deg" : "0.4deg"}`}
+            data-search-title={`#${tag}`}
+            data-search-desc={latest.data.title}
+          >
+            <span class="tag-card__serial">FREQ-{String(index + 1).padStart(2, "0")}</span>
             <span class="tag-card__name">#{tag}</span>
             <span class="tag-card__count">{count} records</span>
-            <span class="tag-card__meta">
-              {Array.from(categories).join(" / ")}
-            </span>
+            <span class="tag-card__meta">{Array.from(categories).join(" / ")}</span>
             <span class="tag-card__latest">latest: {latest.data.title}</span>
           </a>
         ))}
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 </BaseLayout>
 
 <style>
-  .tags-page {
-    display: grid;
-    gap: var(--space-7);
+  .tags-title-section {
+    padding-bottom: 2rem;
   }
 
-  .tags-hero,
-  .tag-index-window {
+  .tag-index-page {
+    width: min(1180px, calc(100% - 8vw));
+    margin: 0 auto 6rem;
+  }
+
+  .tag-ledger-window {
     overflow: hidden;
+    background: rgba(250, 250, 250, 0.84);
+    border: 1px solid var(--theme-line);
+    box-shadow: 0 20px 50px rgba(20, 43, 66, 0.12);
   }
 
-  .tags-hero__body {
-    background:
-      radial-gradient(circle at 78% 22%, rgba(111, 255, 233, 0.28), transparent 14rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(232, 247, 255, 0.54));
-    padding: clamp(1.5rem, 4vw, 3rem);
+  .tag-ledger-intro {
+    padding: clamp(1.25rem, 3vw, 2rem) clamp(1.25rem, 4vw, 3rem);
+    border-bottom: 1px dashed var(--theme-line);
   }
 
-  .tags-hero h1 {
-    font-size: clamp(2.2rem, 6vw, 4rem);
-    margin-bottom: var(--space-3);
+  .tag-ledger-intro h2 {
+    color: #111;
+    font-family: var(--font-serif);
+    font-size: clamp(1.7rem, 4vw, 3rem);
+    margin: 0 0 0.8rem;
   }
 
-  .tags-hero p {
-    color: var(--text-muted);
-    font-size: 1.08rem;
+  .tag-ledger-intro p {
+    max-width: 760px;
+    color: #666;
     line-height: 1.9;
     margin: 0;
-    max-width: 48rem;
   }
 
   .tag-grid {
     display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-    padding: var(--space-5);
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem;
+    padding: clamp(1rem, 3vw, 2rem);
   }
 
   .tag-card {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(226, 244, 255, 0.62));
-    border: 1px solid rgba(94, 200, 255, 0.46);
-    border-radius: 12px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 10px 24px rgba(31, 102, 148, 0.12);
-    color: var(--text-main);
+    position: relative;
     display: grid;
-    gap: var(--space-2);
-    min-height: 10rem;
-    padding: var(--space-4);
+    gap: 0.55rem;
+    min-height: 12rem;
+    padding: 1rem;
+    background:
+      linear-gradient(135deg, rgba(178, 58, 58, 0.07), transparent 38%),
+      #fff;
+    border: 1px solid #e5e1d8;
+    color: #111;
     text-decoration: none;
+    transform: rotate(var(--tag-rotate));
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
+  .tag-card::before,
+  .tag-card::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg-color);
+    transform: translateY(-50%);
+  }
+
+  .tag-card::before { left: -7px; }
+  .tag-card::after { right: -7px; }
+
   .tag-card:hover {
-    border-color: rgba(111, 255, 233, 0.78);
-    transform: translateY(-2px);
+    border-color: var(--theme-blue);
+    box-shadow: 0 18px 38px rgba(20, 43, 66, 0.14);
+    transform: translateY(-4px) rotate(0deg);
+  }
+
+  .tag-card__serial,
+  .tag-card__count,
+  .tag-card__latest {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tag-card__serial {
+    color: #999;
   }
 
   .tag-card__name {
-    color: var(--color-deep-teal);
-    font-family: var(--font-mono);
-    font-size: 1.05rem;
-    font-weight: 800;
+    color: var(--theme-stamp-red);
+    font-family: var(--font-serif);
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1.2;
     overflow-wrap: anywhere;
   }
 
   .tag-card__count {
-    color: var(--color-system-blue);
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
+    color: var(--theme-blue);
   }
 
-  .tag-card__meta,
-  .tag-card__latest {
-    color: var(--text-muted);
+  .tag-card__meta {
+    color: #666;
     line-height: 1.65;
     overflow-wrap: anywhere;
   }
 
   .tag-card__latest {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
+    align-self: end;
+    color: #999;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 560px) {
+    .tag-index-page {
+      width: min(100% - 2rem, 1180px);
+    }
   }
 </style>

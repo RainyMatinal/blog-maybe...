@@ -5,327 +5,334 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-
 const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
-
-const yearGroups = Array.from(
-  posts.reduce((groups, post) => {
-    const year = post.data.pubDate.getFullYear();
-    const list = groups.get(year) ?? [];
-    list.push(post);
-    groups.set(year, list);
-    return groups;
-  }, new Map<number, typeof posts>()),
-).sort(([a], [b]) => b - a);
-
-const totalTags = new Set(posts.flatMap((post) => post.data.tags)).size;
+const formatMonthDay = (date: Date) => new Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit" }).format(date).toUpperCase();
+const groups = Array.from(posts.reduce((map, post) => {
+  const year = post.data.pubDate.getFullYear();
+  const list = map.get(year) ?? [];
+  list.push(post);
+  map.set(year, list);
+  return map;
+}, new Map<number, typeof posts>())).sort(([a], [b]) => b - a);
 ---
 
-<BaseLayout
-  title="Archive"
-  description="RainyMatinal Network Archive 的年份归档页，按时间保存所有公开技术记录。"
->
-  <section class="archive-page" aria-labelledby="archive-title">
-    <header class="archive-hero window-card">
-      <div class="window-titlebar">
-        <span class="window-dot dot-red" aria-hidden="true"></span>
-        <span class="window-dot dot-yellow" aria-hidden="true"></span>
-        <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>explorer.exe - C:\archive\year-index</span>
-      </div>
+<BaseLayout title="往期" description="RainyMatinal 孤星邮局的年份归档。">
+  <section class="page-title-section">
+    <div class="title-overlap-wrapper">
+      <span class="huge-bg-en">ARCHIVE</span>
+      <h1 class="solid-fg-cn">往期</h1>
+    </div>
+    <div class="title-divider"></div>
+  </section>
 
-      <div class="archive-hero__body">
-        <div>
-          <p class="section-kicker">Personal Library / Year Index</p>
-          <h1 id="archive-title">年份归档</h1>
-          <p>
-            像旧系统里的资料柜一样，把每一篇已经发布的技术笔记按年份放回抽屉里。
-          </p>
+  <main class="page-container">
+    <div class="content-wrapper">
+      <div class="archive-timeline">
+        <div class="telegraph-line" aria-hidden="true"></div>
+        <div class="signal-start">
+          <span class="signal-dot" aria-hidden="true"></span>
+          <p class="signal-text">SIGNAL LOCKED // <span>{posts.length}</span> DISPATCHES FOUND</p>
         </div>
 
-        <dl class="archive-stats" aria-label="归档统计">
-          <div>
-            <dt>Records</dt>
-            <dd>{posts.length}</dd>
-          </div>
-          <div>
-            <dt>Years</dt>
-            <dd>{yearGroups.length}</dd>
-          </div>
-          <div>
-            <dt>Tags</dt>
-            <dd>{totalTags}</dd>
-          </div>
-        </dl>
-      </div>
-    </header>
-
-    <div class="archive-layout">
-      <aside class="archive-side window-card" aria-label="归档资料库索引">
-        <div class="window-titlebar">
-          <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>cabinet-tree.ini</span>
-        </div>
-        <div class="archive-side__body">
-          <p class="side-label">Library Root</p>
-          <strong>blog/archive</strong>
-          <p class="side-label">Sort Mode</p>
-          <strong>pubDate DESC</strong>
-          <p class="side-label">Drawers</p>
-          <ul>
-            {yearGroups.map(([year, group]) => (
-              <li>
-                <span class="status-light active" aria-hidden="true"></span>
-                {year} / {group.length} records
-              </li>
+        {groups.map(([year, group]) => (
+          <section class="year-group" aria-labelledby={`year-${year}`}>
+            <div class="year-header">
+              <h2 class="year-stamp" id={`year-${year}`}>{year}</h2>
+            </div>
+            {group.map((post) => (
+              <article class="timeline-item">
+                <span class="signal-node" aria-hidden="true"></span>
+                <div class="archive-postmark" aria-hidden="true">
+                  <div class="postmark-circle">
+                    <div class="postmark-inner">
+                      <span class="postmark-date">{formatMonthDay(post.data.pubDate)}</span>
+                      <span class="postmark-location">RM</span>
+                    </div>
+                  </div>
+                </div>
+                <a class="post-content-link" href={postHref(post.id)} data-search-title={post.data.title} data-search-desc={post.data.description}>
+                  <h3 class="post-title">{post.data.title}</h3>
+                  <p class="post-excerpt">{post.data.description}</p>
+                  <div class="post-tags">
+                    {post.data.tags.map((tag) => <span class="tag-item">#{tag}</span>)}
+                  </div>
+                </a>
+              </article>
             ))}
-          </ul>
-        </div>
-      </aside>
-
-      <div class="year-stack">
-        {yearGroups.map(([year, group]) => (
-          <section class="year-window window-card" aria-labelledby={`year-${year}`}>
-            <div class="window-titlebar">
-              <span class="window-dot dot-yellow" aria-hidden="true"></span>
-              <span>{year}.drawer / {group.length} files</span>
-            </div>
-
-            <div class="year-body">
-              <h2 id={`year-${year}`}>{year}</h2>
-              <ol class="archive-records">
-                {group.map((post, index) => (
-                  <li>
-                    <a href={postHref(post.id)}>
-                      <span class="record-index">{String(index + 1).padStart(2, "0")}</span>
-                      <time datetime={post.data.pubDate.toISOString()}>
-                        {formatDate(post.data.pubDate)}
-                      </time>
-                      <span class="record-main">
-                        <strong>{post.data.title}</strong>
-                        <span>{post.data.description}</span>
-                      </span>
-                      <span class="record-category">[{post.data.category}]</span>
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </div>
           </section>
         ))}
       </div>
     </div>
-  </section>
+  </main>
 </BaseLayout>
 
 <style>
-  .archive-page {
-    display: grid;
-    gap: var(--space-7);
+  .page-container {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    overflow-x: hidden;
+    background-color: var(--bg-color);
+    padding-top: 80px;
+    padding-bottom: 8rem;
   }
 
-  .archive-hero,
-  .archive-side,
-  .year-window {
-    overflow: hidden;
+  .content-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 6vw;
   }
 
-  .archive-hero__body {
-    align-items: end;
-    background:
-      radial-gradient(circle at 84% 22%, rgba(111, 255, 233, 0.28), transparent 14rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(232, 247, 255, 0.54));
-    display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding: clamp(1.5rem, 4vw, 3rem);
+  .archive-timeline {
+    position: relative;
+    margin-top: 4rem;
+    padding-bottom: 4rem;
   }
 
-  .archive-hero h1 {
-    font-size: clamp(2.2rem, 6vw, 4rem);
-    margin-bottom: var(--space-3);
+  .telegraph-line {
+    position: absolute;
+    top: 30px;
+    bottom: 0;
+    left: 200px;
+    z-index: 1;
+    width: 2px;
+    margin-left: -1px;
+    background-image: linear-gradient(to bottom, var(--theme-line) 50%, transparent 50%);
+    background-size: 2px 12px;
   }
 
-  .archive-hero p {
-    color: var(--text-muted);
-    font-size: 1.08rem;
-    line-height: 1.9;
-    margin: 0;
-    max-width: 42rem;
-  }
-
-  .archive-stats {
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(3, minmax(5.5rem, 1fr));
-    margin: 0;
-  }
-
-  .archive-stats div {
-    background: var(--bg-panel-soft);
-    border: 1px solid rgba(94, 200, 255, 0.34);
-    border-radius: 8px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-    padding: var(--space-3);
-  }
-
-  .archive-stats dt,
-  .side-label {
-    color: var(--text-soft);
-    font-family: Tahoma, var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .archive-stats dd {
-    color: var(--color-system-blue);
-    font-family: var(--font-mono);
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin: 0;
-  }
-
-  .archive-layout {
-    align-items: start;
-    display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(13rem, 0.28fr) minmax(0, 1fr);
-  }
-
-  .archive-side {
-    position: sticky;
-    top: var(--space-5);
-  }
-
-  .archive-side__body {
-    display: grid;
-    gap: var(--space-3);
-    padding: var(--space-4);
-  }
-
-  .archive-side strong,
-  .archive-side li {
-    font-family: var(--font-mono);
-    font-size: 0.86rem;
-  }
-
-  .archive-side ul {
-    display: grid;
-    gap: var(--space-2);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .archive-side li {
-    align-items: center;
+  .signal-start {
+    position: relative;
     display: flex;
-    gap: var(--space-2);
-  }
-
-  .year-stack {
-    display: grid;
-    gap: var(--space-5);
-  }
-
-  .year-body {
-    padding: var(--space-5);
-  }
-
-  .year-body h2 {
-    color: var(--color-system-blue);
-    font-family: var(--font-mono);
-    font-size: clamp(1.7rem, 4vw, 2.6rem);
-    margin-bottom: var(--space-5);
-  }
-
-  .archive-records {
-    display: grid;
-    gap: var(--space-3);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .archive-records li {
-    counter-increment: records;
-  }
-
-  .archive-records a {
     align-items: center;
-    background: var(--bg-panel-soft);
-    border: 1px solid rgba(94, 200, 255, 0.3);
-    border-radius: 10px;
-    color: var(--text-main);
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: 2.5rem 4.8rem minmax(0, 1fr) max-content;
-    padding: var(--space-3) var(--space-4);
+    min-height: 24px;
+    margin-bottom: 6rem;
+    padding-left: 250px;
+  }
+
+  .signal-dot {
+    position: absolute;
+    left: 200px;
+    top: 6px;
+    z-index: 2;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    border-radius: 50%;
+    background-color: var(--theme-mintcyan);
+    box-shadow: 0 0 10px var(--theme-mintcyan);
+    animation: pulse-cyan 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  }
+
+  @keyframes pulse-cyan {
+    0%, 100% { opacity: 0.8; transform: scale(1); box-shadow: 0 0 8px var(--theme-mintcyan); }
+    50% { opacity: 0.3; transform: scale(0.85); box-shadow: 0 0 2px var(--theme-mintcyan); }
+  }
+
+  .signal-text {
+    color: #666;
+    font-size: clamp(0.85rem, 4vw, 0.95rem);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .signal-text span {
+    color: var(--theme-blue);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+  }
+
+  .year-group {
+    position: relative;
+    margin-bottom: 4rem;
+  }
+
+  .year-header {
+    position: relative;
+    height: 80px;
+    margin-bottom: 3rem;
+  }
+
+  .year-stamp {
+    position: absolute;
+    left: -50px;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 6px solid var(--theme-stamp-red);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--theme-stamp-red);
+    font-size: 3.5rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    mix-blend-mode: multiply;
+    padding: 16px 36px;
+  }
+
+  .timeline-item {
+    position: relative;
+    display: block;
+    margin-bottom: 4rem;
+    padding-left: 250px;
+  }
+
+  .signal-node {
+    position: absolute;
+    left: 200px;
+    top: 14px;
+    z-index: 5;
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    border: 2px solid #b0aba1;
+    border-radius: 50%;
+    background-color: var(--bg-color);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .archive-postmark {
+    --stamp-ink: var(--theme-blue);
+    position: absolute;
+    right: -60px;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    transform: scale(1.3) rotate(-10deg);
+    transform-origin: center;
+    transition: opacity 0.4s ease;
+  }
+
+  .postmark-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    height: 76px;
+    border: 2px solid var(--stamp-ink);
+    border-radius: 50%;
+    padding: 4px;
+  }
+
+  .postmark-inner {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--stamp-ink);
+    border-radius: 50%;
+    color: var(--stamp-ink);
+  }
+
+  .postmark-date {
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .postmark-location {
+    border-top: 1px solid var(--stamp-ink);
+    font-size: 0.5rem;
+    letter-spacing: 2px;
+    padding-top: 2px;
+  }
+
+  .post-content-link {
+    position: relative;
+    z-index: 2;
+    display: block;
+    padding-right: 150px;
     text-decoration: none;
   }
 
-
-  .archive-records a:hover {
-    background: rgba(255, 255, 255, 0.82);
-    border-color: rgba(111, 255, 233, 0.7);
-    transform: translateX(3px);
+  .post-title {
+    color: #111;
+    font-family: "Noto Serif SC", var(--font-serif);
+    font-size: 2.1rem;
+    font-weight: 900;
+    line-height: 1.3;
+    margin: 0 0 0.8rem;
+    transition: color 0.3s ease;
   }
 
-  .record-index,
-  .archive-records time,
-  .record-category {
-    color: var(--text-soft);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
+  .post-excerpt {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.7;
+    margin: 0 0 1.2rem;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
-  .record-index {
-    color: var(--color-system-blue);
-    font-weight: 800;
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
-  .record-main {
-    display: grid;
-    gap: var(--space-1);
-    min-width: 0;
+  .tag-item {
+    color: #999;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
   }
 
-  .record-main strong,
-  .record-main span {
-    overflow-wrap: anywhere;
+  .timeline-item:hover .post-title,
+  .timeline-item:hover .tag-item {
+    color: var(--theme-blue);
   }
 
-  .record-main span {
-    color: var(--text-muted);
-    line-height: 1.65;
+  .timeline-item:hover .archive-postmark {
+    opacity: 1;
   }
 
-  @media (max-width: 860px) {
-    .archive-hero__body,
-    .archive-layout {
-      grid-template-columns: 1fr;
+  @keyframes pulse-orange {
+    0%, 100% { transform: scale(1.4); box-shadow: 0 0 12px var(--theme-persimmonorange); }
+    50% { transform: scale(1); box-shadow: 0 0 4px var(--theme-persimmonorange); }
+  }
+
+  .timeline-item:hover .signal-node {
+    border-color: var(--theme-persimmonorange);
+    background-color: var(--theme-persimmonorange);
+    animation: pulse-orange 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  }
+
+  @media (max-width: 900px) {
+    .content-wrapper { padding: 0 4vw; }
+    .telegraph-line { left: 30px; }
+    .signal-start { padding-left: 60px; }
+    .signal-dot { left: 30px; }
+    .year-header { height: 50px; }
+    .year-stamp {
+      left: 0;
+      display: inline-block;
+      width: auto;
+      border-width: 4px;
+      font-size: 2.5rem;
+      padding: 4px 12px;
     }
-
-    .archive-side {
-      position: static;
-    }
-
-    .archive-stats {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 640px) {
-    .archive-stats,
-    .archive-records a {
-      grid-template-columns: 1fr;
-    }
+    .timeline-item { padding-left: 60px; }
+    .signal-node { left: 30px; top: 16px; }
+    .post-content-link { padding-right: 0; }
+    .archive-postmark { right: -10px; top: -10px; opacity: 0.12; transform: scale(1.4) rotate(-15deg); }
+    .timeline-item:hover .archive-postmark { opacity: 0.25; transform: scale(1.4) rotate(-15deg); }
+    .post-title { font-size: 1.6rem; }
   }
 </style>

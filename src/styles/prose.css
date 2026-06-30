@@ -1,157 +1,171 @@
 .prose {
-  color: var(--text-main);
-  font-size: 1.04rem;
-  line-height: 1.95;
-  margin-inline: auto;
-  max-width: 72ch;
-  overflow-wrap: break-word;
+  width: 100%;
+  max-width: 100%;
+  color: #333;
 }
 
 .prose > * + * {
-  margin-top: var(--space-5);
+  margin-top: 1.2rem;
 }
 
-.prose :where(h2, h3, h4) {
-  color: var(--text-main);
-  line-height: 1.35;
-  margin-top: var(--space-7);
-  scroll-margin-top: var(--space-6);
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: #111;
+  font-family: "Noto Serif SC", var(--font-serif) !important;
+  font-weight: 900;
+  margin-top: 2.5em;
+  margin-bottom: 1em;
 }
 
-.prose h2 {
-  background: linear-gradient(90deg, rgba(94, 200, 255, 0.16), rgba(111, 255, 233, 0));
-  border-left: 4px solid var(--color-aero-blue);
-  border-radius: 8px;
-  padding: 0.25rem 0.75rem;
-}
-
-.prose h3 {
-  color: var(--color-deep-teal);
-}
-
-.prose p {
-  margin: 0;
-}
-
-.prose :where(p, li) {
-  line-height: 1.95;
+.prose p,
+.prose ul,
+.prose ol,
+.prose li {
+  color: #333;
+  font-size: 1.05rem;
+  line-height: 1.8;
 }
 
 .prose a {
-  color: var(--color-old-link);
-  text-decoration-color: rgba(94, 200, 255, 0.58);
-  text-underline-offset: 0.18em;
+  color: var(--card-theme-color, var(--theme-blue));
+  font-weight: 600;
+  text-decoration: none;
+  padding-bottom: 2px;
+  background-image: linear-gradient(var(--card-theme-color, var(--theme-blue)), var(--card-theme-color, var(--theme-blue)));
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: 0% 2px;
+  transition: background-size 1s cubic-bezier(0.2, 0.8, 0.2, 1), color 1s ease;
 }
 
 .prose a:hover {
-  color: var(--color-system-blue);
-  text-shadow: 0 0 8px rgba(94, 200, 255, 0.32);
-}
-
-.prose :where(ul, ol) {
-  padding-left: 1.35rem;
-}
-
-.prose li + li {
-  margin-top: var(--space-2);
+  background-position: left bottom;
+  background-size: 100% 2px;
 }
 
 .prose blockquote {
-  background: var(--bg-panel-soft);
-  border: 1px solid var(--border-glass);
-  border-left: 4px solid var(--color-aero-blue);
-  border-radius: var(--radius-window);
-  box-shadow: var(--shadow-inset);
-  color: var(--text-muted);
-  margin-inline: 0;
-  padding: var(--space-4) var(--space-5);
-}
-
-.prose :not(pre) > code {
-  background: rgba(111, 255, 233, 0.18);
-  border: 1px solid rgba(94, 200, 255, 0.32);
-  border-radius: var(--radius-control);
-  color: var(--color-deep-teal);
-  font-size: 0.92em;
-  padding: 0.12em 0.35em;
-}
-
-/* Fenced Markdown code blocks render as compact terminal windows. */
-.prose pre {
-  background: linear-gradient(180deg, var(--bg-code) 0%, var(--bg-terminal) 100%);
-  border: 1px solid rgba(94, 200, 255, 0.38);
-  border-radius: 14px;
-  box-shadow: var(--shadow-window), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  color: var(--text-invert);
-  line-height: 1.7;
-  margin: var(--space-6) 0;
-  overflow-x: auto;
-  padding: 3.2rem var(--space-5) var(--space-5);
   position: relative;
+  margin: 2.5rem 0;
+  padding: 1.5rem 2rem 1.5rem 3rem;
+  border-left: 4px solid var(--card-theme-color, #142b42);
+  border-radius: 0 2px 2px 0;
+  background: #f4f3f0;
+  color: #555;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  transition: border-color 0.5s ease;
 }
 
-.prose pre::before {
-  align-items: center;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(94, 200, 255, 0.08));
-  border-bottom: 1px solid rgba(94, 200, 255, 0.25);
-  color: rgba(245, 251, 255, 0.72);
-  content: "terminal - markdown block";
-  display: flex;
-  font-family: Tahoma, var(--font-mono);
-  font-size: 0.76rem;
-  inset: 0 0 auto 0;
-  min-height: 2.2rem;
-  padding-left: 4.2rem;
+.prose blockquote::before {
   position: absolute;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  top: -0.2rem;
+  left: 0.8rem;
+  color: var(--card-theme-color, #142b42);
+  content: "\201C";
+  font-family: var(--font-serif);
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.15;
+  transition: color 0.5s ease;
 }
 
-.prose pre::after {
-  background: var(--color-error-red);
-  border-radius: 4px;
-  box-shadow:
-    1.1rem 0 0 var(--color-warning-amber),
-    2.2rem 0 0 var(--color-glass-green);
-  content: "";
-  height: 0.72rem;
-  left: 1rem;
-  position: absolute;
-  top: 0.74rem;
-  width: 0.72rem;
+.prose blockquote,
+.prose blockquote * {
+  font-style: normal !important;
 }
 
-.prose pre code {
+:not(pre) > code {
+  background-color: rgba(178, 58, 58, 0.08);
+  border-radius: 3px;
+  color: var(--card-theme-color, #b23a3a);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.2em 0.4em;
+  word-break: break-word;
+}
+
+pre {
+  position: relative;
+  z-index: 1;
+  margin: 1.5rem 0;
+  padding: 1.5em;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  background: #111827;
+  color: #fafafa;
+  overflow-x: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 16px 40px rgba(124, 127, 147, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+pre:hover {
+  z-index: 2;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.03), 0 24px 48px rgba(124, 127, 147, 0.16);
+}
+
+pre code {
   color: inherit;
+}
+
+kbd {
+  background-color: #f8f7f4;
+  border: 1px solid #dcdad4;
+  border-bottom: 2px solid #c4c1b8;
+  border-radius: 4px;
+  color: #333;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85em;
+  margin: 0 0.2em;
+  padding: 2px 6px;
+}
+
+.prose img {
   display: block;
-  font-size: 0.95rem;
-  min-width: max-content;
+  width: auto;
+  max-width: 100%;
+  max-height: 60vh;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+.prose hr {
+  width: 60px;
+  margin: 4rem auto;
+  border: none;
+  border-top: 3px solid #ebe9e4;
 }
 
 .prose table {
-  border-collapse: collapse;
   display: block;
-  overflow-x: auto;
   width: 100%;
+  margin: 2rem 0;
+  border-collapse: collapse;
+  overflow-x: auto;
+  font-size: 0.95em;
 }
 
 .prose th,
 .prose td {
-  border: 1px solid rgba(47, 128, 237, 0.18);
-  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid #ebe9e4;
+  padding: 12px 15px;
 }
 
 .prose th {
-  background: rgba(94, 200, 255, 0.14);
+  background-color: rgba(20, 43, 66, 0.03);
+  color: #142b42;
+  font-weight: 700;
 }
 
-@media (max-width: 640px) {
-  .prose {
-    font-size: 1rem;
-    line-height: 1.9;
-  }
-
-  .prose pre {
-    border-radius: var(--radius-window);
-    padding-inline: var(--space-4);
-  }
+.prose tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
 }

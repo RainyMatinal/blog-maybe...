@@ -3,19 +3,17 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/blog/PostCard.astro";
 
-export async function getStaticPaths() {
-  const tagSlug = (tag: string) =>
-    encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"));
+const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}/`;
 
+export async function getStaticPaths() {
+  const tagSlug = (tag: string) => encodeURIComponent(tag.trim().toLowerCase().replace(/\s+/g, "-"));
   const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
 
   const tags = new Map<string, string>();
   for (const post of posts) {
-    for (const tag of post.data.tags) {
-      tags.set(tagSlug(tag), tag);
-    }
+    for (const tag of post.data.tags) tags.set(tagSlug(tag), tag);
   }
 
   return Array.from(tags.entries()).map(([slug, tag]) => ({
@@ -28,66 +26,46 @@ export async function getStaticPaths() {
 }
 
 const { tag, posts } = Astro.props;
-const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
 const categories = [...new Set(posts.map((post) => post.data.category))];
 ---
 
-<BaseLayout
-  title={`Tag: ${tag}`}
-  description={`RainyMatinal Network Archive 中带有 ${tag} 标签的文章。`}
->
-  <section class="tag-page" aria-labelledby="tag-title">
-    <header class="tag-hero window-card">
+<BaseLayout title={`#${tag}`} description={`RainyMatinal 孤星邮局中带有 #${tag} 标签的文章。`}>
+  <section class="page-title-section tag-title-section">
+    <div class="title-overlap-wrapper">
+      <span class="huge-bg-en">FOLDER</span>
+      <h1 class="solid-fg-cn">#{tag}</h1>
+    </div>
+    <div class="title-divider"></div>
+  </section>
+
+  <main class="tag-folder-page">
+    <aside class="tag-side-window" aria-label="标签资料夹信息">
       <div class="window-titlebar">
-        <span class="window-dot dot-red" aria-hidden="true"></span>
-        <span class="window-dot dot-yellow" aria-hidden="true"></span>
         <span class="window-dot dot-green" aria-hidden="true"></span>
-        <span>finder.exe - tag://{tag}</span>
+        <span>tag-folder.ini</span>
       </div>
-
-      <div class="tag-hero__body">
-        <div>
-          <p class="section-kicker">Subject Folder</p>
-          <h1 id="tag-title">#{tag}</h1>
-          <p>这个资料夹收纳了所有带有该主题词的公开记录。</p>
+      <div class="tag-side-body">
+        <p class="side-label">Tag</p>
+        <strong>#{tag}</strong>
+        <div class="tag-stats">
+          <div><span>Records</span><b>{posts.length}</b></div>
+          <div><span>Categories</span><b>{categories.length}</b></div>
         </div>
-
-        <dl class="tag-stats" aria-label="标签统计">
-          <div>
-            <dt>Records</dt>
-            <dd>{posts.length}</dd>
-          </div>
-          <div>
-            <dt>Categories</dt>
-            <dd>{categories.length}</dd>
-          </div>
-        </dl>
+        <p class="side-label">Categories</p>
+        <ul>
+          {categories.map((category) => (
+            <li><span class="status-light active" aria-hidden="true"></span>{category}</li>
+          ))}
+        </ul>
+        <a class="folder-back-link" href="/tags/" data-search-title="标签索引" data-search-desc="返回所有标签">返回标签索引</a>
       </div>
-    </header>
+    </aside>
 
-    <div class="tag-layout">
-      <aside class="tag-side window-card" aria-label="标签资料夹信息">
-        <div class="window-titlebar">
-          <span class="window-dot dot-green" aria-hidden="true"></span>
-          <span>tag-folder.ini</span>
-        </div>
-        <div class="tag-side__body">
-          <p class="side-label">Tag</p>
-          <strong>#{tag}</strong>
-          <p class="side-label">Categories</p>
-          <ul>
-            {categories.map((category) => (
-              <li>
-                <span class="status-light active" aria-hidden="true"></span>
-                {category}
-              </li>
-            ))}
-          </ul>
-          <a class="old-button" href="/tags/">返回标签索引</a>
-        </div>
-      </aside>
-
-      <div class="tag-post-list" aria-label={`${tag} 标签文章列表`}>
+    <section class="tag-post-area" aria-label={`${tag} 标签文章列表`}>
+      <div class="tag-folder-intro">
+        <p>这个资料夹收纳了所有带有该主题词的公开来信。内容顺序按投递日期从新到旧排列。</p>
+      </div>
+      <div class="ticket-grid">
         {posts.map((post, index) => (
           <PostCard
             title={post.data.title}
@@ -96,137 +74,157 @@ const categories = [...new Set(posts.map((post) => post.data.category))];
             category={post.data.category}
             tags={post.data.tags}
             href={postHref(post.id)}
+            heroImage={post.data.heroImage}
             index={index}
           />
         ))}
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 </BaseLayout>
 
 <style>
-  .tag-page {
-    display: grid;
-    gap: var(--space-7);
+  .tag-title-section {
+    padding-bottom: 2rem;
   }
 
-  .tag-hero,
-  .tag-side {
+  .tag-folder-page {
+    display: grid;
+    grid-template-columns: minmax(14rem, 250px) minmax(0, 1fr);
+    gap: 2rem;
+    width: min(1320px, calc(100% - 8vw));
+    margin: 0 auto 6rem;
+  }
+
+  .tag-side-window,
+  .tag-folder-intro {
+    background: rgba(250, 250, 250, 0.84);
+    border: 1px solid var(--theme-line);
+    box-shadow: 0 18px 42px rgba(20, 43, 66, 0.1);
+  }
+
+  .tag-side-window {
     overflow: hidden;
+    align-self: start;
+    position: sticky;
+    top: 7rem;
   }
 
-  .tag-hero__body {
-    align-items: end;
-    background:
-      radial-gradient(circle at 82% 22%, rgba(111, 255, 233, 0.28), transparent 14rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(232, 247, 255, 0.54));
+  .tag-side-body {
     display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding: clamp(1.5rem, 4vw, 3rem);
+    gap: 1rem;
+    padding: 1rem;
   }
 
-  .tag-hero h1 {
-    font-size: clamp(2.2rem, 6vw, 4rem);
-    margin-bottom: var(--space-3);
-    overflow-wrap: anywhere;
-  }
-
-  .tag-hero p {
-    color: var(--text-muted);
-    font-size: 1.08rem;
-    line-height: 1.9;
+  .side-label,
+  .tag-stats span {
+    color: #999;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
     margin: 0;
+    text-transform: uppercase;
+  }
+
+  .tag-side-body > strong {
+    color: var(--theme-stamp-red);
+    font-family: var(--font-serif);
+    font-size: 1.7rem;
+    overflow-wrap: anywhere;
   }
 
   .tag-stats {
     display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(2, minmax(6rem, 1fr));
-    margin: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
   }
 
   .tag-stats div {
-    background: var(--bg-panel-soft);
-    border: 1px solid rgba(94, 200, 255, 0.34);
-    border-radius: 8px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-    padding: var(--space-3);
+    border: 1px dashed rgba(20, 43, 66, 0.18);
+    background: #fff;
+    padding: 0.7rem;
   }
 
-  .tag-stats dt,
-  .side-label {
-    color: var(--text-soft);
-    font-family: Tahoma, var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .tag-stats dd {
-    color: var(--color-system-blue);
+  .tag-stats b {
+    display: block;
+    color: var(--theme-blue);
     font-family: var(--font-mono);
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin: 0;
+    font-size: 1.25rem;
+    margin-top: 0.25rem;
   }
 
-  .tag-layout {
-    align-items: start;
+  .tag-side-body ul {
     display: grid;
-    gap: var(--space-5);
-    grid-template-columns: minmax(13rem, 0.28fr) minmax(0, 1fr);
-  }
-
-  .tag-side {
-    position: sticky;
-    top: var(--space-5);
-  }
-
-  .tag-side__body {
-    display: grid;
-    gap: var(--space-3);
-    padding: var(--space-4);
-  }
-
-  .tag-side strong,
-  .tag-side li {
-    font-family: var(--font-mono);
-    font-size: 0.86rem;
-    overflow-wrap: anywhere;
-  }
-
-  .tag-side ul {
-    display: grid;
-    gap: var(--space-2);
+    gap: 0.55rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .tag-side li {
-    align-items: center;
+  .tag-side-body li {
     display: flex;
-    gap: var(--space-2);
+    align-items: center;
+    gap: 0.55rem;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
 
-  .tag-post-list {
+  .folder-back-link {
+    display: inline-flex;
+    justify-content: center;
+    border: 1px dashed #c9c5bb;
+    color: #666;
+    font-weight: 800;
+    padding: 0.55rem 0.8rem;
+    text-decoration: none;
+    transition: border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  }
+
+  .folder-back-link:hover {
+    border-color: var(--theme-blue);
+    color: var(--theme-blue);
+    transform: translateY(-2px);
+  }
+
+  .tag-post-area {
+    min-width: 0;
+  }
+
+  .tag-folder-intro {
+    margin-bottom: 2rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .tag-folder-intro p {
+    color: #666;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .ticket-grid {
     display: grid;
-    gap: var(--space-5);
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 3rem;
   }
 
-  @media (max-width: 860px) {
-    .tag-hero__body,
-    .tag-layout {
+  @media (max-width: 920px) {
+    .tag-folder-page {
       grid-template-columns: 1fr;
     }
 
-    .tag-side {
+    .tag-side-window {
       position: static;
     }
   }
 
   @media (max-width: 560px) {
+    .tag-folder-page {
+      width: min(100% - 2rem, 1320px);
+    }
+
+    .ticket-grid,
     .tag-stats {
       grid-template-columns: 1fr;
     }

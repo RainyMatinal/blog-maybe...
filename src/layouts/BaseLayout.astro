@@ -11,14 +11,15 @@ type Props = {
 };
 
 const {
-  title = "RainyMatinal Network Archive",
-  description = "一个记录 Arch Linux、Git、C、Astro、网络工程和旧互联网审美的个人技术档案馆。",
+  title = "RainyMatinal 孤星邮局",
+  description = "RainyMatinal 的个人技术邮局。",
   lang = "zh-CN",
   bodyClass = "",
 } = Astro.props;
 
-const siteName = "RainyMatinal Network Archive";
-const pageTitle = title === siteName ? title : `${title} | ${siteName}`;
+const siteName = "RainyMatinal 孤星邮局";
+const pageTitle = title === siteName ? title : `${title} • ${siteName}`;
+const isHome = Astro.url.pathname === "/";
 ---
 
 <!doctype html>
@@ -27,13 +28,20 @@ const pageTitle = title === siteName ? title : `${title} | ${siteName}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#EFEBE0" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="astro-view-transitions-enabled" content="true" />
+    <meta name="astro-view-transitions-fallback" content="animate" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300..900&family=Noto+Sans+SC:wght@400..900&family=Noto+Serif+SC:wght@400..900&family=Noto+Serif:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link href="https://fonts.googleapis.com/css2?family=Niconne&display=swap&text=RainyMatinal" rel="stylesheet" media="print" onload="this.media='all'" />
     <title>{pageTitle}</title>
   </head>
   <body class={bodyClass}>
     <a class="skip-link" href="#content">跳到正文</a>
     <div class="site-shell">
-      <Header />
+      <Header isHome={isHome} />
       <main class="site-main" id="content">
         <slot />
       </main>
