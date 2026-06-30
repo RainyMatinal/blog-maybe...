@@ -9,7 +9,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 const postHref = (id: string) => `/blog/${id.replace(/\.mdx?$/, "")}`;
 ---
 
-<BaseLayout title="来信" description="RainyMatinal 孤星邮局的来信列表。">
+<BaseLayout title="来信" description="RainyMatinal 苦难摇篮的来信列表。">
   <section class="page-title-section">
     <div class="title-overlap-wrapper">
       <span class="huge-bg-en">DISPATCH</span>

@@ -1267,3 +1267,85 @@ body {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
+/* Looping handwritten SVG signature: a slower, pen-like cycle for article/footer signatures. */
+.rainy-signature {
+  overflow: visible;
+}
+
+.rainy-signature text {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.05;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1180;
+  stroke-dashoffset: 1180;
+  paint-order: stroke fill;
+  animation: signature-handwrite-loop 8s cubic-bezier(0.55, 0.04, 0.18, 1) infinite;
+}
+
+.rainy-signature .sig-underline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: signature-underline-loop 8s cubic-bezier(0.55, 0.04, 0.18, 1) infinite;
+}
+
+@keyframes signature-handwrite-loop {
+  0% {
+    opacity: 0;
+    fill: transparent;
+    stroke-dashoffset: 1180;
+  }
+  6% {
+    opacity: 1;
+  }
+  42% {
+    fill: transparent;
+    stroke-dashoffset: 0;
+  }
+  55%, 88% {
+    opacity: 1;
+    fill: currentColor;
+    stroke-dashoffset: 0;
+  }
+  96%, 100% {
+    opacity: 0;
+    fill: transparent;
+    stroke-dashoffset: 1180;
+  }
+}
+
+@keyframes signature-underline-loop {
+  0%, 42% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+  50%, 88% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  96%, 100% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rainy-signature text {
+    animation: none !important;
+    fill: currentColor;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .rainy-signature .sig-underline {
+    animation: none !important;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}

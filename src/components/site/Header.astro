@@ -25,8 +25,8 @@ const categoryItems = [
 ];
 
 const navItems = [
-  { href: "/", label: "邮局", hover: "邮局", key: "home", en: "HOME", cn: "邮局" },
-  { href: "/about/#guestbook", label: "信箱", hover: "留言", key: "guestbook", en: "MESSAGE", cn: "信箱" },
+  { href: "/", label: "摇篮", hover: "摇篮", key: "home", en: "HOME", cn: "摇篮" },
+  { href: "/about/#guestbook", label: "风铃", hover: "留言", key: "guestbook", en: "MESSAGE", cn: "风铃" },
   { href: "/tags/", label: "星图", hover: "友人", key: "blogroll", en: "FRIENDS", cn: "星图" },
   { href: "/archive/", label: "往期", hover: "归档", key: "archive", en: "ARCHIVE", cn: "往期" },
   { href: "/about/", label: "孤星", hover: "关于", key: "about", en: "ABOUT", cn: "孤星" },
@@ -42,14 +42,14 @@ const isActive = (href: string) => {
 <header id="site-header" class:list={["site-header", { "is-home": isHome }]}>
   <div class="header-inner">
     <div class="header-left">
-      <a href="/" class="site-brand" aria-label="RainyMatinal 孤星邮局">
+      <a href="/" class="site-brand" aria-label="RainyMatinal 苦难摇篮">
         <div class="brand-main">
           <span class="brand-rainy">Rainy</span>
           <div class="brand-matinal-wrapper">
             <span class="brand-matinal">Matinal.</span>
           </div>
         </div>
-        <span class="brand-subtitle">—— 孤星邮局 ——</span>
+        <span class="brand-subtitle">—— 苦难摇篮 ——</span>
       </a>
     </div>
 
@@ -57,7 +57,7 @@ const isActive = (href: string) => {
       <nav class="main-nav" aria-label="主导航">
         <ul class="nav-list">
           <li class="nav-item">
-            <a href="/" class:list={["nav-link", { active: pathname === "/" }]} aria-label="首页">邮局</a>
+            <a href="/" class:list={["nav-link", { active: pathname === "/" }]} aria-label="首页">摇篮</a>
           </li>
           <li class="nav-item has-dropdown" id="category-nav-item">
             <button class="nav-link" type="button" aria-label="分类" id="category-nav-toggle">
@@ -108,7 +108,7 @@ const isActive = (href: string) => {
       <ul class="mobile-nav-list">
         <li class="m-nav-item">
           <a href="/" class:list={["m-nav-link", { active: pathname === "/" }]}>
-            <span class="m-en">HOME</span><span class="m-dots"></span><span class="m-cn">邮局</span>
+            <span class="m-en">HOME</span><span class="m-dots"></span><span class="m-cn">摇篮</span>
           </a>
         </li>
         <li class="m-nav-item m-has-dropdown" id="m-category-toggle">
