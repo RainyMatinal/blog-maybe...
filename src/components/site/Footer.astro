@@ -26,3 +26,48 @@
     </a>
   </div>
 </footer>
+<script is:inline>
+  (() => {
+    const replaySignature = () => {
+      const signatures = document.querySelectorAll(".rainy-signature");
+      signatures.forEach((signature, signatureIndex) => {
+        const animatedParts = signature.querySelectorAll("text, .sig-underline");
+        signature.setAttribute("data-replay-id", `${Date.now()}-${signatureIndex}`);
+
+        animatedParts.forEach((part) => {
+          part.getAnimations?.().forEach((animation) => animation.cancel());
+          part.style.animation = "none";
+        });
+
+        signature.getBoundingClientRect();
+
+        requestAnimationFrame(() => {
+          animatedParts.forEach((part) => {
+            part.style.animation = "";
+            part.getAnimations?.().forEach((animation) => {
+              animation.cancel();
+              animation.play();
+            });
+          });
+        });
+      });
+    };
+
+    const scheduleReplay = () => window.setTimeout(replaySignature, 32);
+
+    if (!window.__rainySignatureReplayReady) {
+      window.__rainySignatureReplayReady = true;
+      window.addEventListener("pageshow", scheduleReplay);
+      document.addEventListener("astro:page-load", scheduleReplay);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") scheduleReplay();
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", scheduleReplay, { once: true });
+    } else {
+      scheduleReplay();
+    }
+  })();
+</script>
