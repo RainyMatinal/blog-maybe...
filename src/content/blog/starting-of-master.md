@@ -9,7 +9,7 @@ tags:
   - Pacman
 category: "learning Logs"
 draft: false
-heroImage: "/images/archive/arch-linux-install.jpg"
+heroImage: "/images/archive/miku.png"
 ---
 
 ## 为什么要选择考研
@@ -26,7 +26,7 @@ heroImage: "/images/archive/arch-linux-install.jpg"
 
 ## 人争一口气，专本硕博，为什么我不能是其中之一
 
-从今天开始，我要展示每天12小时的耐力
+从今天开始，我要每天大于12小时的耐力
 wjm已经先我一步迈出去了，我要追随他的脚步，然后超越我自己
 maybe not today
 maybe not tomorrow
@@ -35,13 +35,14 @@ but one day...
 
 ## 学习计划马拉松
 
-每日的任务会记录在此
+2026年6月30日每日的任务
 
 first:英语单词，橙啦课+背单词软件，然后是不背单词50个
 second:数学复习笔记，初等数学，三角函数公式，每日一遍，然后是做同济八的数学练习。
 third:专业课，我现在要在两个月内完成c语言的学习,学完翁恺的基础后，就去zju图灵班深造
 fourth:成人本科，我会写一个软件，把所有的例题加上去，并且背诵
 
+![在这自习室的小小窗户前准备度过550天](/images/blog/learn-room.png)
 ## 这是日记
 
-20260629，第一天
+20260630，我第一次早起成功，......自己都不想多说什么了
