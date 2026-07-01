@@ -1,0 +1,8 @@
+# 中文: Cloudflare Pages 响应头配置，用于避免 HTML 和动画运行时在设备上长期缓存旧版本。
+# EN: Cloudflare Pages response headers that keep HTML and the animation runtime from staying stale on devices.
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+/images/*
+  Cache-Control: public, max-age=86400, must-revalidate

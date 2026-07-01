@@ -1,4 +1,6 @@
-﻿import { defineCollection, z } from "astro:content";
+// 中文: 内容集合配置，定义 blog 和 notes 的 frontmatter 字段。
+// EN: Content collection config defining frontmatter fields for blog and notes.
+import { defineCollection, z } from "astro:content";
 
 const blog = defineCollection({
   type: "content",

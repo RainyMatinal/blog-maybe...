@@ -1,3 +1,7 @@
+/*
+  中文: 设计令牌文件，集中维护颜色、字体、尺寸和兼容变量。
+  EN: Design token file that centralizes colors, fonts, sizing, and compatibility variables.
+*/
 :root {
   --black: 15, 18, 25;
   --gray: 96, 115, 159;

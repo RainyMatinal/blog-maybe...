@@ -12,6 +12,11 @@ draft: false
 heroImage: "/images/archive/miku.png"
 ---
 
+<!--
+中文: 博客文章示例/正文文件，通过 frontmatter 控制标题、日期、标签、分类和封面图。
+EN: Blog post content file; frontmatter controls title, dates, tags, category, and hero image.
+-->
+
 ## 为什么要选择考研
 
 失意的20岁，一个月三千，还有野心，还有不服输

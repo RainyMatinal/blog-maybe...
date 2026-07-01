@@ -1,3 +1,7 @@
+/*
+  中文: 全站全局样式，定义页面骨架、导航、首页、归档、页脚和响应式行为。
+  EN: Global stylesheet for page structure, navigation, home, archive, footer, and responsive behavior.
+*/
 @import "./tokens.css";
 @import "./typography.css";
 @import "./prose.css";

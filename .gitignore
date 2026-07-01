@@ -1,3 +1,5 @@
+# 中文: Git 忽略规则，排除依赖、构建产物、本地缓存和日志文件。
+# EN: Git ignore rules for dependencies, build output, local cache, and log files.
 node_modules/
 dist/
 .astro/

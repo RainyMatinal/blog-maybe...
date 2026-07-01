@@ -1,4 +1,6 @@
 ---
+// 中文: Markdown 文章布局，负责文章元信息、正文、目录、签名和前后篇导航。
+// EN: Markdown post layout for metadata, body content, table of contents, signature, and previous/next navigation.
 import BaseLayout from "./BaseLayout.astro";
 
 type NavPost = {
@@ -101,7 +103,7 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
           </div>
 
           <footer class="letter-signature-area" aria-label="RainyMatinal 文章签名">
-            <svg class="rainy-signature article-signature" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label="RainyMatinal">
+            <svg class="rainy-signature article-signature" data-signature-version="rainy-signature-v20260701-4" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label="RainyMatinal">
               <text x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
               <path pathLength="1" class="sig-underline" d="M104 132 C 178 153, 282 145, 370 136 S 545 119, 622 130" />
             </svg>

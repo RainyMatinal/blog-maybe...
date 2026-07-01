@@ -1,3 +1,7 @@
+/*
+  中文: Markdown 正文排版样式，优化中文阅读、链接、引用和代码块。
+  EN: Markdown prose stylesheet optimized for Chinese reading, links, quotes, and code blocks.
+*/
 .prose {
   width: 100%;
   max-width: 100%;

@@ -1,7 +1,12 @@
-<footer class="hybrid-footer">
+---
+// 中文: 站点页脚组件，展示 RainyMatinal 签名、站点标语和全站签名动画运行时。
+// EN: Site footer component that renders the RainyMatinal signature, slogans, and the shared signature animation runtime.
+---
+
+<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260701-4">
   <div class="footer-signature" aria-label="RainyMatinal 签名动画">
     <div class="signature-svg-wrapper">
-      <svg class="rainy-signature" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label="RainyMatinal">
+      <svg class="rainy-signature" data-signature-version="rainy-signature-v20260701-4" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label="RainyMatinal">
         <text x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
         <path pathLength="1" class="sig-underline" d="M104 132 C 178 153, 282 145, 370 136 S 545 119, 622 130" />
       </svg>
@@ -28,40 +33,112 @@
 </footer>
 <script is:inline>
   (() => {
+    const VERSION = "rainy-signature-v20260701-4";
+    const LOOP_MS = 8000;
+    const TEXT_DASH = 1180;
+    const LINE_DASH = 1;
+
+    const textFrames = [
+      { opacity: 0, fill: "transparent", strokeDashoffset: TEXT_DASH },
+      { opacity: 1, fill: "transparent", strokeDashoffset: TEXT_DASH, offset: 0.04 },
+      { opacity: 1, fill: "transparent", strokeDashoffset: 0, offset: 0.42 },
+      { opacity: 1, fill: "currentColor", strokeDashoffset: 0, offset: 0.54 },
+      { opacity: 1, fill: "currentColor", strokeDashoffset: 0, offset: 0.86 },
+      { opacity: 0, fill: "transparent", strokeDashoffset: TEXT_DASH, offset: 0.98 },
+      { opacity: 0, fill: "transparent", strokeDashoffset: TEXT_DASH },
+    ];
+
+    const lineFrames = [
+      { opacity: 0, strokeDashoffset: LINE_DASH },
+      { opacity: 0, strokeDashoffset: LINE_DASH, offset: 0.18 },
+      { opacity: 1, strokeDashoffset: LINE_DASH, offset: 0.28 },
+      { opacity: 1, strokeDashoffset: 0, offset: 0.5 },
+      { opacity: 1, strokeDashoffset: 0, offset: 0.86 },
+      { opacity: 0, strokeDashoffset: LINE_DASH, offset: 0.98 },
+      { opacity: 0, strokeDashoffset: LINE_DASH },
+    ];
+
+    const cancelAnimations = (node) => {
+      node?.getAnimations?.().forEach((animation) => animation.cancel());
+    };
+
+    const prepareSignature = (signature) => {
+      const text = signature.querySelector("text");
+      const line = signature.querySelector(".sig-underline");
+      if (!text || !line) return null;
+
+      signature.dataset.signatureVersion = VERSION;
+      signature.dataset.signatureReplayId = VERSION + "-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+
+      text.style.opacity = "0";
+      text.style.fill = "transparent";
+      text.style.stroke = "currentColor";
+      text.style.strokeWidth = "1.7";
+      text.style.strokeLinecap = "round";
+      text.style.strokeLinejoin = "round";
+      text.style.strokeDasharray = String(TEXT_DASH);
+      text.style.strokeDashoffset = String(TEXT_DASH);
+
+      line.style.opacity = "0";
+      line.style.fill = "none";
+      line.style.stroke = "currentColor";
+      line.style.strokeWidth = "4";
+      line.style.strokeLinecap = "round";
+      line.style.strokeDasharray = String(LINE_DASH);
+      line.style.strokeDashoffset = String(LINE_DASH);
+
+      return { text, line };
+    };
+
     const replaySignature = () => {
       const signatures = document.querySelectorAll(".rainy-signature");
-      signatures.forEach((signature, signatureIndex) => {
-        const animatedParts = signature.querySelectorAll("text, .sig-underline");
-        signature.setAttribute("data-replay-id", `${Date.now()}-${signatureIndex}`);
+      signatures.forEach((signature) => {
+        const parts = prepareSignature(signature);
+        if (!parts) return;
 
+        const animatedParts = [parts.text, parts.line];
         animatedParts.forEach((part) => {
-          part.getAnimations?.().forEach((animation) => animation.cancel());
+          cancelAnimations(part);
           part.style.animation = "none";
         });
 
         signature.getBoundingClientRect();
 
         requestAnimationFrame(() => {
-          animatedParts.forEach((part) => {
-            part.style.animation = "";
-            part.getAnimations?.().forEach((animation) => {
-              animation.cancel();
-              animation.play();
+          parts.text.style.animation = "";
+          parts.line.style.animation = "";
+
+          if (typeof parts.text.animate === "function" && typeof parts.line.animate === "function") {
+            cancelAnimations(parts.text);
+            cancelAnimations(parts.line);
+            parts.text.animate(textFrames, {
+              duration: LOOP_MS,
+              iterations: Infinity,
+              easing: "linear",
+              fill: "both",
             });
-          });
+            parts.line.animate(lineFrames, {
+              duration: LOOP_MS,
+              iterations: Infinity,
+              easing: "linear",
+              fill: "both",
+            });
+          }
         });
       });
     };
 
     const scheduleReplay = () => window.setTimeout(replaySignature, 32);
 
-    if (!window.__rainySignatureReplayReady) {
-      window.__rainySignatureReplayReady = true;
+    if (!window.__rainySignatureRuntime || window.__rainySignatureRuntime.version !== VERSION) {
+      window.__rainySignatureRuntime = { version: VERSION, replay: scheduleReplay };
       window.addEventListener("pageshow", scheduleReplay);
       document.addEventListener("astro:page-load", scheduleReplay);
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") scheduleReplay();
       });
+    } else {
+      window.__rainySignatureRuntime.replay = scheduleReplay;
     }
 
     if (document.readyState === "loading") {
@@ -71,3 +148,94 @@
     }
   })();
 </script>
+
+<style is:inline>
+  .rainy-signature {
+    --signature-text-dash: 1180;
+    color: currentColor;
+  }
+
+  .rainy-signature text {
+    opacity: 0;
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: var(--signature-text-dash);
+    stroke-dashoffset: var(--signature-text-dash);
+    animation: rainy-signature-write-v20260701-4 8000ms linear infinite both !important;
+  }
+
+  .rainy-signature .sig-underline {
+    opacity: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: rainy-signature-line-v20260701-4 8000ms linear infinite both !important;
+  }
+
+  @keyframes rainy-signature-write-v20260701-4 {
+    0% {
+      opacity: 0;
+      fill: transparent;
+      stroke-dashoffset: var(--signature-text-dash);
+    }
+    4% {
+      opacity: 1;
+      fill: transparent;
+      stroke-dashoffset: var(--signature-text-dash);
+    }
+    42% {
+      opacity: 1;
+      fill: transparent;
+      stroke-dashoffset: 0;
+    }
+    54%,
+    86% {
+      opacity: 1;
+      fill: currentColor;
+      stroke-dashoffset: 0;
+    }
+    98%,
+    100% {
+      opacity: 0;
+      fill: transparent;
+      stroke-dashoffset: var(--signature-text-dash);
+    }
+  }
+
+  @keyframes rainy-signature-line-v20260701-4 {
+    0%,
+    18% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+    28% {
+      opacity: 1;
+      stroke-dashoffset: 1;
+    }
+    50%,
+    86% {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+    98%,
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rainy-signature text,
+    .rainy-signature .sig-underline {
+      animation-duration: 8000ms !important;
+      animation-iteration-count: infinite !important;
+      animation-play-state: running !important;
+    }
+  }
+</style>
