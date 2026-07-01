@@ -4,7 +4,7 @@
 import Signature from "../visual/Signature.astro";
 ---
 
-<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260701-5">
+<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260701-6">
   <div class="footer-signature" aria-label="RainyMatinal 签名动画">
     <div class="signature-svg-wrapper">
       <Signature id="footer-rainy-signature" />
@@ -31,20 +31,26 @@ import Signature from "../visual/Signature.astro";
 </footer>
 <script is:inline>
   (() => {
-    const VERSION = "rainy-signature-v20260701-5";
+    const VERSION = "rainy-signature-v20260701-6";
     const LOOP_MS = 8000;
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const toNumber = (value, fallback) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    };
 
-    const maskFrames = (index) => {
-      const start = 0.035 + index * 0.055;
-      const visible = Math.min(start + 0.015, 0.44);
-      const drawn = Math.min(start + 0.22, 0.68);
+    const maskFrames = (stroke, index) => {
+      const start = clamp(toNumber(stroke.dataset.start, 0.04 + index * 0.04), 0, 0.82);
+      const duration = clamp(toNumber(stroke.dataset.duration, 0.12), 0.035, 0.2);
+      const visible = clamp(start + 0.012, 0, 0.86);
+      const drawn = clamp(start + duration, visible + 0.01, 0.875);
 
       return [
         { offset: 0, opacity: 0, strokeDashoffset: 1 },
         { offset: start, opacity: 0, strokeDashoffset: 1 },
         { offset: visible, opacity: 1, strokeDashoffset: 1 },
         { offset: drawn, opacity: 1, strokeDashoffset: 0 },
-        { offset: 0.84, opacity: 1, strokeDashoffset: 0 },
+        { offset: 0.885, opacity: 1, strokeDashoffset: 0 },
         { offset: 0.965, opacity: 0, strokeDashoffset: 1 },
         { offset: 1, opacity: 0, strokeDashoffset: 1 },
       ];
@@ -52,17 +58,17 @@ import Signature from "../visual/Signature.astro";
 
     const inkFrames = [
       { offset: 0, opacity: 1 },
-      { offset: 0.84, opacity: 1 },
+      { offset: 0.885, opacity: 1 },
       { offset: 0.965, opacity: 0 },
       { offset: 1, opacity: 1 },
     ];
 
     const lineFrames = [
       { offset: 0, opacity: 0, strokeDashoffset: 1 },
-      { offset: 0.48, opacity: 0, strokeDashoffset: 1 },
-      { offset: 0.56, opacity: 1, strokeDashoffset: 1 },
-      { offset: 0.72, opacity: 1, strokeDashoffset: 0 },
-      { offset: 0.84, opacity: 1, strokeDashoffset: 0 },
+      { offset: 0.66, opacity: 0, strokeDashoffset: 1 },
+      { offset: 0.705, opacity: 1, strokeDashoffset: 1 },
+      { offset: 0.86, opacity: 1, strokeDashoffset: 0 },
+      { offset: 0.885, opacity: 1, strokeDashoffset: 0 },
       { offset: 0.965, opacity: 0, strokeDashoffset: 1 },
       { offset: 1, opacity: 0, strokeDashoffset: 1 },
     ];
@@ -89,15 +95,16 @@ import Signature from "../visual/Signature.astro";
       if (ghost) {
         ghost.style.fill = "none";
         ghost.style.stroke = "currentColor";
-        ghost.style.strokeWidth = "1";
-        ghost.style.opacity = "0.08";
+        ghost.style.strokeWidth = "0.9";
+        ghost.style.opacity = "0";
         ghost.style.animation = "none";
       }
 
       strokes.forEach((stroke) => {
+        const width = toNumber(stroke.dataset.width, 36);
         stroke.style.fill = "none";
         stroke.style.stroke = "#fff";
-        stroke.style.strokeWidth = "42";
+        stroke.style.strokeWidth = String(width);
         stroke.style.strokeLinecap = "round";
         stroke.style.strokeLinejoin = "round";
         stroke.style.strokeDasharray = "1";
@@ -152,10 +159,10 @@ import Signature from "../visual/Signature.astro";
             });
 
             parts.strokes.forEach((stroke, index) => {
-              stroke.animate(maskFrames(index), {
+              stroke.animate(maskFrames(stroke, index), {
                 duration: LOOP_MS,
                 iterations: Infinity,
-                easing: "cubic-bezier(0.33, 0, 0.18, 1)",
+                easing: "cubic-bezier(0.3, 0, 0.18, 1)",
                 fill: "both",
               });
             });
@@ -163,7 +170,7 @@ import Signature from "../visual/Signature.astro";
             parts.line.animate(lineFrames, {
               duration: LOOP_MS,
               iterations: Infinity,
-              easing: "cubic-bezier(0.33, 0, 0.18, 1)",
+              easing: "cubic-bezier(0.3, 0, 0.18, 1)",
               fill: "both",
             });
           }
@@ -213,9 +220,9 @@ import Signature from "../visual/Signature.astro";
 
   .rainy-signature .sig-ghost {
     fill: none;
-    opacity: 0.08;
+    opacity: 0;
     stroke: currentColor;
-    stroke-width: 1;
+    stroke-width: 0.9;
   }
 
   .rainy-signature .sig-mask-stroke {
@@ -224,10 +231,10 @@ import Signature from "../visual/Signature.astro";
     stroke: #fff;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 42;
+    stroke-width: 36;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: rainy-signature-mask-write-v20260701-5 8000ms linear infinite both !important;
+    animation: rainy-signature-mask-write-v20260701-6 8000ms linear infinite both !important;
   }
 
   .rainy-signature .sig-underline {
@@ -238,21 +245,21 @@ import Signature from "../visual/Signature.astro";
     stroke-linecap: round;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: rainy-signature-line-v20260701-5 8000ms linear infinite both !important;
+    animation: rainy-signature-line-v20260701-6 8000ms linear infinite both !important;
   }
 
-  @keyframes rainy-signature-mask-write-v20260701-5 {
+  @keyframes rainy-signature-mask-write-v20260701-6 {
     0%,
     4% {
       opacity: 0;
       stroke-dashoffset: 1;
     }
-    14% {
+    12% {
       opacity: 1;
       stroke-dashoffset: 1;
     }
-    56%,
-    84% {
+    72%,
+    88.5% {
       opacity: 1;
       stroke-dashoffset: 0;
     }
@@ -263,18 +270,18 @@ import Signature from "../visual/Signature.astro";
     }
   }
 
-  @keyframes rainy-signature-line-v20260701-5 {
+  @keyframes rainy-signature-line-v20260701-6 {
     0%,
-    48% {
+    66% {
       opacity: 0;
       stroke-dashoffset: 1;
     }
-    56% {
+    70.5% {
       opacity: 1;
       stroke-dashoffset: 1;
     }
-    72%,
-    84% {
+    86%,
+    88.5% {
       opacity: 1;
       stroke-dashoffset: 0;
     }

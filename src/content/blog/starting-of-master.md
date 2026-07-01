@@ -9,7 +9,7 @@ tags:
   - Pacman
 category: "learning Logs"
 draft: false
-heroImage: "/images/archive/miku.png"
+heroImage: "/images/blog/miku.png"
 ---
 
 <!--
@@ -43,11 +43,15 @@ but one day...
 2026年6月30日每日的任务
 
 first:英语单词，橙啦课+背单词软件，然后是不背单词50个
+
 second:数学复习笔记，初等数学，三角函数公式，每日一遍，然后是做同济八的数学练习。
+
 third:专业课，我现在要在两个月内完成c语言的学习,学完翁恺的基础后，就去zju图灵班深造
+
 fourth:成人本科，我会写一个软件，把所有的例题加上去，并且背诵
 
-![在这自习室的小小窗户前准备度过550天](/images/blog/learn-room.png)
+![在这自习室的小小窗户前准备度过550天](/images/blog/learn-room.jpg)
 ## 这是日记
 
 20260630，我第一次早起成功，......自己都不想多说什么了
+20260701，早上因为下超级大暴雨，产生了心里逃避，于是一点钟才醒来开始学习

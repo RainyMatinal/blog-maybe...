@@ -173,18 +173,18 @@ src/layouts/BlogPostLayout.astro
 
 当前动画策略：
 
-- 动画版本号：`rainy-signature-v20260701-5`。
+- 动画版本号：`rainy-signature-v20260701-6`。
 - 循环时长：`8000ms`，也就是每 8 秒重复一遍。
 - 页面进入时会在 `DOMContentLoaded` 后播放。
 - 浏览器从返回缓存恢复页面时，会在 `pageshow` 重新播放。
 - 页面切回可见时，会在 `visibilitychange` 重新播放。
 - Astro 页面切换完成时，会在 `astro:page-load` 重新播放。
-- 优先使用 Web Animations API 创建运行时动画；如果设备不支持，会退回到内联 CSS keyframes。`Signature.astro` 内的 mask 笔画路径负责制造手写显现效果。
+- 优先使用 Web Animations API 创建运行时动画；如果设备不支持，会退回到内联 CSS keyframes。`Signature.astro` 内的多段 mask 笔画路径会按字母顺序显现 RainyMatinal。
 
 如果以后再次修改动画，建议同时修改这两个地方：
 
 1. `src/components/site/Footer.astro` 里的 `VERSION` 常量。
-2. 同文件里的 keyframes 名称，例如 `rainy-signature-mask-write-v20260701-5`。
+2. 同文件里的 keyframes 名称，例如 `rainy-signature-mask-write-v20260701-6`。
 
 这样可以强制浏览器把它视为新动画，减少旧动画被缓存继续使用的概率。
 
@@ -229,14 +229,14 @@ dist/_headers
 
 ```bash
 npm run build
-rg "rainy-signature-v20260701-5|8000" dist
+rg "rainy-signature-v20260701-6|8000" dist
 ```
 
 如果能在 `dist` 里搜到：
 
-- `rainy-signature-v20260701-5`
+- `rainy-signature-v20260701-6`
 - `LOOP_MS = 8000`
-- `rainy-signature-mask-write-v20260701-5`
+- `rainy-signature-mask-write-v20260701-6`
 
 就说明新动画运行时已经进入构建产物。
 
