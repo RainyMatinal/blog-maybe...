@@ -1,0 +1,35 @@
+---
+// 中文: RainyMatinal 手写签名 SVG 组件，通过 mask 笔画路径让签名像被一笔一笔写出来。
+// EN: RainyMatinal handwritten signature SVG component that reveals the wordmark through animated mask strokes.
+
+type Props = {
+  id: string;
+  class?: string;
+  ariaLabel?: string;
+};
+
+const { id, class: className = "", ariaLabel = "RainyMatinal" } = Astro.props;
+const maskId = `${id}-mask`;
+const svgClass = ["rainy-signature", "handwritten-signature", className].filter(Boolean).join(" ");
+---
+
+<svg class={svgClass} data-signature-version="rainy-signature-v20260701-5" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label={ariaLabel}>
+  <defs>
+    <mask id={maskId} maskUnits="userSpaceOnUse">
+      <rect width="720" height="180" fill="black" />
+      <g class="sig-mask-lines" aria-hidden="true">
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-1" d="M54 94 C 90 52, 126 48, 142 84 C 157 118, 105 132, 90 98 C 75 65, 118 52, 150 62 C 182 73, 184 105, 208 105 C 232 105, 233 70, 254 68 C 282 66, 285 108, 310 108 C 338 108, 332 66, 360 66 C 384 66, 392 102, 416 104 C 442 106, 454 72, 478 73 C 502 75, 501 109, 525 112 C 552 115, 560 79, 585 78 C 612 77, 625 95, 645 106" />
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-2" d="M78 62 C 110 29, 150 32, 178 58 S 232 84, 263 50 S 320 43, 348 66 S 397 86, 430 56 S 493 51, 520 74 S 584 88, 618 60" />
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-3" d="M82 126 C 72 104, 72 74, 84 49 C 97 23, 139 29, 146 62 C 153 97, 112 100, 89 88" />
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-4" d="M103 118 C 150 150, 217 133, 270 120 C 334 105, 391 139, 452 122 C 515 105, 568 134, 642 113" />
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-5" d="M200 94 C 224 127, 245 130, 264 94 C 276 70, 297 66, 309 88 C 323 112, 297 129, 276 119" />
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-6" d="M341 94 C 364 123, 389 126, 409 92 C 424 66, 450 66, 463 90 C 475 113, 450 129, 430 119" />
+        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-7" d="M501 96 C 526 126, 557 130, 579 101 C 598 76, 625 76, 645 104 C 655 118, 655 130, 648 142" />
+      </g>
+    </mask>
+  </defs>
+
+  <text class="sig-ghost" x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
+  <text class="sig-ink" mask={`url(#${maskId})`} x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
+  <path pathLength="1" class="sig-underline" d="M104 132 C 178 153, 282 145, 370 136 S 545 119, 622 130" />
+</svg>

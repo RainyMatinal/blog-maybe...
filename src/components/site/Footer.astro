@@ -1,15 +1,13 @@
 ---
 // 中文: 站点页脚组件，展示 RainyMatinal 签名、站点标语和全站签名动画运行时。
 // EN: Site footer component that renders the RainyMatinal signature, slogans, and the shared signature animation runtime.
+import Signature from "../visual/Signature.astro";
 ---
 
-<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260701-4">
+<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260701-5">
   <div class="footer-signature" aria-label="RainyMatinal 签名动画">
     <div class="signature-svg-wrapper">
-      <svg class="rainy-signature" data-signature-version="rainy-signature-v20260701-4" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label="RainyMatinal">
-        <text x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
-        <path pathLength="1" class="sig-underline" d="M104 132 C 178 153, 282 145, 370 136 S 545 119, 622 130" />
-      </svg>
+      <Signature id="footer-rainy-signature" />
     </div>
     <div class="slogan-text">
       <p class="slogan-jp">桜の花の落ちる速さは秒速5センチメートル</p>
@@ -33,29 +31,40 @@
 </footer>
 <script is:inline>
   (() => {
-    const VERSION = "rainy-signature-v20260701-4";
+    const VERSION = "rainy-signature-v20260701-5";
     const LOOP_MS = 8000;
-    const TEXT_DASH = 1180;
-    const LINE_DASH = 1;
 
-    const textFrames = [
-      { opacity: 0, fill: "transparent", strokeDashoffset: TEXT_DASH },
-      { opacity: 1, fill: "transparent", strokeDashoffset: TEXT_DASH, offset: 0.04 },
-      { opacity: 1, fill: "transparent", strokeDashoffset: 0, offset: 0.42 },
-      { opacity: 1, fill: "currentColor", strokeDashoffset: 0, offset: 0.54 },
-      { opacity: 1, fill: "currentColor", strokeDashoffset: 0, offset: 0.86 },
-      { opacity: 0, fill: "transparent", strokeDashoffset: TEXT_DASH, offset: 0.98 },
-      { opacity: 0, fill: "transparent", strokeDashoffset: TEXT_DASH },
+    const maskFrames = (index) => {
+      const start = 0.035 + index * 0.055;
+      const visible = Math.min(start + 0.015, 0.44);
+      const drawn = Math.min(start + 0.22, 0.68);
+
+      return [
+        { offset: 0, opacity: 0, strokeDashoffset: 1 },
+        { offset: start, opacity: 0, strokeDashoffset: 1 },
+        { offset: visible, opacity: 1, strokeDashoffset: 1 },
+        { offset: drawn, opacity: 1, strokeDashoffset: 0 },
+        { offset: 0.84, opacity: 1, strokeDashoffset: 0 },
+        { offset: 0.965, opacity: 0, strokeDashoffset: 1 },
+        { offset: 1, opacity: 0, strokeDashoffset: 1 },
+      ];
+    };
+
+    const inkFrames = [
+      { offset: 0, opacity: 1 },
+      { offset: 0.84, opacity: 1 },
+      { offset: 0.965, opacity: 0 },
+      { offset: 1, opacity: 1 },
     ];
 
     const lineFrames = [
-      { opacity: 0, strokeDashoffset: LINE_DASH },
-      { opacity: 0, strokeDashoffset: LINE_DASH, offset: 0.18 },
-      { opacity: 1, strokeDashoffset: LINE_DASH, offset: 0.28 },
-      { opacity: 1, strokeDashoffset: 0, offset: 0.5 },
-      { opacity: 1, strokeDashoffset: 0, offset: 0.86 },
-      { opacity: 0, strokeDashoffset: LINE_DASH, offset: 0.98 },
-      { opacity: 0, strokeDashoffset: LINE_DASH },
+      { offset: 0, opacity: 0, strokeDashoffset: 1 },
+      { offset: 0.48, opacity: 0, strokeDashoffset: 1 },
+      { offset: 0.56, opacity: 1, strokeDashoffset: 1 },
+      { offset: 0.72, opacity: 1, strokeDashoffset: 0 },
+      { offset: 0.84, opacity: 1, strokeDashoffset: 0 },
+      { offset: 0.965, opacity: 0, strokeDashoffset: 1 },
+      { offset: 1, opacity: 0, strokeDashoffset: 1 },
     ];
 
     const cancelAnimations = (node) => {
@@ -63,31 +72,50 @@
     };
 
     const prepareSignature = (signature) => {
-      const text = signature.querySelector("text");
+      const ink = signature.querySelector(".sig-ink");
+      const ghost = signature.querySelector(".sig-ghost");
       const line = signature.querySelector(".sig-underline");
-      if (!text || !line) return null;
+      const strokes = Array.from(signature.querySelectorAll(".sig-mask-stroke"));
+      if (!ink || !line || strokes.length === 0) return null;
 
       signature.dataset.signatureVersion = VERSION;
       signature.dataset.signatureReplayId = VERSION + "-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
-      text.style.opacity = "0";
-      text.style.fill = "transparent";
-      text.style.stroke = "currentColor";
-      text.style.strokeWidth = "1.7";
-      text.style.strokeLinecap = "round";
-      text.style.strokeLinejoin = "round";
-      text.style.strokeDasharray = String(TEXT_DASH);
-      text.style.strokeDashoffset = String(TEXT_DASH);
+      ink.style.fill = "currentColor";
+      ink.style.stroke = "none";
+      ink.style.opacity = "1";
+      ink.style.animation = "none";
 
-      line.style.opacity = "0";
+      if (ghost) {
+        ghost.style.fill = "none";
+        ghost.style.stroke = "currentColor";
+        ghost.style.strokeWidth = "1";
+        ghost.style.opacity = "0.08";
+        ghost.style.animation = "none";
+      }
+
+      strokes.forEach((stroke) => {
+        stroke.style.fill = "none";
+        stroke.style.stroke = "#fff";
+        stroke.style.strokeWidth = "42";
+        stroke.style.strokeLinecap = "round";
+        stroke.style.strokeLinejoin = "round";
+        stroke.style.strokeDasharray = "1";
+        stroke.style.strokeDashoffset = "1";
+        stroke.style.opacity = "0";
+        stroke.style.animation = "none";
+      });
+
       line.style.fill = "none";
       line.style.stroke = "currentColor";
       line.style.strokeWidth = "4";
       line.style.strokeLinecap = "round";
-      line.style.strokeDasharray = String(LINE_DASH);
-      line.style.strokeDashoffset = String(LINE_DASH);
+      line.style.strokeDasharray = "1";
+      line.style.strokeDashoffset = "1";
+      line.style.opacity = "0";
+      line.style.animation = "none";
 
-      return { text, line };
+      return { ink, ghost, line, strokes };
     };
 
     const replaySignature = () => {
@@ -96,7 +124,7 @@
         const parts = prepareSignature(signature);
         if (!parts) return;
 
-        const animatedParts = [parts.text, parts.line];
+        const animatedParts = [parts.ink, parts.ghost, parts.line, ...parts.strokes].filter(Boolean);
         animatedParts.forEach((part) => {
           cancelAnimations(part);
           part.style.animation = "none";
@@ -105,22 +133,37 @@
         signature.getBoundingClientRect();
 
         requestAnimationFrame(() => {
-          parts.text.style.animation = "";
+          parts.ink.style.animation = "";
           parts.line.style.animation = "";
+          parts.strokes.forEach((stroke) => {
+            stroke.style.animation = "";
+          });
 
-          if (typeof parts.text.animate === "function" && typeof parts.line.animate === "function") {
-            cancelAnimations(parts.text);
+          if (typeof parts.ink.animate === "function") {
+            cancelAnimations(parts.ink);
             cancelAnimations(parts.line);
-            parts.text.animate(textFrames, {
+            parts.strokes.forEach(cancelAnimations);
+
+            parts.ink.animate(inkFrames, {
               duration: LOOP_MS,
               iterations: Infinity,
               easing: "linear",
               fill: "both",
             });
+
+            parts.strokes.forEach((stroke, index) => {
+              stroke.animate(maskFrames(index), {
+                duration: LOOP_MS,
+                iterations: Infinity,
+                easing: "cubic-bezier(0.33, 0, 0.18, 1)",
+                fill: "both",
+              });
+            });
+
             parts.line.animate(lineFrames, {
               duration: LOOP_MS,
               iterations: Infinity,
-              easing: "linear",
+              easing: "cubic-bezier(0.33, 0, 0.18, 1)",
               fill: "both",
             });
           }
@@ -151,20 +194,40 @@
 
 <style is:inline>
   .rainy-signature {
-    --signature-text-dash: 1180;
     color: currentColor;
   }
 
-  .rainy-signature text {
-    opacity: 0;
-    fill: transparent;
+  .rainy-signature text,
+  .rainy-signature .sig-ink,
+  .rainy-signature .sig-ghost {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .rainy-signature .sig-ink {
+    fill: currentColor;
+    opacity: 1;
+    stroke: none;
+  }
+
+  .rainy-signature .sig-ghost {
+    fill: none;
+    opacity: 0.08;
     stroke: currentColor;
-    stroke-width: 1.7;
+    stroke-width: 1;
+  }
+
+  .rainy-signature .sig-mask-stroke {
+    fill: none;
+    opacity: 0;
+    stroke: #fff;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-dasharray: var(--signature-text-dash);
-    stroke-dashoffset: var(--signature-text-dash);
-    animation: rainy-signature-write-v20260701-4 8000ms linear infinite both !important;
+    stroke-width: 42;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: rainy-signature-mask-write-v20260701-5 8000ms linear infinite both !important;
   }
 
   .rainy-signature .sig-underline {
@@ -175,55 +238,47 @@
     stroke-linecap: round;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: rainy-signature-line-v20260701-4 8000ms linear infinite both !important;
+    animation: rainy-signature-line-v20260701-5 8000ms linear infinite both !important;
   }
 
-  @keyframes rainy-signature-write-v20260701-4 {
-    0% {
-      opacity: 0;
-      fill: transparent;
-      stroke-dashoffset: var(--signature-text-dash);
-    }
+  @keyframes rainy-signature-mask-write-v20260701-5 {
+    0%,
     4% {
-      opacity: 1;
-      fill: transparent;
-      stroke-dashoffset: var(--signature-text-dash);
+      opacity: 0;
+      stroke-dashoffset: 1;
     }
-    42% {
+    14% {
       opacity: 1;
-      fill: transparent;
+      stroke-dashoffset: 1;
+    }
+    56%,
+    84% {
+      opacity: 1;
       stroke-dashoffset: 0;
     }
-    54%,
-    86% {
-      opacity: 1;
-      fill: currentColor;
-      stroke-dashoffset: 0;
-    }
-    98%,
+    96.5%,
     100% {
       opacity: 0;
-      fill: transparent;
-      stroke-dashoffset: var(--signature-text-dash);
+      stroke-dashoffset: 1;
     }
   }
 
-  @keyframes rainy-signature-line-v20260701-4 {
+  @keyframes rainy-signature-line-v20260701-5 {
     0%,
-    18% {
+    48% {
       opacity: 0;
       stroke-dashoffset: 1;
     }
-    28% {
+    56% {
       opacity: 1;
       stroke-dashoffset: 1;
     }
-    50%,
-    86% {
+    72%,
+    84% {
       opacity: 1;
       stroke-dashoffset: 0;
     }
-    98%,
+    96.5%,
     100% {
       opacity: 0;
       stroke-dashoffset: 1;
@@ -231,7 +286,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .rainy-signature text,
+    .rainy-signature .sig-mask-stroke,
     .rainy-signature .sig-underline {
       animation-duration: 8000ms !important;
       animation-iteration-count: infinite !important;

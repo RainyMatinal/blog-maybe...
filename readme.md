@@ -7,7 +7,7 @@ EN: Project README that explains how to use, write, add images, deploy, and trou
 
 这是一个基于 Astro 的静态个人博客。它的定位不是普通模板站，而是一个偏旧互联网资料库气质的个人技术档案馆：记录 Linux、Git、C 语言、前端、网络工程和考研路线。
 
-当前项目可以直接部署到 Cloudflare Pages。页面底部和文章底部的 RainyMatinal 签名动画已经改为带版本号的内联运行时：每次进入页面会重新创建动画，每 8 秒循环一次，并尽量避免浏览器或 Cloudflare 缓存旧动画。
+当前项目可以直接部署到 Cloudflare Pages。页面底部和文章底部的 RainyMatinal 签名动画已经改为带版本号的手写笔画内联运行时：每次进入页面会重新创建动画，每 8 秒循环一次，并尽量避免浏览器或 Cloudflare 缓存旧动画。
 
 ## 1. 技术栈
 
@@ -173,18 +173,18 @@ src/layouts/BlogPostLayout.astro
 
 当前动画策略：
 
-- 动画版本号：`rainy-signature-v20260701-4`。
+- 动画版本号：`rainy-signature-v20260701-5`。
 - 循环时长：`8000ms`，也就是每 8 秒重复一遍。
 - 页面进入时会在 `DOMContentLoaded` 后播放。
 - 浏览器从返回缓存恢复页面时，会在 `pageshow` 重新播放。
 - 页面切回可见时，会在 `visibilitychange` 重新播放。
 - Astro 页面切换完成时，会在 `astro:page-load` 重新播放。
-- 优先使用 Web Animations API 创建运行时动画；如果设备不支持，会退回到内联 CSS keyframes。
+- 优先使用 Web Animations API 创建运行时动画；如果设备不支持，会退回到内联 CSS keyframes。`Signature.astro` 内的 mask 笔画路径负责制造手写显现效果。
 
 如果以后再次修改动画，建议同时修改这两个地方：
 
 1. `src/components/site/Footer.astro` 里的 `VERSION` 常量。
-2. 同文件里的 keyframes 名称，例如 `rainy-signature-write-v20260701-4`。
+2. 同文件里的 keyframes 名称，例如 `rainy-signature-mask-write-v20260701-5`。
 
 这样可以强制浏览器把它视为新动画，减少旧动画被缓存继续使用的概率。
 
@@ -229,14 +229,14 @@ dist/_headers
 
 ```bash
 npm run build
-rg "rainy-signature-v20260701-4|8000" dist
+rg "rainy-signature-v20260701-5|8000" dist
 ```
 
 如果能在 `dist` 里搜到：
 
-- `rainy-signature-v20260701-4`
+- `rainy-signature-v20260701-5`
 - `LOOP_MS = 8000`
-- `rainy-signature-write-v20260701-4`
+- `rainy-signature-mask-write-v20260701-5`
 
 就说明新动画运行时已经进入构建产物。
 
