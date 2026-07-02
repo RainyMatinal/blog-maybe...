@@ -4,7 +4,7 @@
 import Signature from "../visual/Signature.astro";
 ---
 
-<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260702-8">
+<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260702-9">
   <div class="footer-signature" aria-label="RainyMatinal 签名动画">
     <div class="signature-svg-wrapper">
       <Signature id="footer-rainy-signature" />
@@ -31,10 +31,10 @@ import Signature from "../visual/Signature.astro";
 </footer>
 <script is:inline>
   (() => {
-    const VERSION = "rainy-signature-v20260702-8";
+    const VERSION = "rainy-signature-v20260702-9";
     const LOOP_MS = 8000;
     const HOLD_OFFSET = 0.91;
-    const FADE_OFFSET = 0.975;
+    const RESET_OFFSET = 0.965;
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
     const toNumber = (value, fallback) => {
       const parsed = Number(value);
@@ -44,16 +44,17 @@ import Signature from "../visual/Signature.astro";
     const letterFrames = (stroke, index) => {
       const start = clamp(toNumber(stroke.dataset.start, 0.04 + index * 0.065), 0, 0.88);
       const duration = clamp(toNumber(stroke.dataset.duration, 0.08), 0.035, 0.16);
-      const visible = clamp(start + 0.006, 0, 0.9);
+      const visible = start;
       const drawn = clamp(start + duration, visible + 0.012, HOLD_OFFSET);
 
       return [
         { offset: 0, opacity: 0, strokeDashoffset: 1 },
-        { offset: start, opacity: 0, strokeDashoffset: 1 },
+        { offset: Math.max(start - 0.001, 0), opacity: 0, strokeDashoffset: 1 },
         { offset: visible, opacity: 1, strokeDashoffset: 1 },
         { offset: drawn, opacity: 1, strokeDashoffset: 0 },
         { offset: HOLD_OFFSET, opacity: 1, strokeDashoffset: 0 },
-        { offset: FADE_OFFSET, opacity: 0, strokeDashoffset: 1 },
+        { offset: RESET_OFFSET - 0.001, opacity: 1, strokeDashoffset: 0 },
+        { offset: RESET_OFFSET, opacity: 0, strokeDashoffset: 1 },
         { offset: 1, opacity: 0, strokeDashoffset: 1 },
       ];
     };
@@ -70,9 +71,9 @@ import Signature from "../visual/Signature.astro";
       signature.dataset.signatureReplayId = VERSION + "-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
       strokes.forEach((stroke) => {
-        const width = toNumber(stroke.dataset.width, 8);
+        const width = toNumber(stroke.dataset.width, 2.7);
         stroke.style.fill = "none";
-        stroke.style.stroke = "currentColor";
+        stroke.style.stroke = "#000";
         stroke.style.strokeWidth = String(width);
         stroke.style.strokeLinecap = "round";
         stroke.style.strokeLinejoin = "round";
@@ -142,38 +143,38 @@ import Signature from "../visual/Signature.astro";
 
 <style is:inline>
   .rainy-signature {
-    color: currentColor;
+    color: #000;
   }
 
   .rainy-signature .sig-letter-stroke {
     fill: none;
     opacity: 0;
-    stroke: currentColor;
+    stroke: #000;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 8;
+    stroke-width: 2.7;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
     vector-effect: non-scaling-stroke;
-    animation: rainy-signature-letter-write-v20260702-8 8000ms linear infinite both !important;
+    animation: rainy-signature-letter-write-v20260702-9 8000ms linear infinite both !important;
   }
 
-  @keyframes rainy-signature-letter-write-v20260702-8 {
+  @keyframes rainy-signature-letter-write-v20260702-9 {
     0%,
     3.5% {
       opacity: 0;
       stroke-dashoffset: 1;
     }
-    12% {
+    3.6% {
       opacity: 1;
       stroke-dashoffset: 1;
     }
     88%,
-    91% {
+    96.4% {
       opacity: 1;
       stroke-dashoffset: 0;
     }
-    97.5%,
+    96.5%,
     100% {
       opacity: 0;
       stroke-dashoffset: 1;
