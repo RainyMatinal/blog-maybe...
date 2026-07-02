@@ -4,7 +4,7 @@
 import Signature from "../visual/Signature.astro";
 ---
 
-<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260701-6">
+<footer class="hybrid-footer" data-signature-version="rainy-signature-v20260702-8">
   <div class="footer-signature" aria-label="RainyMatinal 签名动画">
     <div class="signature-svg-wrapper">
       <Signature id="footer-rainy-signature" />
@@ -31,79 +31,48 @@ import Signature from "../visual/Signature.astro";
 </footer>
 <script is:inline>
   (() => {
-    const VERSION = "rainy-signature-v20260701-6";
+    const VERSION = "rainy-signature-v20260702-8";
     const LOOP_MS = 8000;
+    const HOLD_OFFSET = 0.91;
+    const FADE_OFFSET = 0.975;
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
     const toNumber = (value, fallback) => {
       const parsed = Number(value);
       return Number.isFinite(parsed) ? parsed : fallback;
     };
 
-    const maskFrames = (stroke, index) => {
-      const start = clamp(toNumber(stroke.dataset.start, 0.04 + index * 0.04), 0, 0.82);
-      const duration = clamp(toNumber(stroke.dataset.duration, 0.12), 0.035, 0.2);
-      const visible = clamp(start + 0.012, 0, 0.86);
-      const drawn = clamp(start + duration, visible + 0.01, 0.875);
+    const letterFrames = (stroke, index) => {
+      const start = clamp(toNumber(stroke.dataset.start, 0.04 + index * 0.065), 0, 0.88);
+      const duration = clamp(toNumber(stroke.dataset.duration, 0.08), 0.035, 0.16);
+      const visible = clamp(start + 0.006, 0, 0.9);
+      const drawn = clamp(start + duration, visible + 0.012, HOLD_OFFSET);
 
       return [
         { offset: 0, opacity: 0, strokeDashoffset: 1 },
         { offset: start, opacity: 0, strokeDashoffset: 1 },
         { offset: visible, opacity: 1, strokeDashoffset: 1 },
         { offset: drawn, opacity: 1, strokeDashoffset: 0 },
-        { offset: 0.885, opacity: 1, strokeDashoffset: 0 },
-        { offset: 0.965, opacity: 0, strokeDashoffset: 1 },
+        { offset: HOLD_OFFSET, opacity: 1, strokeDashoffset: 0 },
+        { offset: FADE_OFFSET, opacity: 0, strokeDashoffset: 1 },
         { offset: 1, opacity: 0, strokeDashoffset: 1 },
       ];
     };
-
-    const inkFrames = [
-      { offset: 0, opacity: 1 },
-      { offset: 0.885, opacity: 1 },
-      { offset: 0.965, opacity: 0 },
-      { offset: 1, opacity: 1 },
-    ];
-
-    const lineFrames = [
-      { offset: 0, opacity: 0, strokeDashoffset: 1 },
-      { offset: 0.66, opacity: 0, strokeDashoffset: 1 },
-      { offset: 0.705, opacity: 1, strokeDashoffset: 1 },
-      { offset: 0.86, opacity: 1, strokeDashoffset: 0 },
-      { offset: 0.885, opacity: 1, strokeDashoffset: 0 },
-      { offset: 0.965, opacity: 0, strokeDashoffset: 1 },
-      { offset: 1, opacity: 0, strokeDashoffset: 1 },
-    ];
 
     const cancelAnimations = (node) => {
       node?.getAnimations?.().forEach((animation) => animation.cancel());
     };
 
     const prepareSignature = (signature) => {
-      const ink = signature.querySelector(".sig-ink");
-      const ghost = signature.querySelector(".sig-ghost");
-      const line = signature.querySelector(".sig-underline");
-      const strokes = Array.from(signature.querySelectorAll(".sig-mask-stroke"));
-      if (!ink || !line || strokes.length === 0) return null;
+      const strokes = Array.from(signature.querySelectorAll(".sig-letter-stroke"));
+      if (strokes.length === 0) return null;
 
       signature.dataset.signatureVersion = VERSION;
       signature.dataset.signatureReplayId = VERSION + "-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
-      ink.style.fill = "currentColor";
-      ink.style.stroke = "none";
-      ink.style.opacity = "1";
-      ink.style.animation = "none";
-
-      if (ghost) {
-        ghost.style.fill = "none";
-        ghost.style.stroke = "currentColor";
-        ghost.style.strokeWidth = "0.9";
-        ghost.style.opacity = "0";
-        ghost.style.animation = "none";
-      }
-
       strokes.forEach((stroke) => {
-        const width = toNumber(stroke.dataset.width, 36);
+        const width = toNumber(stroke.dataset.width, 8);
         stroke.style.fill = "none";
-        stroke.style.stroke = "#fff";
+        stroke.style.stroke = "currentColor";
         stroke.style.strokeWidth = String(width);
         stroke.style.strokeLinecap = "round";
         stroke.style.strokeLinejoin = "round";
@@ -111,18 +80,10 @@ import Signature from "../visual/Signature.astro";
         stroke.style.strokeDashoffset = "1";
         stroke.style.opacity = "0";
         stroke.style.animation = "none";
+        stroke.style.vectorEffect = "non-scaling-stroke";
       });
 
-      line.style.fill = "none";
-      line.style.stroke = "currentColor";
-      line.style.strokeWidth = "4";
-      line.style.strokeLinecap = "round";
-      line.style.strokeDasharray = "1";
-      line.style.strokeDashoffset = "1";
-      line.style.opacity = "0";
-      line.style.animation = "none";
-
-      return { ink, ghost, line, strokes };
+      return { strokes };
     };
 
     const replaySignature = () => {
@@ -131,47 +92,27 @@ import Signature from "../visual/Signature.astro";
         const parts = prepareSignature(signature);
         if (!parts) return;
 
-        const animatedParts = [parts.ink, parts.ghost, parts.line, ...parts.strokes].filter(Boolean);
-        animatedParts.forEach((part) => {
-          cancelAnimations(part);
-          part.style.animation = "none";
+        parts.strokes.forEach((stroke) => {
+          cancelAnimations(stroke);
+          stroke.style.animation = "none";
         });
 
         signature.getBoundingClientRect();
 
         requestAnimationFrame(() => {
-          parts.ink.style.animation = "";
-          parts.line.style.animation = "";
           parts.strokes.forEach((stroke) => {
             stroke.style.animation = "";
           });
 
-          if (typeof parts.ink.animate === "function") {
-            cancelAnimations(parts.ink);
-            cancelAnimations(parts.line);
-            parts.strokes.forEach(cancelAnimations);
-
-            parts.ink.animate(inkFrames, {
-              duration: LOOP_MS,
-              iterations: Infinity,
-              easing: "linear",
-              fill: "both",
-            });
-
+          if (typeof parts.strokes[0]?.animate === "function") {
             parts.strokes.forEach((stroke, index) => {
-              stroke.animate(maskFrames(stroke, index), {
+              cancelAnimations(stroke);
+              stroke.animate(letterFrames(stroke, index), {
                 duration: LOOP_MS,
                 iterations: Infinity,
-                easing: "cubic-bezier(0.3, 0, 0.18, 1)",
+                easing: "cubic-bezier(0.28, 0, 0.18, 1)",
                 fill: "both",
               });
-            });
-
-            parts.line.animate(lineFrames, {
-              duration: LOOP_MS,
-              iterations: Infinity,
-              easing: "cubic-bezier(0.3, 0, 0.18, 1)",
-              fill: "both",
             });
           }
         });
@@ -204,53 +145,22 @@ import Signature from "../visual/Signature.astro";
     color: currentColor;
   }
 
-  .rainy-signature text,
-  .rainy-signature .sig-ink,
-  .rainy-signature .sig-ghost {
-    animation: none !important;
-    stroke-dasharray: none !important;
-    stroke-dashoffset: 0 !important;
-  }
-
-  .rainy-signature .sig-ink {
-    fill: currentColor;
-    opacity: 1;
-    stroke: none;
-  }
-
-  .rainy-signature .sig-ghost {
+  .rainy-signature .sig-letter-stroke {
     fill: none;
     opacity: 0;
     stroke: currentColor;
-    stroke-width: 0.9;
-  }
-
-  .rainy-signature .sig-mask-stroke {
-    fill: none;
-    opacity: 0;
-    stroke: #fff;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 36;
+    stroke-width: 8;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: rainy-signature-mask-write-v20260701-6 8000ms linear infinite both !important;
+    vector-effect: non-scaling-stroke;
+    animation: rainy-signature-letter-write-v20260702-8 8000ms linear infinite both !important;
   }
 
-  .rainy-signature .sig-underline {
-    opacity: 0;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 4;
-    stroke-linecap: round;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: rainy-signature-line-v20260701-6 8000ms linear infinite both !important;
-  }
-
-  @keyframes rainy-signature-mask-write-v20260701-6 {
+  @keyframes rainy-signature-letter-write-v20260702-8 {
     0%,
-    4% {
+    3.5% {
       opacity: 0;
       stroke-dashoffset: 1;
     }
@@ -258,34 +168,12 @@ import Signature from "../visual/Signature.astro";
       opacity: 1;
       stroke-dashoffset: 1;
     }
-    72%,
-    88.5% {
+    88%,
+    91% {
       opacity: 1;
       stroke-dashoffset: 0;
     }
-    96.5%,
-    100% {
-      opacity: 0;
-      stroke-dashoffset: 1;
-    }
-  }
-
-  @keyframes rainy-signature-line-v20260701-6 {
-    0%,
-    66% {
-      opacity: 0;
-      stroke-dashoffset: 1;
-    }
-    70.5% {
-      opacity: 1;
-      stroke-dashoffset: 1;
-    }
-    86%,
-    88.5% {
-      opacity: 1;
-      stroke-dashoffset: 0;
-    }
-    96.5%,
+    97.5%,
     100% {
       opacity: 0;
       stroke-dashoffset: 1;
@@ -293,8 +181,7 @@ import Signature from "../visual/Signature.astro";
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .rainy-signature .sig-mask-stroke,
-    .rainy-signature .sig-underline {
+    .rainy-signature .sig-letter-stroke {
       animation-duration: 8000ms !important;
       animation-iteration-count: infinite !important;
       animation-play-state: running !important;

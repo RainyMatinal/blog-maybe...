@@ -1,6 +1,6 @@
 ---
-// 中文: RainyMatinal 手写签名 SVG 组件，通过多段 mask 笔画按字母顺序写出完整签名。
-// EN: RainyMatinal handwritten signature SVG component that writes the full wordmark with ordered mask strokes.
+// 中文: RainyMatinal 手写签名 SVG 组件，每个字母是一条独立的真实手写路径。
+// EN: RainyMatinal handwritten signature SVG component; every letter is one independent handwritten path.
 
 type Props = {
   id: string;
@@ -9,38 +9,23 @@ type Props = {
 };
 
 const { id, class: className = "", ariaLabel = "RainyMatinal" } = Astro.props;
-const maskId = `${id}-mask`;
 const svgClass = ["rainy-signature", "handwritten-signature", className].filter(Boolean).join(" ");
 ---
 
-<svg class={svgClass} data-signature-version="rainy-signature-v20260701-6" viewBox="0 0 720 180" width="100%" height="100%" role="img" aria-label={ariaLabel}>
-  <defs>
-    <mask id={maskId} maskUnits="userSpaceOnUse" mask-type="luminance">
-      <rect width="720" height="180" fill="black" />
-      <g class="sig-mask-lines" aria-hidden="true">
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-01" data-letter="R-stem" data-start="0.035" data-duration="0.105" data-width="38" d="M76 128 C 70 100, 70 63, 84 43 C 97 24, 129 31, 134 59 C 139 88, 105 101, 78 87" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-02" data-letter="R-bowl" data-start="0.075" data-duration="0.125" data-width="40" d="M83 44 C 119 22, 171 36, 169 72 C 167 105, 118 103, 86 89" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-03" data-letter="R-leg" data-start="0.125" data-duration="0.11" data-width="34" d="M111 91 C 128 105, 143 123, 160 137" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-04" data-letter="a" data-start="0.185" data-duration="0.125" data-width="36" d="M175 103 C 174 80, 204 69, 219 85 C 237 105, 215 132, 191 122 C 171 113, 176 86, 202 81 C 221 78, 232 90, 236 103" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-05" data-letter="i-dot" data-start="0.245" data-duration="0.045" data-width="22" d="M258 57 C 260 54, 264 54, 266 57 C 268 61, 265 65, 261 65 C 257 65, 255 61, 258 57" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-06" data-letter="i-stem" data-start="0.275" data-duration="0.085" data-width="30" d="M260 82 C 258 98, 258 113, 263 128" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-07" data-letter="n" data-start="0.325" data-duration="0.13" data-width="36" d="M284 128 C 282 105, 285 82, 303 79 C 326 75, 323 111, 328 128 C 333 105, 346 82, 366 83 C 390 84, 383 115, 393 128" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-08" data-letter="y" data-start="0.39" data-duration="0.13" data-width="36" d="M407 82 C 405 105, 413 126, 431 121 C 449 116, 452 92, 453 78 C 449 112, 436 143, 407 155" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-09" data-letter="M-left" data-start="0.455" data-duration="0.105" data-width="38" d="M483 128 C 475 99, 476 66, 492 49 C 511 64, 516 100, 524 121" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-10" data-letter="M-right" data-start="0.505" data-duration="0.12" data-width="38" d="M524 121 C 533 92, 541 64, 556 50 C 575 72, 578 101, 584 128" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-11" data-letter="a" data-start="0.565" data-duration="0.115" data-width="35" d="M593 104 C 592 82, 621 73, 635 88 C 652 106, 632 130, 609 122 C 590 116, 593 89, 617 83 C 636 78, 649 89, 653 103" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-12" data-letter="t-stem" data-start="0.62" data-duration="0.09" data-width="30" d="M666 62 C 662 89, 663 115, 672 130" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-13" data-letter="t-cross" data-start="0.655" data-duration="0.065" data-width="26" d="M643 82 C 665 78, 688 80, 704 87" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-14" data-letter="i-dot" data-start="0.685" data-duration="0.04" data-width="20" d="M702 58 C 705 55, 709 55, 711 58 C 713 62, 710 66, 706 66 C 702 66, 700 62, 702 58" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-15" data-letter="i-stem" data-start="0.705" data-duration="0.07" data-width="28" d="M706 82 C 704 99, 705 115, 710 129" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-16" data-letter="final-n-a" data-start="0.725" data-duration="0.105" data-width="34" d="M94 132 C 150 151, 207 133, 258 121 C 314 108, 362 138, 414 125 C 458 114, 500 121, 542 132" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-17" data-letter="final-a-l" data-start="0.755" data-duration="0.095" data-width="34" d="M538 132 C 579 145, 615 128, 648 121 C 684 114, 704 127, 714 145" />
-        <path pathLength="1" class="sig-mask-stroke sig-mask-stroke-18" data-letter="flourish" data-start="0.785" data-duration="0.075" data-width="28" d="M121 58 C 183 36, 222 60, 273 51 C 338 40, 381 74, 434 55 C 488 36, 548 57, 611 49" />
-      </g>
-    </mask>
-  </defs>
-
-  <text class="sig-ghost" x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
-  <text class="sig-ink" mask={`url(#${maskId})`} x="50%" y="92" text-anchor="middle" font-family="Segoe Script, Lucida Handwriting, Niconne, Brush Script MT, cursive" font-size="82">RainyMatinal</text>
-  <path pathLength="1" class="sig-underline" d="M104 132 C 178 153, 282 145, 370 136 S 545 119, 622 130" />
+<svg class={svgClass} data-signature-version="rainy-signature-v20260702-8" viewBox="40 0 780 180" width="100%" height="100%" role="img" aria-label={ariaLabel}>
+  <title>{ariaLabel}</title>
+  <g class="sig-letter-lines" aria-hidden="true">
+    <path pathLength="1" class="sig-letter-stroke sig-letter-01" data-letter="R" data-start="0.035" data-duration="0.11" data-width="8.6" d="M70 128 C 68 96, 71 58, 84 40 C 101 22, 151 30, 158 58 C 166 91, 115 101, 86 88 C 108 101, 133 121, 159 136" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-02" data-letter="a" data-start="0.13" data-duration="0.083" data-width="8.4" d="M159 136 C 153 116, 161 91, 185 83 C 203 77, 218 91, 218 109 C 218 127, 190 133, 174 119 C 158 105, 174 85, 198 85 C 212 86, 218 99, 219 112" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-03" data-letter="i" data-start="0.202" data-duration="0.056" data-width="7.7" d="M219 113 C 225 101, 233 91, 242 82 C 239 99, 240 116, 248 127" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-04" data-letter="n" data-start="0.25" data-duration="0.088" data-width="8.2" d="M248 127 C 250 104, 258 85, 273 82 C 293 80, 288 112, 298 126 C 307 100, 320 82, 337 84 C 355 87, 351 111, 366 124" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-05" data-letter="y" data-start="0.33" data-duration="0.102" data-width="8.2" d="M366 124 C 363 109, 364 92, 366 84 C 363 110, 375 127, 392 119 C 408 111, 416 88, 419 76 C 413 114, 400 148, 374 157" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-06" data-letter="M" data-start="0.422" data-duration="0.13" data-width="8.8" d="M374 157 C 379 140, 382 128, 384 126 C 380 95, 383 62, 400 42 C 419 63, 430 99, 438 124 C 449 91, 462 59, 480 42 C 499 66, 504 100, 512 126" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-07" data-letter="a" data-start="0.54" data-duration="0.078" data-width="8.2" d="M512 126 C 510 114, 518 93, 540 85 C 556 80, 572 94, 572 111 C 572 128, 547 132, 530 119 C 515 107, 530 85, 554 86 C 568 87, 573 100, 575 112" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-08" data-letter="t" data-start="0.608" data-duration="0.079" data-width="7.9" d="M575 112 C 583 107, 589 91, 596 70 C 599 62, 600 56, 600 52 M576 84 C 598 79, 621 81, 636 87" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-09" data-letter="i" data-start="0.678" data-duration="0.055" data-width="7.4" d="M636 87 C 646 84, 654 82, 658 82 C 656 99, 657 115, 664 127" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-10" data-letter="n" data-start="0.725" data-duration="0.071" data-width="7.7" d="M664 127 C 666 104, 673 86, 685 84 C 700 82, 697 108, 704 123" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-11" data-letter="a" data-start="0.788" data-duration="0.065" data-width="7.5" d="M704 123 C 707 104, 720 90, 737 92 C 754 94, 760 113, 748 123 C 736 134, 714 125, 720 107 C 724 96, 738 93, 750 101 C 756 106, 758 112, 756 119" />
+    <path pathLength="1" class="sig-letter-stroke sig-letter-12" data-letter="l" data-start="0.845" data-duration="0.045" data-width="7.3" d="M756 119 C 760 96, 766 68, 778 45 C 774 76, 775 107, 786 130" />
+  </g>
 </svg>
