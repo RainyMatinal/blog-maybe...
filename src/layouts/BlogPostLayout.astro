@@ -1,8 +1,7 @@
 ---
 // 中文: Markdown 文章布局，负责文章元信息、正文、目录、签名和前后篇导航。
-// EN: Markdown post layout for metadata, body content, table of contents, signature, and previous/next navigation.
+// EN: Markdown post layout for metadata, body content, table of contents, previous/next navigation.
 import BaseLayout from "./BaseLayout.astro";
-import Signature from "../components/visual/Signature.astro";
 
 type NavPost = {
   title: string;
@@ -102,11 +101,6 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
           <div class="prose article-prose">
             <slot />
           </div>
-
-          <footer class="letter-signature-area" aria-label="RainyMatinal 文章签名">
-            <Signature id="article-rainy-signature" class="article-signature" ariaLabel="RainyMatinal" />
-            <p>Archived by RainyMatinal. Keep the signal readable.</p>
-          </footer>
         </div>
       </main>
 
@@ -427,21 +421,6 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
   .article-prose {
     max-width: 760px;
     margin: 0 auto;
-  }
-
-  .letter-signature-area {
-    display: grid;
-    justify-items: center;
-    margin: 4rem auto 0;
-    max-width: 500px;
-    color: #888;
-    font-size: 0.86rem;
-    text-align: center;
-  }
-
-  .article-signature {
-    height: 120px;
-    max-width: 500px;
   }
 
   .toc-sidebar-wrapper {
