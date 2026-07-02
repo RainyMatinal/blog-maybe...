@@ -1,6 +1,6 @@
 ---
-// 中文: RainyMatinal 手写签名 SVG 组件，每个字母是一条独立、细线、纯黑的真实手写路径。
-// EN: RainyMatinal handwritten signature SVG component; each letter is an independent, thin, pure-black handwritten path.
+// 中文: RainyMatinal 手写签名 SVG 组件，每个字母由多段独立细线笔画组成，用来模拟真实水笔/钢笔书写。
+// EN: RainyMatinal handwritten signature SVG component; every letter is built from multiple thin independent strokes for pen-like writing.
 
 type Props = {
   id: string;
@@ -12,20 +12,42 @@ const { id, class: className = "", ariaLabel = "RainyMatinal" } = Astro.props;
 const svgClass = ["rainy-signature", "handwritten-signature", className].filter(Boolean).join(" ");
 ---
 
-<svg class={svgClass} data-signature-version="rainy-signature-v20260702-9" viewBox="40 0 860 180" width="100%" height="100%" role="img" aria-label={ariaLabel}>
+<svg class={svgClass} data-signature-version="rainy-signature-v20260702-10" viewBox="40 0 960 180" width="100%" height="100%" role="img" aria-label={ariaLabel}>
   <title>{ariaLabel}</title>
   <g class="sig-letter-lines" aria-hidden="true">
-    <path pathLength="1" class="sig-letter-stroke sig-letter-01" data-letter="R" data-start="0.035" data-duration="0.105" data-width="3.1" d="M72 128 C 69 103, 71 66, 83 43 C 95 20, 145 25, 157 53 C 169 84, 123 103, 90 91 C 108 104, 128 120, 149 134" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-02" data-letter="a" data-start="0.13" data-duration="0.073" data-width="2.8" d="M166 112 C 171 93, 191 84, 203 94 C 217 106, 203 125, 185 122 C 170 119, 166 101, 181 91 C 194 82, 211 91, 213 111" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-03" data-letter="i" data-start="0.202" data-duration="0.052" data-width="2.4" d="M230 118 C 234 105, 239 92, 247 81 C 245 98, 246 113, 251 126" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-04" data-letter="n" data-start="0.252" data-duration="0.078" data-width="2.7" d="M267 125 C 268 105, 274 87, 286 84 C 303 80, 301 111, 309 125 C 318 102, 331 85, 346 86 C 361 88, 361 111, 371 124" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-05" data-letter="y" data-start="0.325" data-duration="0.088" data-width="2.8" d="M386 84 C 381 106, 388 123, 401 119 C 417 115, 425 92, 428 78 C 421 113, 408 144, 384 154" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-06" data-letter="M" data-start="0.415" data-duration="0.122" data-width="3.0" d="M414 126 C 410 94, 415 64, 430 45 C 449 68, 458 99, 466 123 C 476 92, 490 63, 507 45 C 524 69, 529 99, 535 126" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-07" data-letter="a" data-start="0.532" data-duration="0.07" data-width="2.7" d="M550 112 C 555 94, 574 85, 586 95 C 599 107, 586 124, 569 122 C 555 120, 551 103, 565 93 C 578 84, 594 91, 596 111" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-08" data-letter="t" data-start="0.598" data-duration="0.074" data-width="2.5" d="M614 126 C 610 102, 613 76, 625 53 M603 86 C 621 82, 641 83, 655 88" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-09" data-letter="i" data-start="0.668" data-duration="0.052" data-width="2.3" d="M662 94 C 672 102, 681 114, 690 126" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-10" data-letter="n" data-start="0.718" data-duration="0.07" data-width="2.6" d="M706 125 C 707 106, 713 88, 725 85 C 741 82, 739 111, 747 124 C 755 104, 767 89, 780 90" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-11" data-letter="a" data-start="0.783" data-duration="0.064" data-width="2.5" d="M794 112 C 799 96, 817 88, 828 98 C 839 108, 828 123, 813 122 C 800 121, 796 106, 809 97 C 821 89, 834 94, 836 113" />
-    <path pathLength="1" class="sig-letter-stroke sig-letter-12" data-letter="l" data-start="0.842" data-duration="0.045" data-width="2.4" d="M851 126 C 854 99, 860 71, 872 46 C 868 77, 869 107, 878 130" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-01" data-letter="R" data-part="stem" data-start="0.035" data-duration="0.05" data-width="2.7" d="M76 132 C 72 103, 75 62, 90 42" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-02" data-letter="R" data-part="bowl" data-start="0.077" data-duration="0.06" data-width="2.7" d="M90 42 C 121 23, 164 35, 164 65 C 164 96, 114 104, 89 91" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-03" data-letter="R" data-part="leg" data-start="0.127" data-duration="0.038" data-width="2.6" d="M89 91 C 110 104, 136 121, 158 135" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-04" data-letter="a" data-part="loop" data-start="0.165" data-duration="0.047" data-width="2.5" d="M205 94 C 187 85, 168 100, 170 119 C 172 136, 199 134, 211 115 C 221 99, 217 90, 205 94" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-05" data-letter="a" data-part="exit" data-start="0.205" data-duration="0.026" data-width="2.4" d="M211 115 C 212 126, 223 128, 236 120" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-06" data-letter="i" data-part="stem" data-start="0.232" data-duration="0.028" data-width="2.35" d="M250 96 C 246 110, 247 122, 255 130" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-07" data-letter="i" data-part="dot" data-start="0.258" data-duration="0.014" data-width="2.3" d="M253 73 C 255 71, 258 71, 260 74" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-08" data-letter="n" data-part="hump" data-start="0.281" data-duration="0.064" data-width="2.45" d="M276 128 C 277 109, 284 94, 296 92 C 313 91, 314 116, 324 126 C 339 126, 349 108, 366 101" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-09" data-letter="y" data-part="cup" data-start="0.348" data-duration="0.044" data-width="2.55" d="M394 96 C 390 112, 395 127, 408 127 C 423 126, 432 101, 436 86" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-10" data-letter="y" data-part="tail" data-start="0.386" data-duration="0.05" data-width="2.55" d="M436 86 C 429 126, 412 153, 386 160" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-11" data-letter="M" data-part="left" data-start="0.438" data-duration="0.047" data-width="2.75" d="M465 128 C 461 96, 467 63, 486 43" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-12" data-letter="M" data-part="middle" data-start="0.48" data-duration="0.055" data-width="2.75" d="M486 43 C 501 72, 509 99, 516 126 C 527 91, 540 62, 555 44" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-13" data-letter="M" data-part="right" data-start="0.531" data-duration="0.046" data-width="2.75" d="M555 44 C 573 69, 584 98, 590 128" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-14" data-letter="a" data-part="loop" data-start="0.575" data-duration="0.044" data-width="2.45" d="M637 95 C 619 87, 601 101, 603 119 C 605 135, 630 132, 642 114 C 651 99, 648 90, 637 95" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-15" data-letter="a" data-part="exit" data-start="0.612" data-duration="0.024" data-width="2.35" d="M642 114 C 643 126, 654 128, 667 120" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-16" data-letter="t" data-part="stem" data-start="0.637" data-duration="0.039" data-width="2.35" d="M688 129 C 684 104, 690 76, 705 55" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-17" data-letter="t" data-part="cross" data-start="0.669" data-duration="0.025" data-width="2.25" d="M673 88 C 696 83, 720 85, 735 92" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-18" data-letter="i" data-part="stem" data-start="0.695" data-duration="0.027" data-width="2.25" d="M756 98 C 752 111, 753 123, 761 130" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-19" data-letter="i" data-part="dot" data-start="0.72" data-duration="0.014" data-width="2.2" d="M759 74 C 761 71, 764 71, 766 74" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-20" data-letter="n" data-part="hump" data-start="0.742" data-duration="0.057" data-width="2.35" d="M784 128 C 785 110, 792 95, 805 92 C 822 90, 823 115, 831 126 C 845 126, 855 108, 868 101" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-21" data-letter="a" data-part="loop" data-start="0.801" data-duration="0.043" data-width="2.35" d="M909 96 C 891 88, 873 102, 875 119 C 877 135, 901 132, 913 114 C 922 100, 919 91, 909 96" />
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-22" data-letter="a" data-part="exit" data-start="0.837" data-duration="0.022" data-width="2.25" d="M913 114 C 914 126, 925 128, 937 120" />
+
+    <path pathLength="1" class="sig-letter-stroke sig-stroke-23" data-letter="l" data-part="stem" data-start="0.862" data-duration="0.048" data-width="2.35" d="M954 130 C 957 101, 964 68, 976 45 C 972 78, 973 109, 983 132" />
   </g>
 </svg>
