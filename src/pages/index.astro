@@ -20,24 +20,7 @@ const actualPosts = collectionPosts.map((post) => ({
   heroImage: post.data.heroImage,
 }));
 
-const placeholderPosts = [
-  ["Arch Linux 安装记录", "从分区、联网到桌面环境，把第一次系统安装过程打包成一封来信。", "技术", ["Arch", "Linux"]],
-  ["GitHub SSH 配置笔记", "SSH key、remote、push 权限与仓库同步路线的备忘。", "手稿", ["Git", "GitHub"]],
-  ["H3C VLAN 基础笔记", "Access、Trunk、VLANIF 与网络工程入门配置现场。", "片言", ["H3C", "VLAN"]],
-  ["C 语言学习索引", "把语法、指针、编译和调试拆成可复查的小档案。", "手稿", ["C", "学习"]],
-  ["前端实验记录", "Astro、CSS、组件与个人站点重构的阶段性手记。", "共鸣", ["Astro", "CSS"]],
-  ["考研路线备忘", "阶段目标、复盘节奏和长期学习计划的索引页。", "呓语", ["考研", "复盘"]],
-].map(([title, description, category, tags], index) => ({
-  title: String(title),
-  description: String(description),
-  category: String(category),
-  tags: tags as string[],
-  pubDate: new Date(2026, 5, 26 - index),
-  href: actualPosts[index]?.href ?? "/blog/",
-  heroImage: undefined,
-}));
-
-const posts = actualPosts.length >= 6 ? actualPosts : [...actualPosts, ...placeholderPosts].slice(0, 9);
+const posts = actualPosts.slice(0, 9);
 const latest = posts[0];
 const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
@@ -46,6 +29,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
   <div class="hero-section-container">
     <div class="hero-wrapper">
       <main class="hero-content">
+        {latest ? (
         <section class="parcel-hero">
           <div class="parcel-image-frame">
             <a href={latest.href} aria-label={latest.title}>
@@ -70,6 +54,17 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
             </div>
           </div>
         </section>
+        ) : (
+          <section class="empty-hero" aria-labelledby="empty-hero-title">
+            <p class="empty-code">NO PUBLIC DISPATCH</p>
+            <h1 id="empty-hero-title">风铃暂时没有新消息</h1>
+            <p>公开文章仍在整理中，完成归档后会从这里寄出。</p>
+            <div class="postal-sticker" aria-hidden="true">
+              <span class="sticker-lines"></span>
+              <span class="sticker-text">ARCHIVE STANDBY</span>
+            </div>
+          </section>
+        )}
       </main>
     </div>
     <div class="paper-stack paper-stack-1" aria-hidden="true"></div>
@@ -86,6 +81,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
         </div>
       </div>
 
+      {posts.length > 0 ? (
       <div class="ticket-grid">
         {posts.map((post, index) => (
           <div class="stagger-card" style={`--stagger: ${index};`}>
@@ -102,6 +98,12 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
           </div>
         ))}
       </div>
+      ) : (
+        <div class="archive-empty">
+          <span>000 / EMPTY</span>
+          <p>目前没有公开投递。</p>
+        </div>
+      )}
     </div>
   </section>
 </BaseLayout>
@@ -126,6 +128,37 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
   .hero-content {
     max-width: 1440px;
     margin: 0 auto;
+  }
+
+  .empty-hero {
+    display: grid;
+    justify-items: start;
+    min-height: 360px;
+    align-content: center;
+    border: 1px dashed var(--theme-line);
+    padding: clamp(2rem, 7vw, 6rem);
+  }
+
+  .empty-hero h1 {
+    margin: 0.45rem 0 1rem;
+    color: #222;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    letter-spacing: 0;
+  }
+
+  .empty-hero > p:not(.empty-code) {
+    margin: 0 0 2rem;
+    color: #777;
+  }
+
+  .empty-code {
+    margin: 0;
+    color: var(--theme-stamp-red);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
   }
 
   .paper-stack {
@@ -374,6 +407,25 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
     gap: 3.5rem;
+  }
+
+  .archive-empty {
+    border-top: 1px solid var(--theme-line);
+    border-bottom: 1px solid var(--theme-line);
+    padding: 2rem 1rem;
+    color: #777;
+  }
+
+  .archive-empty span {
+    color: var(--theme-stamp-red);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .archive-empty p {
+    margin: 0.65rem 0 0;
   }
 
   .stagger-card {

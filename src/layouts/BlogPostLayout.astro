@@ -1,5 +1,5 @@
 ---
-// 中文: Markdown 文章布局，负责文章元信息、正文、目录、签名和前后篇导航。
+// 中文: Markdown 文章布局，负责文章元信息、正文、目录和前后篇导航。
 // EN: Markdown post layout for metadata, body content, table of contents, previous/next navigation.
 import BaseLayout from "./BaseLayout.astro";
 
@@ -8,6 +8,12 @@ type NavPost = {
   description: string;
   href: string;
   label: string;
+};
+
+type ArticleHeading = {
+  depth: number;
+  slug: string;
+  text: string;
 };
 
 type Props = {
@@ -21,6 +27,7 @@ type Props = {
   heroImage?: string;
   previousPost?: NavPost;
   nextPost?: NavPost;
+  headings?: ArticleHeading[];
 };
 
 const {
@@ -33,7 +40,11 @@ const {
   draft = false,
   previousPost,
   nextPost,
+  headings = [],
 } = Astro.props;
+
+const tocHeadings = headings.filter(({ depth }) => depth === 2 || depth === 3);
+const hasToc = tocHeadings.length >= 2;
 
 const formatDate = (date?: Date) =>
   date
@@ -50,13 +61,21 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
       <div class="placeholder-image article-cover-placeholder" data-label="PLACEHOLDER COVER"></div>
     </div>
 
-    <div class="article-shell">
-      <aside class="toc-sidebar-wrapper" aria-label="文章目录">
-        <div class="toc-card">
-          <p class="toc-kicker">CONTENTS</p>
-          <ol class="toc-list" id="article-toc"></ol>
-        </div>
-      </aside>
+    <div class:list={["article-shell", { "has-toc": hasToc }]}>
+      {hasToc && (
+        <aside class="toc-sidebar-wrapper" aria-label="文章目录">
+          <div class="toc-card">
+            <p class="toc-kicker">CONTENTS</p>
+            <ol class="toc-list">
+              {tocHeadings.map((heading) => (
+                <li class:list={["h" + heading.depth]}>
+                  <a href={"#" + heading.slug}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </aside>
+      )}
 
       <main class="letter-paper">
         <div class="ribbon-wrapper blog-pin-ribbon">
@@ -98,6 +117,24 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
             <div class="letter-divider" aria-hidden="true"></div>
           </header>
 
+          {hasToc && (
+            <details class="mobile-toc-details">
+              <summary>
+                <span class="mobile-toc-heading">
+                  <span>CONTENTS</span>
+                  <strong>文章目录</strong>
+                </span>
+                <span class="mobile-toc-toggle" aria-hidden="true"></span>
+              </summary>
+              <ol class="toc-list">
+                {tocHeadings.map((heading) => (
+                  <li class:list={["h" + heading.depth]}>
+                    <a href={"#" + heading.slug}>{heading.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
           <div class="prose article-prose">
             <slot />
           </div>
@@ -144,20 +181,6 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
       )}
     </div>
 
-    <button class="mobile-toc-button" type="button" id="mobile-toc-button" aria-label="打开文章目录">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <div class="mobile-toc-drawer" id="mobile-toc-drawer" aria-hidden="true">
-      <div class="mobile-toc-panel">
-        <button class="mobile-toc-close" type="button" id="mobile-toc-close" aria-label="关闭目录">×</button>
-        <p class="toc-kicker">CONTENTS</p>
-        <ol class="toc-list" id="mobile-article-toc"></ol>
-      </div>
-    </div>
-
     <button class="back-to-top-btn" type="button" id="back-to-top" aria-label="回到顶部">
       <svg class="progress-ring" viewBox="0 0 48 48" aria-hidden="true">
         <circle class="progress-ring-bg" cx="24" cy="24" r="20"></circle>
@@ -177,56 +200,37 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
     if (!article || article.dataset.ready === "true") return;
     article.dataset.ready = "true";
 
-    const headings = Array.from(article.querySelectorAll(".article-prose h2, .article-prose h3"));
-    const tocTargets = [document.getElementById("article-toc"), document.getElementById("mobile-article-toc")].filter(Boolean);
-    const slugify = (text, index) =>
-      String(text || `section-${index + 1}`)
-        .trim()
-        .toLowerCase()
-        .replace(/[^\w\u4e00-\u9fa5]+/g, "-")
-        .replace(/^-|-$/g, "") || `section-${index + 1}`;
-
-    headings.forEach((heading, index) => {
-      if (!heading.id) heading.id = slugify(heading.textContent, index);
-    });
-
-    const tocMarkup = headings.length
-      ? headings.map((heading) => `<li class="${heading.tagName.toLowerCase()}"><a href="#${heading.id}">${heading.textContent}</a></li>`).join("")
-      : `<li><span>这封来信没有二级目录</span></li>`;
-    tocTargets.forEach((toc) => { toc.innerHTML = tocMarkup; });
-
+    const headings = Array.from(article.querySelectorAll(".article-prose h2[id], .article-prose h3[id]"));
     const tocLinks = Array.from(article.querySelectorAll(".toc-list a"));
+    const setActiveHeading = (id) => {
+      tocLinks.forEach((link) => {
+        const isActive = link.getAttribute("href") === "#" + id;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    };
+    const updateActiveHeading = () => {
+      const readingLine = Math.max(120, window.innerHeight * 0.24);
+      let activeHeading = headings[0];
+      headings.forEach((heading) => {
+        if (heading.getBoundingClientRect().top <= readingLine) activeHeading = heading;
+      });
+      if (activeHeading) setActiveHeading(activeHeading.id);
+    };
     if (headings.length && "IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (!visible) return;
-        tocLinks.forEach((link) => link.classList.toggle("is-active", link.getAttribute("href") === `#${visible.target.id}`));
-      }, { rootMargin: "-15% 0px -68% 0px", threshold: [0, 0.3, 0.7] });
+      const observer = new IntersectionObserver(updateActiveHeading, {
+        rootMargin: "-18% 0px -72% 0px",
+        threshold: [0, 1],
+      });
       headings.forEach((heading) => observer.observe(heading));
+    } else if (headings.length) {
+      window.addEventListener("scroll", updateActiveHeading, { passive: true });
     }
-
-    const tocButton = document.getElementById("mobile-toc-button");
-    const tocDrawer = document.getElementById("mobile-toc-drawer");
-    const tocClose = document.getElementById("mobile-toc-close");
-    const openToc = () => {
-      tocDrawer?.classList.add("is-open");
-      tocDrawer?.setAttribute("aria-hidden", "false");
-      document.body.classList.add("toc-locked");
-    };
-    const closeToc = () => {
-      tocDrawer?.classList.remove("is-open");
-      tocDrawer?.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("toc-locked");
-    };
-    tocButton?.addEventListener("click", openToc);
-    tocClose?.addEventListener("click", closeToc);
-    tocDrawer?.addEventListener("click", (event) => {
-      if (event.target === tocDrawer) closeToc();
+    updateActiveHeading();
+    article.querySelectorAll(".mobile-toc-details a").forEach((link) => {
+      link.addEventListener("click", () => link.closest("details")?.removeAttribute("open"));
     });
-    tocDrawer?.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeToc));
-
     const topButton = document.getElementById("back-to-top");
     const progress = topButton?.querySelector(".progress-ring-fill");
     const circumference = 2 * Math.PI * 20;
@@ -275,11 +279,9 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
     grid-template-columns: minmax(0, 960px);
     justify-content: center;
     gap: 3rem;
-    width: min(100%, 1180px);
+    width: min(calc(100% - 2rem), 960px);
     margin: -6rem auto 0;
-    padding: 0 4vw;
   }
-
   .letter-paper {
     position: relative;
     z-index: 3;
@@ -423,14 +425,16 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
     margin: 0 auto;
   }
 
+  .article-prose :global(h2[id]),
+  .article-prose :global(h3[id]) {
+    scroll-margin-top: 7rem;
+  }
+
   .toc-sidebar-wrapper {
-    position: absolute;
-    top: 3rem;
-    right: calc(100% + 2rem);
+    display: none;
     width: 220px;
     z-index: 2;
   }
-
   .toc-card {
     position: sticky;
     top: 7rem;
@@ -460,24 +464,99 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
   .toc-list a,
   .toc-list span {
     display: block;
-    overflow: hidden;
+    border-left: 2px solid transparent;
     color: #777;
     font-size: 0.8rem;
     font-weight: 700;
     line-height: 1.55;
-    padding: 0.35rem 0;
+    padding: 0.35rem 0 0.35rem 0.55rem;
     text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    transition: color 0.25s ease, transform 0.25s ease;
+    transition: border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
   }
 
   .toc-list a:hover,
   .toc-list a.is-active {
+    border-left-color: var(--theme-blue);
     color: var(--theme-blue);
     transform: translateX(4px);
   }
 
+  .mobile-toc-details {
+    display: none;
+    margin: 0 0 2.5rem;
+    border: 1px solid var(--theme-line);
+    background: rgba(250, 250, 250, 0.82);
+    box-shadow: 0 12px 28px rgba(20, 43, 66, 0.08);
+  }
+
+  .mobile-toc-details summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 52px;
+    padding: 0.65rem 0.85rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .mobile-toc-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-toc-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+  }
+
+  .mobile-toc-heading > span {
+    color: var(--theme-stamp-red);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+  }
+
+  .mobile-toc-heading strong {
+    color: #222;
+    font-size: 0.9rem;
+  }
+
+  .mobile-toc-toggle {
+    position: relative;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 24px;
+    border: 1px solid var(--theme-line);
+    background: #fff;
+  }
+
+  .mobile-toc-toggle::before,
+  .mobile-toc-toggle::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 1px;
+    background: var(--theme-ink);
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-toc-toggle::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .mobile-toc-details[open] .mobile-toc-toggle::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  .mobile-toc-details > .toc-list {
+    border-top: 1px dashed var(--theme-line);
+    padding: 0.7rem 0.85rem 0.9rem;
+  }
   .article-out-meta {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -565,74 +644,6 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
     font-size: 0.86rem;
   }
 
-  .mobile-toc-button {
-    position: fixed;
-    right: 1rem;
-    bottom: 5.2rem;
-    z-index: 80;
-    display: none;
-    width: 46px;
-    height: 46px;
-    place-items: center;
-    border: 1px solid var(--theme-line);
-    background: rgba(250, 250, 250, 0.9);
-    box-shadow: 0 14px 30px rgba(20, 43, 66, 0.12);
-    backdrop-filter: blur(10px);
-    cursor: pointer;
-  }
-
-  .mobile-toc-button span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    margin: 3px auto;
-    background: var(--theme-ink);
-  }
-
-  .mobile-toc-drawer {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: grid;
-    align-items: end;
-    background: rgba(20, 43, 66, 0.28);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
-  }
-
-  .mobile-toc-drawer.is-open {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .mobile-toc-panel {
-    max-height: 70vh;
-    overflow: auto;
-    background: #fff;
-    border-top: 1px solid var(--theme-line);
-    box-shadow: 0 -18px 50px rgba(20, 43, 66, 0.18);
-    padding: 1.2rem;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-  }
-
-  .mobile-toc-drawer.is-open .mobile-toc-panel {
-    transform: translateY(0);
-  }
-
-  .mobile-toc-close {
-    float: right;
-    border: 1px solid var(--theme-line);
-    background: #fff;
-    color: #111;
-    font-size: 1.4rem;
-    line-height: 1;
-    width: 34px;
-    height: 34px;
-    cursor: pointer;
-  }
-
   .back-to-top-btn {
     position: fixed;
     right: 1rem;
@@ -686,20 +697,35 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
     font-weight: 900;
   }
 
-  body.toc-locked {
-    overflow: hidden;
+  @media (min-width: 1281px) {
+    .article-shell.has-toc {
+      grid-template-columns: 220px minmax(0, 960px);
+      align-items: start;
+      width: min(calc(100% - 2rem), 1232px);
+    }
+
+    .article-shell.has-toc .toc-sidebar-wrapper {
+      display: block;
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .article-shell.has-toc .letter-paper {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .article-shell.has-toc .article-out-meta,
+    .article-shell.has-toc .article-nav {
+      grid-column: 2;
+    }
   }
 
   @media (max-width: 1280px) {
-    .toc-sidebar-wrapper {
-      display: none;
-    }
-
-    .mobile-toc-button {
-      display: grid;
+    .mobile-toc-details {
+      display: block;
     }
   }
-
   @media (max-width: 820px) {
     .enclosure-image {
       aspect-ratio: 4 / 3;
@@ -708,7 +734,7 @@ const updateLabel = updatedDate ? formatDate(updatedDate) : undefined;
 
     .article-shell {
       margin-top: -3rem;
-      padding: 0 1rem;
+      width: calc(100% - 2rem);
       gap: 2rem;
     }
 
